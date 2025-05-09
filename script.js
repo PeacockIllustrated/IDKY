@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const idkInput = document.getElementById('idkInput');
     const logButton = document.getElementById('logButton');
     const selectAllButton = document.getElementById('selectAllButton');
-    const selectedCountDisplay = document.getElementById('selectedCount'); 
+    const selectedCountDisplay = document.getElementById('selectedCount'); // Ensured this is declared
     const reviewedCountDisplay = document.getElementById('reviewedCountDisplay');
     const testKnowledgeButton = document.getElementById('testKnowledgeButton');
     const processSelectedButton = document.getElementById('processSelectedButton');
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const noMomentsPlaceholder = document.getElementById('noMomentsPlaceholder');
     const overallLoadingIndicator = document.getElementById('overallLoadingIndicator');
     const toastNotification = document.getElementById('toastNotification');
-    const userPointsDisplayContainer = document.querySelector('.points-section .points-display:first-child'); 
+    const userPointsDisplayContainer = document.getElementById('mainPointsDisplay'); // Corrected to target the specific div for main points flash
     const userPointsDisplay = document.getElementById('userPointsDisplay');
     const stupidPointsDisplay = document.getElementById('userStupidPointsDisplay'); 
 
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const OPENAI_API_KEY = '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';
     // --- END WARNING ---
 
-    let localStorageKeySuffix = '_v22_distinct_deep_quiz_fullscript'; 
+    let localStorageKeySuffix = '_v22_distinct_deep_quiz_fullscript_fix'; 
     let loggedMoments = JSON.parse(localStorage.getItem('idk_moments' + localStorageKeySuffix)) || [];
     let archivedKnowledge = JSON.parse(localStorage.getItem('idk_archived_knowledge' + localStorageKeySuffix)) || [];
     let deeplyUnderstoodKnowledge = JSON.parse(localStorage.getItem('idk_deeply_understood' + localStorageKeySuffix)) || [];
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createParticle(x, y, color, size, count, spread, speedMultiplier = 1) { for (let i = 0; i < count; i++) { particles.push({ x, y, size: Math.random() * size + 2, color, vx: (Math.random() - 0.5) * spread * speedMultiplier, vy: (Math.random() - 0.5) * spread * speedMultiplier, life: 60 + Math.random() * 30 });}}
     function updateAndDrawParticles() { ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height); for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.life--; if (p.life <= 0) { particles.splice(i, 1); continue; } ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 90; ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); } ctx.globalAlpha = 1; if (particles.length > 0) { requestAnimationFrame(updateAndDrawParticles); }}
-    function triggerParticleBurst(type = 'small') { const cX = window.innerWidth / 2; const cY = window.innerHeight / 3; let clr, sz, cnt, sprd, spd; if (type === 'perfectQuiz') { clr = 'var(--retro-yellow)'; sz = 8; cnt = 100; sprd = 8; spd = 1.5; } else if (type === 'correctAnswer') { clr = 'var(--retro-teal)'; sz = 6; cnt = 50; sprd = 5; spd = 1; } else if (type === 'dumbAnswer') { clr = 'var(--retro-coral)'; sz = 5; cnt = 30; sprd = 4; spd = 0.8;} createParticle(cX, cY, clr, sz, cnt, sprd, spd); if (particles.length === cnt || type === 'dumbAnswer') { requestAnimationFrame(updateAndDrawParticles); }}
+    function triggerParticleBurst(type = 'small') { const cX = window.innerWidth / 2; const cY = window.innerHeight / 3; let clr, sz, cnt, sprd, spd; if (type === 'perfectQuiz') { clr = 'var(--retro-yellow)'; sz = 8; cnt = 100; sprd = 8; spd = 1.5; } else if (type === 'correctAnswer') { clr = 'var(--retro-teal)'; sz = 6; cnt = 50; sprd = 5; spd = 1; } else if (type === 'dumbAnswer') { clr = 'var(--retro-coral)'; sz = 5; cnt = 30; sprd = 4; spd = 0.8;} createParticle(cX, cY, clr, sz, cnt, sprd, spd); if (particles.length === cnt || type === 'dumbAnswer' || type === 'perfectQuiz' || type === 'correctAnswer' ) { requestAnimationFrame(updateAndDrawParticles); }}
     function formatAnswerForRetroDisplay(text) { if (!text || typeof text !== 'string') return text; const p = '     > '; let h = text.split('\n').map(l => l.trim() === '' ? '' : p + l).join('<br>'); h = h.replace(/^<br>\s*/, '').replace(/\s*<br>$/, ''); h = h.replace(/(<br>\s*){2,}/g, '<br>'); return h; }
     function showToast(message, duration = 2500) { toastNotification.textContent = message; toastNotification.classList.add('show'); setTimeout(() => { toastNotification.classList.remove('show'); }, duration); }
     function autoSetInitialType(text) { const lT = text.toLowerCase().trim(); if (lT.endsWith('?')) return 'question'; const qS = ['what', 'when', 'where', 'who', 'why', 'how', 'is ', 'are ', 'do ', 'does ', 'did ', 'can ', 'could ', 'will ', 'would ', 'should ', 'may ', 'might ']; for (const s of qS) { if (lT.startsWith(s)) return 'question'; } return 'statement'; }
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             stupidPointsDisplay.textContent = userStupidPoints;
         }
     }
-            
+    
     function renderMoments() { 
          if (!momentsList) return;
          momentsList.innerHTML = ''; 
@@ -418,4 +418,4 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
 
     renderMoments(); renderArchivedKnowledge(); renderDeeplyUnderstoodKnowledge();
 });
-/script>
+</script>
