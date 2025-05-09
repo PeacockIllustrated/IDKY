@@ -18,7 +18,7 @@ i.fas, i.far { vertical-align: middle; }
     margin-bottom: 20px; box-shadow: 3px 3px 0px 0px var(--retro-dark);
 }
 .app-title-bar { 
-    display: flex; justify-content: space-between; align-items: center;
+    display: flex; justify-content: space-between; align-items: center; 
     margin-bottom: 10px; padding-bottom: 5px; border-bottom: var(--pixel-border-width) dashed var(--retro-teal);
 }
 .app-title-container { display: flex; align-items: center; flex-grow: 1; }
@@ -37,11 +37,12 @@ i.fas, i.far { vertical-align: middle; }
     transition: transform 0.1s ease-out, color 0.1s ease-out; 
     line-height: 1.2; 
 }
-.points-display.points-earned-flash { animation: pointsFlash 0.5s ease-in-out; }
+.points-display#mainPointsDisplay.points-earned-flash { animation: pointsFlash 0.5s ease-in-out; } /* Target specific element for flash */
 @keyframes pointsFlash { 0%, 100% { transform: scale(1); color: var(--retro-text); } 50% { transform: scale(1.15); color: var(--retro-yellow); } }
 .points-display i.points-icon { margin-right: 4px; text-shadow: 1px 1px 0px var(--retro-dark); }
 .points-display i.fa-coins { color: var(--retro-yellow); }
 .points-display i.fa-poo { color: var(--retro-coral); }
+
 
 .input-area { display: flex; flex-direction: column; gap: 8px; }
 .input-area textarea { width: 100%; padding: 8px; border: var(--pixel-border-width) solid var(--retro-border-color); font-family: 'VT323', monospace; font-size: 18px; resize: vertical; min-height: 60px; background-color: var(--retro-light-bg); color: var(--retro-text); outline: none; }
