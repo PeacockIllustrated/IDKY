@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I Don't Know Yet! - Final Mastery</title>
+    <title>I Don't Know Yet! - Retro Final Fix</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
@@ -19,8 +19,8 @@
                 <div class="app-title-container"> 
                     <i class="fas fa-microchip title-icon"></i><h1>I Don't Know Yet!</h1> 
                 </div>
-                <div class="points-section">
-                    <div class="points-display">
+                <div class="points-section"> {/* Wrapper for vertical stacking */}
+                    <div class="points-display" id="mainPointsDisplay"> {/* Added ID for clarity for flash animation target */}
                         <i class="fas fa-coins points-icon"></i> <span id="userPointsDisplay">0</span> PTS
                     </div>
                     <div class="points-display">
@@ -37,7 +37,7 @@
         <div class="list-controls-bar">
             <div class="select-all-container">
                 <button class="select-all-button" id="selectAllButton">SEL. ALL</button>
-                <span id="selectedCount">0 SEL</span>
+                <span id="selectedCount">0 SEL</span> {/* This ID must match JS */}
                 <span id="reviewedCountDisplay">(0/0 Reviewed)</span>
             </div>
             <button class="test-knowledge-button" id="testKnowledgeButton" disabled>Test Knowledge!</button>
