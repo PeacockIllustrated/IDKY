@@ -125,10 +125,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 '--theme-text-on-dark': '#F0F0F0',   // Light gray text on dark blue
                 '--theme-page-bg': '#E8E8E8'         // Light gray for overall page background
             }
+        },
+        
+    // Theme-related state
+    const themes = {
+        default: { /* ... existing default theme ... */ },
+        oceanDepths: { /* ... existing oceanDepths theme ... */ },
+        volcanoRush: { /* ... existing volcanoRush theme ... */ },
+        techOrangeBlue: { /* ... existing techOrangeBlue theme ... */ },
+        forestGreens: { // New Theme
+            name: "Forest Greens",
+            cost: 1, // Price for testing
+            cssVariables: {
+                '--theme-primary-dark': '#1A2B12',    // Very Dark Green for primary dark / text
+                '--theme-primary-accent': '#335128', // Dark Green for primary accent
+                '--theme-secondary-accent': '#526F35',// Medium Olive Green for secondary accent
+                '--theme-tertiary-accent': '#8A9A5B', // Lighter Olive/Moss Green for tertiary
+                '--theme-highlight-accent': '#E0E7A3',// Pale Yellow-Green for highlights
+                '--theme-light-bg': '#F0F5E0',       // Very light green/off-white for light backgrounds
+                '--theme-card-bg': '#FFFFFF',        // White for cards (or a very light cream like #FCFFF0)
+                '--theme-text-on-dark': '#E0E7A3',   // Pale Yellow-Green text on dark green
+                '--theme-page-bg': '#D8E0C0'         // Light mossy green for overall page background
+            }
         }
     };
     let ownedThemes = JSON.parse(localStorage.getItem('idk_owned_themes' + localStorageKeySuffix)) || ['default'];
     let currentTheme = localStorage.getItem('idk_current_theme' + localStorageKeySuffix) || 'default';
+
 
 
 
