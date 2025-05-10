@@ -55,10 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ambient Particle Effect Variables
     let ambientEmitters = [];
-    const AMBIENT_PARTICLE_RATE = 2; // Particles per frame per active emitter edge segment
-    const AMBIENT_PARTICLE_LIFESPAN_FACTOR = 4; // Multiplier for base lifespan
+    const AMBIENT_PARTICLE_RATE = 2;
+    const AMBIENT_PARTICLE_LIFESPAN_FACTOR = 4;
 
-    let localStorageKeySuffix = '_v28_ambient_particles'; // Updated suffix
+    let localStorageKeySuffix = '_v28_ambient_particles_fix'; // Updated suffix
     let loggedMoments = JSON.parse(localStorage.getItem('idk_moments' + localStorageKeySuffix)) || [];
     let archivedKnowledge = JSON.parse(localStorage.getItem('idk_archived_knowledge' + localStorageKeySuffix)) || [];
     let deeplyUnderstoodKnowledge = JSON.parse(localStorage.getItem('idk_deeply_understood' + localStorageKeySuffix)) || [];
@@ -132,9 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (type === "ambientFocus") {
                 particleLife = (90 + Math.random() * 60) * AMBIENT_PARTICLE_LIFESPAN_FACTOR;
-                particleSize = Math.random() * (size - 1) + 1; // Ensure size is at least 1
+                particleSize = Math.random() * (size - 1) + 1;
                 const angle = Math.random() * Math.PI * 2;
-                const emitSpeed = (Math.random() * 0.2 + 0.05) * speedMultiplier; // Slower
+                const emitSpeed = (Math.random() * 0.2 + 0.05) * speedMultiplier;
                 vx = Math.cos(angle) * emitSpeed;
                 vy = Math.sin(angle) * emitSpeed;
             }
@@ -152,24 +152,25 @@ document.addEventListener('DOMContentLoaded', () => {
         ambientEmitters.forEach(emitter => {
             if (emitter.isActive && emitter.element) {
                 const rect = emitter.element.getBoundingClientRect();
-                if (rect.height > 0 && rect.width > 0) {
+                // Check if the element is actually visible and has dimensions
+                if (rect.height > 0 && rect.width > 0 && emitter.element.classList.contains('expanded')) {
                     const themeColor = getComputedStyle(document.documentElement).getPropertyValue(emitter.colorVar).trim() || themes.default.cssVariables[emitter.colorVar];
                     
                     for (let i = 0; i < AMBIENT_PARTICLE_RATE; i++) {
                         let x, y;
                         const edgeChoice = Math.random();
-                        const particleOffset = 3; // How far from the edge particles spawn
+                        const particleOffset = 3;
 
-                        if (edgeChoice < 0.25) { // Top edge
+                        if (edgeChoice < 0.25) {
                             x = rect.left + Math.random() * rect.width;
                             y = rect.top - particleOffset;
-                        } else if (edgeChoice < 0.5) { // Bottom edge
+                        } else if (edgeChoice < 0.5) {
                             x = rect.left + Math.random() * rect.width;
                             y = rect.bottom + particleOffset;
-                        } else if (edgeChoice < 0.75) { // Left edge
+                        } else if (edgeChoice < 0.75) {
                             x = rect.left - particleOffset;
                             y = rect.top + Math.random() * rect.height;
-                        } else { // Right edge
+                        } else {
                             x = rect.right + particleOffset;
                             y = rect.top + Math.random() * rect.height;
                         }
@@ -184,9 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
             p.x += p.vx;
             p.y += p.vy;
             if (p.type !== "ambientFocus") {
-                p.vy += 0.05; // Gravity for burst particles
+                p.vy += 0.05;
             } else {
-                p.vx *= 0.98; // Ambient particles drift and slow down
+                p.vx *= 0.98;
                 p.vy *= 0.98;
             }
             p.life--;
@@ -208,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cX = customX !== undefined ? customX : window.innerWidth / 2;
         const cY = customY !== undefined ? customY : window.innerHeight / 3;
         let clr, sz, cnt, sprd, spd;
-        const defaultColorVar = '--theme-secondary-accent'; // Fallback for theme vars
+        const defaultColorVar = '--theme-secondary-accent'; 
 
         if (type === 'perfectQuiz') {
             clr = getComputedStyle(document.documentElement).getPropertyValue('--theme-secondary-accent').trim() || themes.default.cssVariables[defaultColorVar];
@@ -222,10 +223,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (type === 'masteredItem') {
             clr = getComputedStyle(document.documentElement).getPropertyValue('--theme-secondary-accent').trim() || themes.default.cssVariables[defaultColorVar];
             sz = 7; cnt = 40; sprd = 6; spd = 1.2;
+        } else { // Default burst if type not recognized
+             clr = getComputedStyle(document.documentElement).getPropertyValue('--theme-tertiary-accent').trim() || themes.default.cssVariables['--theme-tertiary-accent'];
+             sz = 4; cnt = 20; sprd = 3; spd = 1;
         }
 
-        createParticle(cX, cY, clr, sz, cnt, sprd, spd, "burst"); // Explicitly "burst" type
-        // The main loop is already running via requestAnimationFrame in updateAndDrawParticles
+        createParticle(cX, cY, clr, sz, cnt, sprd, spd, "burst");
     }
 
     function formatAnswerForRetroDisplay(text) { if (!text || typeof text !== 'string') return text; const p = '     > '; let h = text.split('\n').map(l => l.trim() === '' ? '' : p + l).join('<br>'); h = h.replace(/^<br>\s*/, '').replace(/\s*<br>$/, ''); h = h.replace(/(<br>\s*){2,}/g, '<br>'); return h; }
@@ -333,20 +336,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    function updateAmbientEmitters(targetEmitterId, isExpanding) {
-        let foundActive = false;
+    function updateAmbientEmitters(targetEmitterContainerId, isExpanding) {
         ambientEmitters.forEach(emitter => {
-            if (emitter.id === targetEmitterId) {
+            if (emitter.id === targetEmitterContainerId) {
                 emitter.isActive = isExpanding;
                 if (isExpanding) {
-                    // Ensure the element reference is fresh if DOM might have changed,
-                    // though for these specific accordions, it's unlikely.
-                    if (emitter.id === 'archivedItemsListContainer') emitter.element = archivedItemsListContainer;
-                    if (emitter.id === 'deepenedItemsListContainer') emitter.element = deepenedItemsListContainer;
+                    emitter.element = document.getElementById(targetEmitterContainerId); // Ensure element ref is current
                 }
-                if (emitter.isActive) foundActive = true;
             } else {
-                emitter.isActive = false; // Deactivate others
+                emitter.isActive = false;
             }
         });
     }
@@ -358,13 +356,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ambientEmitters.push({ id: 'deepenedItemsListContainer', element: deepenedItemsListContainer, isActive: false, colorVar: '--theme-secondary-accent' });
     }
 
-
     if (archiveHeader) {
         archiveHeader.addEventListener('click', () => {
             const isNowExpanded = archivedItemsListContainer.classList.toggle('expanded');
             archiveToggleIcon.classList.toggle('expanded');
             updateAmbientEmitters('archivedItemsListContainer', isNowExpanded);
-            if (isNowExpanded && deepenedItemsListContainer.classList.contains('expanded')) { // If opening archive, close deepened
+            if (isNowExpanded && deepenedItemsListContainer.classList.contains('expanded')) {
                 deepenedItemsListContainer.classList.remove('expanded');
                 deepenedToggleIcon.classList.remove('expanded');
                 updateAmbientEmitters('deepenedItemsListContainer', false);
@@ -377,14 +374,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const isNowExpanded = deepenedItemsListContainer.classList.toggle('expanded');
             deepenedToggleIcon.classList.toggle('expanded');
             updateAmbientEmitters('deepenedItemsListContainer', isNowExpanded);
-            if (isNowExpanded && archivedItemsListContainer.classList.contains('expanded')) { // If opening deepened, close archive
+            if (isNowExpanded && archivedItemsListContainer.classList.contains('expanded')) {
                 archivedItemsListContainer.classList.remove('expanded');
                 archiveToggleIcon.classList.remove('expanded');
                 updateAmbientEmitters('archivedItemsListContainer', false);
             }
         });
     }
-
 
     function renderMoments() {
          if (!momentsList) return;
@@ -488,7 +484,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('idk_deeply_understood' + localStorageKeySuffix, JSON.stringify(deeplyUnderstoodKnowledge));
         localStorage.setItem('idk_user_points_val' + localStorageKeySuffix, userPoints.toString());
         localStorage.setItem('idk_user_stupid_points_val' + localStorageKeySuffix, userStupidPoints.toString());
-         // Owned themes and current theme are saved directly when changed
     }
     function toggleUserReviewedStatus(timestamp) { const m = loggedMoments.find(mo => mo.timestamp === timestamp); if (m) { m.userMarkedReviewed = !m.userMarkedReviewed; showToast(m.userMarkedReviewed ? "REVIEWED!" : "UNREVIEWED."); saveMoments(); renderMoments(); renderArchivedKnowledge(); renderDeeplyUnderstoodKnowledge(); } }
     function toggleArchiveRevisedStatus(timestamp) { const moment = archivedKnowledge.find(m => m.timestamp === timestamp); if (moment) { moment.isRevisedForDeepTest = !moment.isRevisedForDeepTest; showToast(moment.isRevisedForDeepTest ? "REVISED FOR DEEPER TEST!" : "Marked Unrevised."); saveMoments(); renderArchivedKnowledge(); }}
@@ -736,5 +731,5 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
     renderMoments();
     renderArchivedKnowledge();
     renderDeeplyUnderstoodKnowledge();
-    requestAnimationFrame(updateAndDrawParticles); // Start particle animation loop
+    requestAnimationFrame(updateAndDrawParticles);
 });
