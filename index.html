@@ -71,6 +71,8 @@
         .points-display i.points-icon { margin-right: 4px; text-shadow: 1px 1px 0px var(--retro-dark); }
         .points-display i.fa-coins { color: var(--retro-yellow); }
         .points-display i.fa-poo { color: var(--retro-coral); }
+        .points-display i.gold-star-icon { color: var(--retro-yellow); } /* Gold star icon color */
+
 
         .api-key-area {
             margin-top: 10px; padding-top: 10px;
@@ -144,7 +146,7 @@
         .action-button i.fas, .action-button i.far { text-shadow: 1px 1px 0 var(--retro-dark); }
         .action-button:disabled { border-color: #aaa; color: #aaa; background-color: #ddd; cursor: not-allowed; transform: none; }
         .moment-answer-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .moment-answer-wrapper.expanded { max-height: 800px; } /* Increased from 500px */
+        .moment-answer-wrapper.expanded { max-height: 800px; }
         .moment-answer-content { background-color: var(--retro-light-bg); padding: 5px 5px 5px 3px; margin: 8px; font-size: 16px; color: var(--retro-text); border: var(--pixel-border-width) dashed var(--retro-border-color); word-break: break-word; }
         .moment-answer-content.loading { display: flex; align-items: center; justify-content: center; min-height: 50px; text-align: center; }
         .spinner-char { font-size: 20px; display: inline-block; }
@@ -193,7 +195,7 @@
         .accordion-content-container { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out, border 0.4s ease-in-out, padding 0.4s ease-in-out; border: none; padding: 0;}
         .accordion-content-container.expanded { max-height: 1000px; border: var(--pixel-border-width) solid var(--retro-border-color); border-top: none; padding: 10px; background-color: var(--retro-light-bg); }
         .archived-moment-card, .deepened-moment-card { background-color: var(--retro-card-bg); margin-bottom: 8px; border: var(--pixel-border-width) solid var(--retro-teal); padding: 8px; animation: retroFadeIn 0.4s ease-out forwards; opacity: 0; }
-        .deepened-moment-card { border-color: var(--retro-yellow); }
+        .deepened-moment-card { border-color: var(--retro-yellow); transition: box-shadow 0.2s ease-out; } /* Added transition for smooth box-shadow clear */
         .archived-moment-card .moment-text-container, .deepened-moment-card .moment-text-container { cursor: pointer; }
         .archived-moment-card .moment-text, .deepened-moment-card .moment-text { font-size: 16px; color: var(--retro-text); }
         .archived-moment-card .moment-timestamp, .deepened-moment-card .moment-timestamp { font-size: 12px; color: #666; }
@@ -203,6 +205,16 @@
             border: none;
             box-shadow: none;
         }
+        /* Celebratory animation for mastered cards */
+        .deepened-moment-card.mastered-celebrate-pop {
+            animation: masteredPop 0.5s ease-out;
+        }
+        @keyframes masteredPop {
+            0% { transform: scale(1); border-width: var(--pixel-border-width); }
+            50% { transform: scale(1.03); border-width: calc(var(--pixel-border-width) + 1px); box-shadow: 0 0 8px var(--retro-yellow); }
+            100% { transform: scale(1); border-width: var(--pixel-border-width); box-shadow: none; }
+        }
+
 
         .quiz-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000; animation: fadeInBg 0.3s ease; }
         .quiz-modal-overlay.show { display: flex; }
@@ -250,6 +262,9 @@
                     </div>
                     <div class="points-display">
                         <i class="fas fa-poo points-icon"></i> <span id="userStupidPointsDisplay">0</span> SILLY
+                    </div>
+                    <div class="points-display">
+                        <i class="fas fa-star points-icon gold-star-icon"></i> <span id="goldStarsDisplay">0</span> STARS
                     </div>
                 </div>
             </div>
@@ -339,6 +354,7 @@
             const userPointsDisplayContainer = document.querySelector('.points-section .points-display:first-child');
             const userPointsDisplay = document.getElementById('userPointsDisplay');
             const stupidPointsDisplay = document.getElementById('userStupidPointsDisplay');
+            const goldStarsDisplay = document.getElementById('goldStarsDisplay'); // Gold Stars display
 
             const userApiKeyInput = document.getElementById('userApiKeyInput');
             const saveApiKeyButton = document.getElementById('saveApiKeyButton');
@@ -373,7 +389,7 @@
             particleCanvas.height = window.innerHeight;
             window.addEventListener('resize', () => { particleCanvas.width = window.innerWidth; particleCanvas.height = window.innerHeight; });
 
-            let localStorageKeySuffix = '_v23_points_layout_fix'; // Suffix for localStorage keys to isolate data for this version
+            let localStorageKeySuffix = '_v24_mastery_celebrate';
             let loggedMoments = JSON.parse(localStorage.getItem('idk_moments' + localStorageKeySuffix)) || [];
             let archivedKnowledge = JSON.parse(localStorage.getItem('idk_archived_knowledge' + localStorageKeySuffix)) || [];
             let deeplyUnderstoodKnowledge = JSON.parse(localStorage.getItem('idk_deeply_understood' + localStorageKeySuffix)) || [];
@@ -411,8 +427,23 @@
 
             function createParticle(x, y, color, size, count, spread, speedMultiplier = 1) { for (let i = 0; i < count; i++) { particles.push({ x, y, size: Math.random() * size + 2, color, vx: (Math.random() - 0.5) * spread * speedMultiplier, vy: (Math.random() - 0.5) * spread * speedMultiplier, life: 60 + Math.random() * 30 });}}
             function updateAndDrawParticles() { ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height); for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.life--; if (p.life <= 0) { particles.splice(i, 1); continue; } ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 90; ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); } ctx.globalAlpha = 1; if (particles.length > 0) { requestAnimationFrame(updateAndDrawParticles); }}
-            function triggerParticleBurst(type = 'small') { const cX = window.innerWidth / 2; const cY = window.innerHeight / 3; let clr, sz, cnt, sprd, spd; if (type === 'perfectQuiz') { clr = 'var(--retro-yellow)'; sz = 8; cnt = 100; sprd = 8; spd = 1.5; } else if (type === 'correctAnswer') { clr = 'var(--retro-teal)'; sz = 6; cnt = 50; sprd = 5; spd = 1; } else if (type === 'dumbAnswer') { clr = 'var(--retro-coral)'; sz = 5; cnt = 30; sprd = 4; spd = 0.8;} createParticle(cX, cY, clr, sz, cnt, sprd, spd); if (particles.length === cnt || type === 'dumbAnswer') { requestAnimationFrame(updateAndDrawParticles); }}
-            function formatAnswerForRetroDisplay(text) { if (!text || typeof text !== 'string') return text; const p = '     > '; let h = text.split('\n').map(l => l.trim() === '' ? '' : p + l).join('<br>'); h = h.replace(/^<br>\s*/, '').replace(/\s*<br>$/, ''); h = h.replace(/(<br>\s*){2,}/g, '<br>'); return h; }
+            
+            function triggerParticleBurst(type = 'small', customX, customY) {
+                const cX = customX !== undefined ? customX : window.innerWidth / 2;
+                const cY = customY !== undefined ? customY : window.innerHeight / 3;
+                let clr, sz, cnt, sprd, spd;
+                if (type === 'perfectQuiz') { clr = 'var(--retro-yellow)'; sz = 8; cnt = 100; sprd = 8; spd = 1.5; }
+                else if (type === 'correctAnswer') { clr = 'var(--retro-teal)'; sz = 6; cnt = 50; sprd = 5; spd = 1; }
+                else if (type === 'dumbAnswer') { clr = 'var(--retro-coral)'; sz = 5; cnt = 30; sprd = 4; spd = 0.8;}
+                else if (type === 'masteredItem') { clr = 'var(--retro-yellow)'; sz = 7; cnt = 40; sprd = 6; spd = 1.2; } // For mastered item clicks
+
+                createParticle(cX, cY, clr, sz, cnt, sprd, spd);
+                if (particles.length === cnt || type === 'dumbAnswer' || type === 'masteredItem') { // Ensure new types also start animation loop
+                    requestAnimationFrame(updateAndDrawParticles);
+                }
+            }
+
+            function formatAnswerForRetroDisplay(text) { if (!text || typeof text !== 'string') return text; const p = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;> '; let h = text.split('\n').map(l => l.trim() === '' ? '' : p + l).join('<br>'); h = h.replace(/^<br>\s*/, '').replace(/\s*<br>$/, ''); h = h.replace(/(<br>\s*){2,}/g, '<br>'); return h; }
             function showToast(message, duration = 2500) { toastNotification.textContent = message; toastNotification.classList.add('show'); setTimeout(() => { toastNotification.classList.remove('show'); }, duration); }
             function autoSetInitialType(text) { const lT = text.toLowerCase().trim(); if (lT.endsWith('?')) return 'question'; const qS = ['what', 'when', 'where', 'who', 'why', 'how', 'is ', 'are ', 'do ', 'does ', 'did ', 'can ', 'could ', 'will ', 'would ', 'should ', 'may ', 'might ']; for (const s of qS) { if (lT.startsWith(s)) return 'question'; } return 'statement'; }
             function triggerPointsFlash() {
@@ -438,6 +469,7 @@
                 }
                 if(userPointsDisplay) userPointsDisplay.textContent = userPoints;
                 if (stupidPointsDisplay) { stupidPointsDisplay.textContent = userStupidPoints; }
+                if (goldStarsDisplay) { goldStarsDisplay.textContent = deeplyUnderstoodKnowledge.length; } // Update gold stars
             }
 
             function renderMoments() {
@@ -479,11 +511,56 @@
             }
             function renderDeeplyUnderstoodKnowledge() {
                 if(!deepenedMomentsList || !noDeepenedPlaceholder) return;
-                deepenedMomentsList.innerHTML = ''; noDeepenedPlaceholder.style.display = deeplyUnderstoodKnowledge.length === 0 ? 'block' : 'none';
-                deeplyUnderstoodKnowledge.forEach((moment) => { const listItem = document.createElement('li'); listItem.className = 'moment-card deepened-moment-card'; const displayAnswerHTML = moment.answer ? formatAnswerForRetroDisplay(moment.answer) : ''; const deepDiveAnswerHTML = moment.deepDiveAnswer ? formatAnswerForRetroDisplay(moment.deepDiveAnswer) : '';
-                listItem.innerHTML = `<div class="moment-header"><div class="moment-text-container" data-timestamp="${moment.timestamp}"><div class="moment-main-text"><span class="moment-text">${moment.text}</span><span class="moment-timestamp">MASTERED: ${new Date(moment.deeplyUnderstoodTimestamp || Date.now()).toLocaleDateString()}</span></div><i class="fas fa-caret-down expand-icon ${moment.isAnswerExpanded ? 'expanded' : ''}"></i></div></div><div class="moment-answer-wrapper ${moment.isAnswerExpanded ? 'expanded' : ''}">${moment.answer ? `<div class="moment-answer-content"><strong>Original Insight:</strong><br>${displayAnswerHTML}</div>` : ''}${moment.deepDiveAnswer ? `<div class="deep-dive-answer-container"><div class="moment-answer-content"><strong>Deep Dive:</strong><br>${deepDiveAnswerHTML}</div></div>` : ''}</div>`;
-                deepenedMomentsList.appendChild(listItem); listItem.querySelector('.moment-text-container').addEventListener('click', () => { const deepMoment = deeplyUnderstoodKnowledge.find(dm => dm.timestamp === moment.timestamp); if(deepMoment) { deepMoment.isAnswerExpanded = !deepMoment.isAnswerExpanded; saveMoments(); renderDeeplyUnderstoodKnowledge(); }}); });
+                deepenedMomentsList.innerHTML = '';
+                noDeepenedPlaceholder.style.display = deeplyUnderstoodKnowledge.length === 0 ? 'block' : 'none';
+
+                deeplyUnderstoodKnowledge.forEach((moment) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'moment-card deepened-moment-card';
+                    // Ensure data-timestamp is set on the card for querying later
+                    listItem.dataset.timestamp = moment.timestamp; 
+                    const displayAnswerHTML = moment.answer ? formatAnswerForRetroDisplay(moment.answer) : '';
+                    const deepDiveAnswerHTML = moment.deepDiveAnswer ? formatAnswerForRetroDisplay(moment.deepDiveAnswer) : '';
+                    listItem.innerHTML = `<div class="moment-header"><div class="moment-text-container" data-timestamp="${moment.timestamp}"><div class="moment-main-text"><span class="moment-text">${moment.text}</span><span class="moment-timestamp">MASTERED: ${new Date(moment.deeplyUnderstoodTimestamp || Date.now()).toLocaleDateString()}</span></div><i class="fas fa-caret-down expand-icon ${moment.isAnswerExpanded ? 'expanded' : ''}"></i></div></div><div class="moment-answer-wrapper ${moment.isAnswerExpanded ? 'expanded' : ''}">${moment.answer ? `<div class="moment-answer-content"><strong>Original Insight:</strong><br>${displayAnswerHTML}</div>` : ''}${moment.deepDiveAnswer ? `<div class="deep-dive-answer-container"><div class="moment-answer-content"><strong>Deep Dive:</strong><br>${deepDiveAnswerHTML}</div></div>` : ''}</div>`;
+                    deepenedMomentsList.appendChild(listItem);
+
+                    listItem.querySelector('.moment-text-container').addEventListener('click', (event) => {
+                        const deepMoment = deeplyUnderstoodKnowledge.find(dm => dm.timestamp === moment.timestamp);
+                        if (deepMoment) {
+                            deepMoment.isAnswerExpanded = !deepMoment.isAnswerExpanded;
+                            deepMoment.justClickedForCelebration = true; // Mark for celebration on next render
+                            saveMoments();
+                            renderDeeplyUnderstoodKnowledge(); // This will re-render and pick up the flag
+                        }
+                    });
+                });
+
+                // After all items are appended, apply celebration effects if flagged
+                deeplyUnderstoodKnowledge.forEach(moment => {
+                    if (moment.justClickedForCelebration) {
+                        // Query using the card's data-timestamp now
+                        const cardElement = deepenedMomentsList.querySelector(`.deepened-moment-card[data-timestamp="${moment.timestamp}"]`);
+                        if (cardElement) {
+                            cardElement.classList.add('mastered-celebrate-pop');
+                            const rect = cardElement.getBoundingClientRect();
+                            const particleX = rect.left + rect.width / 2;
+                            const particleY = rect.top + rect.height / 2;
+                            triggerParticleBurst('masteredItem', particleX, particleY);
+
+                            setTimeout(() => {
+                                cardElement.classList.remove('mastered-celebrate-pop');
+                            }, 500); // Duration of masteredPop animation
+                        }
+                        delete moment.justClickedForCelebration; // Clean up flag
+                    }
+                });
+                if (deeplyUnderstoodKnowledge.some(m => m.justClickedForCelebration === undefined && Object.keys(m).includes('justClickedForCelebration'))) {
+                    // This condition means a flag was deleted, so we might want to save.
+                    // However, this flag is purely transient for UI effect. Not critical to save its deletion.
+                }
+                updateCountersAndPointsDisplay(); // Ensure star count is up-to-date
             }
+
             function handleCheckboxChange(event) { const ts = parseInt(event.target.dataset.timestamp); const mom = loggedMoments.find(m => m.timestamp === ts); if (mom) mom.selectedForBatch = event.target.checked; saveMoments(); updateCountersAndPointsDisplay(); }
             function handleTextContainerClick(event) { const ts = parseInt(event.currentTarget.dataset.timestamp); const mom = loggedMoments.find(m => m.timestamp === ts); if (mom && !mom.answer && !mom.isProcessing && !mom.isRegenerating) { const liEl = document.getElementById(`moment-item-${ts}`); fetchSingleAIAnswer(mom, liEl, true);} else { toggleAnswerExpansion(ts);}}
             function handleReviewButtonClick(event) { const ts = parseInt(event.currentTarget.dataset.timestamp); toggleUserReviewedStatus(ts); }
@@ -491,6 +568,9 @@
             function toggleAnswerExpansion(timestamp) { const m = loggedMoments.find(mo => mo.timestamp === timestamp); if (m) {m.isAnswerExpanded = !m.isAnswerExpanded; saveMoments(); renderMoments();}}
 
             function saveMoments() {
+                // Clean up any transient flags before saving
+                deeplyUnderstoodKnowledge.forEach(m => delete m.justClickedForCelebration);
+
                 localStorage.setItem('idk_moments' + localStorageKeySuffix, JSON.stringify(loggedMoments));
                 localStorage.setItem('idk_archived_knowledge' + localStorageKeySuffix, JSON.stringify(archivedKnowledge));
                 localStorage.setItem('idk_deeply_understood' + localStorageKeySuffix, JSON.stringify(deeplyUnderstoodKnowledge));
@@ -542,7 +622,6 @@
                 renderMoments();
             });
 
-            // System prompts for AI interactions
             const AI_MCQ_PROMPT_SYSTEM = `You are a quiz question generator. Based on the user's original logged text and an AI explanation, create a single, concise question to test comprehension of this information. Then provide ONE correct answer, ONE plausible but incorrect distractor, AND ONE silly, obviously wrong, or humorous "dumb answer" distractor. Format your entire response *strictly* as:\nQ: [Your Question Here]\nC: [The Correct Answer Here]\nD1: [Plausible Distractor 1 Here]\nDUMB: [The Silly/Dumb Distractor Here]\nDo not add any other text or conversational pleasantries.`;
             const AI_DEEPEN_UNDERSTANDING_PROMPT_SYSTEM = `The user previously logged: "[USER_LOG_TEXT]" and received this explanation: "[ORIGINAL_AI_ANSWER]". They now want to deepen their understanding. Provide a concise explanation that includes 3 new distinct pieces of information, facts, or related concepts that expand on the original topic. Keep the retro interface style and output in plain text.`;
             const AI_DEEP_DIVE_MCQ_PROMPT_SYSTEM = `You are an advanced quiz question generator. The user has received an initial explanation and a "deep dive" explanation for a topic.
@@ -619,16 +698,16 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
                 if (prepButton) { prepButton.disabled = true; prepButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';}
 
                 if (isForArchivedItem) {
-                    for (let i = 0; i < 3; i++) { // Attempt to generate 3 deep dive questions
+                    for (let i = 0; i < 3; i++) { 
                         try {
                             const mcqText = await fetchAIAnswerLogic(null, false, false, null, false, specificArchivedMoment, true, i + 1);
                             const qMatch = mcqText.match(/Q:\s*([\s\S]*?)\nC:/i); const cMatch = mcqText.match(/C:\s*([\s\S]*?)\nD1:/i); const d1Match = mcqText.match(/D1:\s*([\s\S]*?)\nD2:/i); const d2Match = mcqText.match(/D2:\s*([\s\S]*?)$/i);
                             if (qMatch && cMatch && d1Match && d2Match) { let opts = [cMatch[1].trim(), d1Match[1].trim(), d2Match[1].trim()]; opts.sort(() => 0.5 - Math.random()); currentQuizQuestionsData.push({ question: qMatch[1].trim(), options: opts, correctAnswerText: cMatch[1].trim(), originalMomentTimestamp: specificArchivedMoment.timestamp, isDumb: false }); } else { console.warn(`Deep Dive MCQ PARSE FAIL (Q${i+1}):`, mcqText); currentQuizQuestionsData.push(null); }
                         } catch (e) { console.error(`Error gen deep dive MCQ (Q${i+1}):`, e); currentQuizQuestionsData.push(null); }
                     }
-                    currentQuizQuestionsData = currentQuizQuestionsData.filter(q => q !== null); // Remove any nulls from failed generations
-                } else { // Regular quiz
-                    const shuffled = itemsForQuizSource.sort(() => 0.5 - Math.random()); const itemsForThisQuiz = shuffled.slice(0, 3); // Max 3 questions
+                    currentQuizQuestionsData = currentQuizQuestionsData.filter(q => q !== null); 
+                } else { 
+                    const shuffled = itemsForQuizSource.sort(() => 0.5 - Math.random()); const itemsForThisQuiz = shuffled.slice(0, 3); 
                     for (const item of itemsForThisQuiz) {
                         try {
                             const mcqText = await fetchAIAnswerLogic(null, false, true, item);
@@ -659,7 +738,7 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
                 const qData = currentQuizQuestionsData[currentQuizQuestionIndex];
                 const isCorrect = userAnswerText === qData.correctAnswerText;
                 const isDumbSelection = !isDeepDiveQuiz && qData.dumbAnswerText && userAnswerText === qData.dumbAnswerText;
-                const pointsForThisQuestion = isDeepDiveQuiz ? 3 : 2; // Points for correct answers
+                const pointsForThisQuestion = isDeepDiveQuiz ? 3 : 2;
 
                 if (isDumbSelection) {
                     userStupidPoints++;
@@ -671,11 +750,11 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
                     quizOptionsContainer.querySelectorAll('.quiz-option').forEach(opt => { if (opt.textContent === qData.correctAnswerText) { opt.classList.add('correct'); }});
                 } else if (isCorrect) {
                     quizFeedbackArea.textContent = `CORRECT! +${pointsForThisQuestion} PTS!`; quizFeedbackArea.className = 'quiz-feedback-area correct'; selectedQuizOptionElement.classList.add('correct'); currentQuizCorrectAnswersCount++; userPoints += pointsForThisQuestion; triggerPointsFlash(); triggerParticleBurst('correctAnswer'); showToast(`CORRECT! +${pointsForThisQuestion} PTS!`);
-                    if (!isDeepDiveQuiz) { // Archive moment on correct answer in regular quiz
+                    if (!isDeepDiveQuiz) { 
                         const momentToArchiveIndex = loggedMoments.findIndex(m => m.timestamp === qData.originalMomentTimestamp);
                         if (momentToArchiveIndex > -1) { const momentToArchive = loggedMoments.splice(momentToArchiveIndex, 1)[0]; const cardElement = document.getElementById(`moment-item-${qData.originalMomentTimestamp}`); if(cardElement) cardElement.classList.add('archiving'); setTimeout(() => { momentToArchive.isArchived = true; momentToArchive.archivedTimestamp = Date.now(); momentToArchive.isAnswerExpanded = false; archivedKnowledge.unshift(momentToArchive); saveMoments(); renderMoments(); renderArchivedKnowledge(); renderDeeplyUnderstoodKnowledge(); }, 500);} else { saveMoments(); updateCountersAndPointsDisplay(); }
                     } else { saveMoments(); updateCountersAndPointsDisplay(); }
-                } else { // Incorrect (but not dumb) answer
+                } else { 
                     quizFeedbackArea.textContent = `INCORRECT. Correct was: ${qData.correctAnswerText}`; quizFeedbackArea.className = 'quiz-feedback-area incorrect'; selectedQuizOptionElement.classList.add('incorrect'); quizOptionsContainer.querySelectorAll('.quiz-option').forEach(opt => { if (opt.textContent === qData.correctAnswerText) { opt.classList.add('correct'); }});
                 }
                 quizOptionsContainer.querySelectorAll('.quiz-option').forEach(opt => { opt.style.pointerEvents = 'none'; }); submitQuizAnswerButton.style.display = 'none';
@@ -689,7 +768,7 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
 
             function finishMCQQuiz() {
                 let quizResultText = `QUIZ FINISHED! YOU GOT ${currentQuizCorrectAnswersCount} OF ${currentQuizQuestionsData.length} CORRECT.`;
-                const perfectScoreBonus = isDeepDiveQuiz ? 7 : 5; // Bonus points for a perfect score
+                const perfectScoreBonus = isDeepDiveQuiz ? 7 : 5;
                 let earnedPerfectBonus = false;
 
                 if (currentQuizCorrectAnswersCount === currentQuizQuestionsData.length && currentQuizQuestionsData.length > 0) {
@@ -698,7 +777,7 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
                     triggerPointsFlash(); triggerParticleBurst('perfectQuiz');
                     quizResultText += `\nPERFECT SCORE! +${perfectScoreBonus} <i class="fas fa-coins points-icon"></i> BONUS!`;
 
-                    if (isDeepDiveQuiz && currentDeepDiveQuizMoment) { // Move to Deeply Understood on perfect Deep Dive quiz
+                    if (isDeepDiveQuiz && currentDeepDiveQuizMoment) {
                         const momentToMasterIndex = archivedKnowledge.findIndex(m => m.timestamp === currentDeepDiveQuizMoment.timestamp);
                         if (momentToMasterIndex > -1) {
                             const momentToMaster = archivedKnowledge.splice(momentToMasterIndex, 1)[0];
@@ -710,18 +789,17 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
                         }
                     }
                 }
-                saveMoments(); renderMoments(); renderArchivedKnowledge(); renderDeeplyUnderstoodKnowledge();
+                saveMoments(); renderMoments(); renderArchivedKnowledge(); renderDeeplyUnderstoodKnowledge(); // This will update star count via updateCountersAndPointsDisplay
                 quizFeedbackArea.innerHTML = quizResultText.replace(/\n/g, '<br>');
                 showToast(earnedPerfectBonus ? `PERFECT QUIZ! +${perfectScoreBonus} BONUS PTS!` : `QUIZ DONE. ${currentQuizCorrectAnswersCount}/${currentQuizQuestionsData.length}.`);
                 submitQuizAnswerButton.style.display = 'none'; nextQuizQuestionButton.style.display = 'none';
                 finishQuizButton.style.display = 'none'; closeQuizButton.style.display = 'inline-block';
-                currentDeepDiveQuizMoment = null; // Reset after quiz
+                currentDeepDiveQuizMoment = null;
             }
 
             archiveHeader.addEventListener('click', () => { archivedItemsListContainer.classList.toggle('expanded'); archiveToggleIcon.classList.toggle('expanded'); });
             deepenedHeader.addEventListener('click', () => { deepenedItemsListContainer.classList.toggle('expanded'); deepenedToggleIcon.classList.toggle('expanded'); });
 
-            // Initial Renders
             renderMoments();
             renderArchivedKnowledge();
             renderDeeplyUnderstoodKnowledge();
