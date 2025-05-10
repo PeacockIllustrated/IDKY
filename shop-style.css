@@ -1,158 +1,213 @@
 /* shop-style.css */
 
-/* ... (existing styles from the top: body.shop-active, #particleCanvasShop, .vending-machine-page-container) ... */
+html, body.shop-active { /* Apply to html as well for full viewport control */
+    height: 100%; /* Ensure html and body can act as full height references if needed */
+    margin: 0;
+    padding: 0;
+}
+
+body.shop-active {
+    background-color: var(--theme-page-bg, #1a202c);
+    color: var(--theme-text-main, #EAEAEA);
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center content horizontally */
+    justify-content: flex-start; /* Align content to the top */
+    min-height: 100vh; /* Ensure body takes at least full viewport height */
+    padding: 20px; /* Overall page padding */
+    overflow-y: auto; /* Allow scrolling if content overflows viewport */
+    box-sizing: border-box; /* Include padding in height calculation */
+}
+
+#particleCanvasShop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.vending-machine-page-container {
+    width: 100%;
+    max-width: 700px;
+    /* margin: 0 auto; /* Centering handled by body flex */
+    display: flex; /* Use flex to manage its children */
+    flex-direction: column;
+    align-items: center; /* Center the machine itself if it's narrower than max-width */
+    padding-top: 30px; /* Space for the absolute back link */
+    position: relative; /* For the back link positioning */
+}
+
+.vending-back-to-app-link {
+    position: absolute; /* Position relative to vending-machine-page-container */
+    top: 0px; /* At the very top of its container */
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+    color: var(--theme-secondary-accent, #E9C46A);
+    text-decoration: none;
+    padding: 8px 15px;
+    border: var(--pixel-border-width) solid var(--theme-secondary-accent, #E9C46A);
+    background-color: rgba(from var(--theme-primary-dark, #000) r g b / 0.85); /* More opaque */
+    box-shadow: 2px 2px 0 var(--theme-secondary-accent, #E9C46A);
+    transition: all 0.2s ease;
+    z-index: 100; /* Above vending machine */
+    margin-bottom: 20px; /* Ensure space below it before machine starts */
+}
+.vending-back-to-app-link:hover {
+    background-color: var(--theme-secondary-accent, #E9C46A);
+    color: var(--theme-primary-dark, #264653);
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 3px 3px 0 var(--theme-primary-dark, #264653);
+}
+.vending-back-to-app-link i { margin-right: 8px; }
+
+
+.vending-machine {
+    width: 100%; /* Take full width of its container (.vending-machine-page-container) */
+    background-color: var(--theme-light-bg, #c0c0c0);
+    border: 4px solid var(--theme-border-main, #333);
+    border-radius: 10px;
+    box-shadow:
+        inset 0 0 15px rgba(0,0,0,0.3),
+        5px 5px 0px var(--theme-primary-dark, #111),
+        0 0 30px rgba(from var(--theme-secondary-accent, #E9C46A) r g b / 0.3);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    /* max-height: calc(100vh - 120px); /* Max height to prevent overflow, adjust 120px based on header/footer/padding */
+}
 
 .shop-header {
     display: flex;
-    flex-wrap: wrap; /* Crucial for responsiveness */
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 5px; /* Reduced padding for tighter fit */
-    margin-bottom: 20px; /* Reduced margin */
+    padding: 10px 5px;
+    margin-bottom: 15px; /* Reduced margin */
     border-bottom: var(--pixel-border-width) dashed var(--theme-secondary-accent, #E9C46A);
-    position: relative;
+    /* position: relative; /* No longer needed for children if flex handles it */
 }
 
-.shop-header .brand-logo { /* Wrap the H1 in a div if not already for better flex control */
-    order: 2; /* Title in the middle */
-    flex-grow: 1; /* Allow it to take available space */
-    text-align: center; /* Center the H1 within its container */
-    width: 100%; /* Force it to a new line on small screens if needed */
-    margin: 5px 0; /* Add some vertical margin when wrapped */
+.shop-header .brand-logo {
+    order: 2;
+    flex-grow: 1;
+    text-align: center;
+    width: 100%; /* Make it take full width to wrap below/above side elements */
+    margin: 5px 0;
 }
-
 .shop-header h1 {
-    font-size: 24px; /* Make title smaller by default */
+    font-size: 24px;
+    line-height: 1.2;
+    word-break: break-word;
+    /* Other h1 styles from before */
     color: var(--theme-secondary-accent, #E9C46A);
-    text-shadow: 1px 1px 0 var(--theme-primary-dark, #264653), 0 0 5px var(--theme-secondary-accent, #E9C46A); /* Simpler shadow for smaller size */
+    text-shadow: 1px 1px 0 var(--theme-primary-dark, #264653), 0 0 5px var(--theme-secondary-accent, #E9C46A);
     animation: pulseHeaderShop 2.5s infinite ease-in-out, textGlitchShop 7s infinite steps(4, end);
     display: inline-block;
-    letter-spacing: 0.5px; /* Reduced letter spacing */
-    /* margin: 10px 0; Removed, handled by .brand-logo */
-    /* order: 2; Moved to .brand-logo */
-    /* flex-basis: 100%; Moved to .brand-logo */
-    /* text-align: center; Moved to .brand-logo */
+    letter-spacing: 0.5px;
     transition: transform 0.2s ease-out;
-    line-height: 1.2; /* Help with multi-line title */
-    word-break: break-word; /* Allow title to break if very long */
 }
 .shop-header h1:hover { transform: scale(1.02) rotate(-1deg); }
 .shop-header h1 i { /* ... same ... */ }
 
-/* Keyframe animations (pulseHeaderShop, spinIconWobbleShop, textGlitchShop) remain the same */
+/* Keyframe animations remain the same */
 
-
-.back-to-app-link {
-    font-size: 14px; /* Smaller font */
+.back-to-app-link.header-internal { /* Style for the one that was inside the header */
+    font-size: 14px;
     color: var(--theme-card-bg, #FFFFFF);
     text-decoration: none;
-    padding: 6px 10px; /* Smaller padding */
+    padding: 6px 10px;
     border: var(--pixel-border-width) solid var(--theme-primary-dark, #264653);
     background-color: var(--theme-primary-accent, #2A9D8F);
     box-shadow: 2px 2px 0 var(--theme-primary-dark, #264653);
     transition: all 0.15s ease-out;
-    z-index: 10;
-    order: 1; /* Keep it to the left */
-    white-space: nowrap; /* Prevent text wrapping */
+    order: 1;
+    white-space: nowrap;
+    /* margin-bottom: 10px; /* Only if it wraps */
 }
-/* Hover/active for back-to-app-link remains the same */
+
 
 .shop-header-pts {
-    font-size: 16px; /* Smaller font */
-    padding: 6px 10px; /* Smaller padding */
+    font-size: 16px;
+    padding: 6px 10px;
     background-color: var(--theme-card-bg, #FFFFFF);
     border: var(--pixel-border-width) solid var(--theme-secondary-accent, #E9C46A);
     box-shadow: 1px 1px 0 var(--theme-secondary-accent, #E9C46A);
     color: var(--theme-text-main, #264653);
-    z-index: 10;
-    order: 3; /* Keep it to the right */
-    white-space: nowrap; /* Prevent text wrapping */
+    order: 3;
+    white-space: nowrap;
+    /* margin-bottom: 10px; /* Only if it wraps */
 }
-/* Hover/active for shop-header-pts points display remains the same */
-/* coinJiggleShop keyframes remain same */
+/* ... (rest of .shop-header-pts styles, coinJiggleShop, etc.) ... */
 
-.shop-intro-text { /* ... remains same ... */ }
 
 .vending-machine-display-window {
-    /* ... existing styles ... */
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* Further reduce min item width */
-    gap: 10px; /* Reduce gap */
-    height: auto; /* Let it grow based on content */
-    min-height: 300px;
-    max-height: calc(100vh - 250px); /* Prevent it from being too tall, adjust 250px based on header/footer height */
+    background-color: rgba(from var(--theme-primary-dark, #000000) r g b / 0.2);
+    border: 3px solid var(--theme-primary-dark, #111);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+    padding: 20px;
+    /* height: 400px; /* Let's remove fixed height and use flex-grow */
+    flex-grow: 1; /* Allow this section to take available vertical space */
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+    border-radius: 5px;
+    position: relative;
+    min-height: 300px; /* Ensure it has some scrollable area */
 }
+/* ... (scanlines, .vending-item-slot, and all its children styles remain the same as the "visually heavy" version) ... */
 
-.shop-theme-card {
-    /* ... existing styles ... */
-    padding: 10px; /* Reduce padding inside card */
-}
+.vending-machine-footer { /* ... remains same ... */ }
 
-.shop-theme-preview-large {
-    height: 80px; /* Smaller preview */
-    margin-bottom: 10px;
-}
-
-.shop-theme-name {
-    font-size: 16px; /* Smaller name */
-    margin-bottom: 5px;
-}
-.shop-theme-description {
-    font-size: 12px;
-    margin-bottom: 10px;
-    min-height: 2.4em; /* Roughly 2 lines */
-}
-.vending-item-status, .shop-theme-cost {
-    font-size: 12px; /* Smaller status/cost */
-    margin-bottom: 8px;
-}
-
-.shop-theme-button {
-    padding: 6px 8px; /* Smaller button */
-    font-size: 14px;
-}
-
-/* ... (rest of the styles, including hover effects, animations, footer, etc., remain the same) ... */
-
-/* More aggressive Media Query for very narrow screens, if the above isn't enough */
-@media (max-width: 420px) { /* Adjust this breakpoint as needed */
-    .shop-header {
-        padding: 8px 5px; /* Even tighter padding */
-    }
-    .shop-header .brand-logo { /* Ensure title has space to wrap */
-        width: auto; /* Let it shrink if back/pts are on same line */
-        flex-basis: content;
-        margin: 5px auto; /* Center if it's on its own line */
-    }
-     .shop-header h1 {
-        font-size: 20px; /* Even smaller title */
-    }
-    .back-to-app-link, .shop-header-pts {
-        font-size: 12px;
-        padding: 5px 8px;
-        margin-bottom: 5px; /* Reduce margin when stacked */
-    }
-    .vending-machine-display-window {
-        grid-template-columns: 1fr; /* Single column for very narrow screens */
-        gap: 15px;
-    }
-    .shop-theme-card {
-        padding: 15px; /* More padding if single column */
-    }
-    .shop-theme-preview-large {
-        height: 100px; /* Can be a bit taller in single column */
-    }
-}
-
-/* Existing media query for 600px - can be adjusted or merged */
+/* Media Query for smaller screens */
 @media (max-width: 600px) {
+    .vending-machine-page-container {
+        padding: 10px;
+        padding-top: 50px; /* More space for absolute back link */
+    }
+    .vending-back-to-app-link {
+        /* It's already absolute and centered, should be fine, adjust top if needed */
+        top: 10px;
+    }
     .shop-header {
-        /* flex-direction: column; /* Already handled by flex-wrap now */
-        /* align-items: center; */ /* Flexbox default is stretch if not column */
+        flex-direction: column; /* Stack header items on small screens */
+        align-items: center;
     }
-     /* If title is too long and items don't wrap nicely, force column earlier */
+    .shop-header .brand-logo {
+        order: 1; /* Title first */
+        width: 100%;
+        margin-bottom: 10px;
+    }
     .shop-header h1 {
-        font-size: 26px;
-        /* margin-bottom: 10px; */ /* Handled by .brand-logo margin */
+        font-size: 22px; /* Further reduce title size */
     }
-    /* .back-to-app-link, .shop-header-pts might not need order changes if flex-wrap works well */
+    .back-to-app-link.header-internal { /* Hide the one that was inside the header, rely on the absolute positioned one */
+        display: none;
+    }
+    .shop-header-pts {
+        order: 2; /* Points below title */
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+
+    .vending-machine-display-window {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Even smaller items */
+        gap: 8px;
+        min-height: 250px;
+        /* max-height: calc(100vh - 220px); /* Adjust max height for mobile */
+    }
+    /* ... (other mobile adjustments for .shop-theme-card etc. remain same) ... */
+}
+
+/* Additional media query for very narrow screens if the 600px one isn't enough */
+@media (max-width: 420px) {
+    .shop-header h1 { font-size: 20px; }
+    .vending-machine-display-window {
+        grid-template-columns: 1fr; /* Single column */
+    }
+    /* ... (other very narrow screen adjustments) ... */
 }
