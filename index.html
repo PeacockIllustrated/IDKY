@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>I DON'T KNOW, YET! - Retro Points Layout</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css"> <!-- Main styles -->
+    <!-- shop-style.css is NOT needed for index.html, only for shop.html -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <canvas id="particleCanvas"></canvas>
+    <canvas id="particleCanvas"></canvas> <!-- Main particle canvas for index.html -->
 
     <div class="app-container">
         <div class="header-section">
@@ -86,6 +87,8 @@
     </div>
 
     <div class="toast-notification" id="toastNotification">Toast message</div>
+
+    <!-- Quiz Modal (remains on index.html) -->
     <div class="quiz-modal-overlay" id="quizModalOverlay">
         <div class="quiz-modal">
             <h2 id="quizModalTitle">KNOWLEDGE TEST!</h2>
@@ -98,7 +101,11 @@
                 <button class="quiz-modal-button" id="finishQuizButton" style="display: none;">FINISH QUIZ</button>
                 <button class="quiz-modal-button" id="closeQuizButton" style="display:none;">CLOSE</button>
             </div>
-       <div class="shop-toolbar-fixed" id="shopToolbar">
+        </div>
+    </div>
+
+    <!-- Shop Toolbar for index.html - Its content will be managed by script.js to be a link -->
+    <div class="shop-toolbar-fixed" id="shopToolbar">
         <div class="shop-toolbar-header" id="shopToolbarHeader">
             <span><i class="fas fa-palette"></i> THEME SHOP</span>
             <span class="shop-pts-display">
@@ -107,90 +114,16 @@
             <i class="fas fa-chevron-up shop-toggle-icon" id="shopToggleIcon"></i>
         </div>
         <div class="shop-accordion-content" id="shopAccordionContent">
-            <div class="theme-item" data-theme-id="default">
-                <div class="theme-preview" id="preview-default">
-                    <span style="background-color: #264653;"></span>
-                    <span style="background-color: #2A9D8F;"></span>
-                    <span style="background-color: #E9C46A;"></span>
-                    <span style="background-color: #F4A261;"></span>
-                    <span style="background-color: #EAEAEA;"></span>
-                </div>
-                <div class="theme-info">
-                    <span class="theme-name">Default Retro</span>
-                    <span class="theme-status">EQUIPPED</span>
-                </div>
-                <button class="theme-button" data-theme-id="default" data-cost="0" disabled>APPLY</button>
+            <!-- This content will be dynamically replaced by script.js with a link to shop.html -->
+            <!-- Fallback content in case JS fails or is delayed: -->
+            <div class="theme-item" style="justify-content: center; padding: 15px 10px;">
+                <a href="shop.html" class="shop-page-link-button" style="display: inline-block; padding: 8px 15px; background-color: var(--theme-secondary-accent, #E9C46A); color: var(--theme-primary-dark, #264653); text-decoration: none; font-size: 16px; border: var(--pixel-border-width, 2px) solid var(--theme-primary-dark, #264653); box-shadow: 1px 1px 0 var(--theme-primary-dark, #264653);">
+                    <i class="fas fa-store"></i> VISIT THEME EMPORIUM
+                </a>
             </div>
-        <!-- ... (inside <div class="shop-accordion-content" id="shopAccordionContent">) ... -->
-        <!-- ... (Volcano Rush theme item) ... -->
-
-            <div class="theme-item" data-theme-id="techOrangeBlue">
-                <div class="theme-preview" id="preview-techOrangeBlue">
-                    <span style="background-color: #FF6600;"></span> <!-- Orange -->
-                    <span style="background-color: #F0F0F0;"></span> <!-- Light Gray/White -->
-                    <span style="background-color: #C0C0C0;"></span> <!-- Medium Gray -->
-                    <span style="background-color: #4A7DB5;"></span> <!-- Medium Blue -->
-                    <span style="background-color: #004C97;"></span> <!-- Darker Blue -->
-                </div>
-                <div class="theme-info">
-                    <span class="theme-name">Tech Orange & Blue</span>
-                    <span class="theme-cost"><i class="fas fa-coins"></i> 1 PTS</span>
-                </div>
-                <button class="theme-button" data-theme-id="techOrangeBlue" data-cost="1">BUY</button>
-            </div>
-
-    
-            
-            <div class="theme-item" data-theme-id="oceanDepths">
-                <div class="theme-preview" id="preview-oceanDepths">
-                    <span style="background-color: #03045E;"></span>
-                    <span style="background-color: #0077B6;"></span>
-                    <span style="background-color: #00B4D8;"></span>
-                    <span style="background-color: #90E0EF;"></span>
-                    <span style="background-color: #CAF0F8;"></span>
-                </div>
-                <div class="theme-info">
-                    <span class="theme-name">Ocean Depths</span>
-                    <span class="theme-cost"><i class="fas fa-coins"></i> 50 PTS</span>
-                </div>
-                <button class="theme-button" data-theme-id="oceanDepths" data-cost="50">BUY</button>
-            </div>
-
-            <div class="theme-item" data-theme-id="volcanoRush">
-                <div class="theme-preview" id="preview-volcanoRush">
-                    <span style="background-color: #2B0000;"></span>
-                    <span style="background-color: #6A0000;"></span>
-                    <span style="background-color: #FF4500;"></span>
-                    <span style="background-color: #FF8C00;"></span>
-                    <span style="background-color: #FFFFE0;"></span>
-                </div>
-                <div class="theme-info">
-                    <span class="theme-name">Volcano Rush</span>
-                    <span class="theme-cost"><i class="fas fa-coins"></i> 75 PTS</span>
-                </div>
-                <button class="theme-button" data-theme-id="volcanoRush" data-cost="75">BUY</button>
-            </div>
-
-                <div class="theme-item" data-theme-id="forestGreens">
-                <div class="theme-preview" id="preview-forestGreens">
-                    <span style="background-color: #1A2B12;"></span> <!-- Very Dark Green -->
-                    <span style="background-color: #335128;"></span> <!-- Dark Green -->
-                    <span style="background-color: #526F35;"></span> <!-- Medium Olive Green -->
-                    <span style="background-color: #8A9A5B;"></span> <!-- Lighter Olive -->
-                    <span style="background-color: #E0E7A3;"></span> <!-- Pale Yellow-Green -->
-                </div>
-                <div class="theme-info">
-                    <span class="theme-name">Forest Greens</span>
-                    <span class="theme-cost"><i class="fas fa-coins"></i> 1 PTS</span>
-                </div>
-                <button class="theme-button" data-theme-id="forestGreens" data-cost="1">BUY</button>
-            </div>
-            
         </div>
     </div>
 
-    
-            
-    <script src="script.js"></script>
+    <script src="script.js"></script> <!-- Main script for index.html -->
 </body>
 </html>
