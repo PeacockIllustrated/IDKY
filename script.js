@@ -4,20 +4,72 @@ document.addEventListener('DOMContentLoaded', () => {
     const idkInput = document.getElementById('idkInput');
     const logButton = document.getElementById('logButton');
     const selectAllButton = document.getElementById('selectAllButton');
-    // ... (all other const declarations as before) ...
-    const shopUserPointsDisplay = document.getElementById('shopUserPoints');
+    const selectedCountDisplay = document.getElementById('selectedCount'); // THIS WAS MISSING IN THE PREVIOUS FULL SCRIPT RESPONSE
+    const reviewedCountDisplay = document.getElementById('reviewedCountDisplay'); // THIS WAS MISSING
+    const testKnowledgeButton = document.getElementById('testKnowledgeButton');
+    const processSelectedButton = document.getElementById('processSelectedButton');
+    const momentsList = document.getElementById('momentsList');
+    const noMomentsPlaceholder = document.getElementById('noMomentsPlaceholder');
+    const overallLoadingIndicator = document.getElementById('overallLoadingIndicator');
+    const toastNotification = document.getElementById('toastNotification');
+    const userPointsDisplay = document.getElementById('userPoints');
+    const stupidPointsDisplay = document.getElementById('userStupidPoints');
+    const goldStarsDisplay = document.getElementById('goldStars');
 
+    const userApiKeyInput = document.getElementById('userApiKeyInput');
+    const saveApiKeyButton = document.getElementById('saveApiKeyButton');
+
+    const quizModalOverlay = document.getElementById('quizModalOverlay');
+    const quizModalTitle = document.getElementById('quizModalTitle');
+    const quizQuestionNumber = document.getElementById('quizQuestionNumber');
+    const quizQuestionText = document.getElementById('quizQuestionText');
+    const quizOptionsContainer = document.getElementById('quizOptionsContainer');
+    const quizFeedbackArea = document.getElementById('quizFeedbackArea');
+    const submitQuizAnswerButton = document.getElementById('submitQuizAnswerButton');
+    const nextQuizQuestionButton = document.getElementById('nextQuizQuestionButton');
+    const finishQuizButton = document.getElementById('finishQuizButton');
+    const closeQuizButton = document.getElementById('closeQuizButton');
+
+    const archiveHeader = document.getElementById('archiveHeader');
+    const archiveToggleIcon = document.getElementById('archiveToggleIcon');
+    const archivedItemsListContainer = document.getElementById('archivedItemsListContainer');
+    const archivedMomentsList = document.getElementById('archivedMomentsList');
+    const noArchivedPlaceholder = document.getElementById('noArchivedPlaceholder');
+
+    const deepenedHeader = document.getElementById('deepenedHeader');
+    const deepenedToggleIcon = document.getElementById('deepenedToggleIcon');
+    const deepenedItemsListContainer = document.getElementById('deepenedItemsListContainer');
+    const deepenedMomentsList = document.getElementById('deepenedMomentsList');
+    const noDeepenedPlaceholder = document.getElementById('noDeepenedPlaceholder');
+
+    const particleCanvas = document.getElementById('particleCanvas');
+    let ctx, particles = [];
+    if (particleCanvas) {
+        ctx = particleCanvas.getContext('2d');
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+        window.addEventListener('resize', () => {
+            if (particleCanvas) {
+                particleCanvas.width = window.innerWidth;
+                particleCanvas.height = window.innerHeight;
+            }
+        });
+    }
+
+    const shopToolbar = document.getElementById('shopToolbar');
+    const shopToolbarHeader = document.getElementById('shopToolbarHeader');
+    const shopAccordionContent = document.getElementById('shopAccordionContent');
+    const shopUserPointsDisplay = document.getElementById('shopUserPoints');
 
     // --- State Variables & Config ---
     const localStorageKeySuffix = '_v27_theme_shop';
-    const themes = { /* ... COMPLETE THEMES OBJECT ... */
+    const themes = { // THIS MUST BE COMPLETE AND MATCH shop-script.js
         default: { name: "Default Retro", cost: 0, owned: true, description: "The classic look and feel.", cssVariables: { '--theme-primary-dark': '#264653', '--theme-primary-accent': '#2A9D8F', '--theme-secondary-accent': '#E9C46A', '--theme-tertiary-accent': '#F4A261', '--theme-highlight-accent': '#E76F51', '--theme-light-bg': '#EAEAEA', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#EAEAEA', '--theme-page-bg': 'rgb(174, 217, 211)' } },
         oceanDepths: { name: "Ocean Depths", cost: 1, description: "Dive into cool blue tranquility.", cssVariables: { '--theme-primary-dark': '#03045E', '--theme-primary-accent': '#0077B6', '--theme-secondary-accent': '#00B4D8', '--theme-tertiary-accent': '#90E0EF', '--theme-highlight-accent': '#CAF0F8', '--theme-light-bg': '#E0FBFC', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#CAF0F8', '--theme-page-bg': '#ADE8F4' } },
         volcanoRush: { name: "Volcano Rush", cost: 1, description: "Fiery reds and oranges.", cssVariables: { '--theme-primary-dark': '#2B0000', '--theme-primary-accent': '#6A0000', '--theme-secondary-accent': '#FF4500', '--theme-tertiary-accent': '#FF8C00', '--theme-highlight-accent': '#AE2012', '--theme-light-bg': '#FFF2E6', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#FFDAB9', '--theme-page-bg': '#FFCDB2' } },
         techOrangeBlue: { name: "Tech Orange & Blue", cost: 1, description: "A modern tech-inspired palette.", cssVariables: { '--theme-primary-dark': '#004C97', '--theme-primary-accent': '#4A7DB5', '--theme-secondary-accent': '#FF6600', '--theme-tertiary-accent': '#C0C0C0', '--theme-highlight-accent': '#FF7700', '--theme-light-bg': '#F0F0F0', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#F0F0F0', '--theme-page-bg': '#E8E8E8' } },
         forestGreens: { name: "Forest Greens", cost: 1, description: "Earthy and calming greens.", cssVariables: { '--theme-primary-dark': '#1A2B12', '--theme-primary-accent': '#335128', '--theme-secondary-accent': '#526F35', '--theme-tertiary-accent': '#8A9A5B', '--theme-highlight-accent': '#E0E7A3', '--theme-light-bg': '#F0F5E0', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#E0E7A3', '--theme-page-bg': '#D8E0C0' } }
     };
-    // ... (all other state variables as before) ...
     let currentTheme = localStorage.getItem('idk_current_theme' + localStorageKeySuffix) || 'default';
     let userPoints = parseInt(localStorage.getItem('idk_user_points_val' + localStorageKeySuffix)) || 0;
     let userStupidPoints = parseInt(localStorage.getItem('idk_user_stupid_points_val' + localStorageKeySuffix)) || 0;
@@ -34,8 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isDeepDiveQuiz = false;
     let currentDeepDiveQuizMoment = null;
 
-
-    // ... (API Key Logic, Particle & Utility Functions, applyThemeOnIndex, updateCountersAndPointsDisplay, Shop Toolbar Link Logic ... all as before) ...
+    // --- API Key Logic ---
     if(userApiKeyInput) userApiKeyInput.value = userProvidedApiKey;
     if(saveApiKeyButton) {
         saveApiKeyButton.addEventListener('click', () => {
@@ -53,6 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // --- Particle & Utility Functions ---
     function createParticle(x, y, color, size, count, spread, speedMultiplier = 1) { if (!ctx) return; for (let i = 0; i < count; i++) { particles.push({ x, y, size: Math.random() * size + 2, color, vx: (Math.random() - 0.5) * spread * speedMultiplier, vy: (Math.random() - 0.5) * spread * speedMultiplier, life: 60 + Math.random() * 30 });}}
     function updateAndDrawParticles() { if (!ctx || !particleCanvas) return; ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height); for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.life--; if (p.life <= 0) { particles.splice(i, 1); continue; } ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 90; ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); } ctx.globalAlpha = 1; if (particles.length > 0) { requestAnimationFrame(updateAndDrawParticles); }}
     function triggerParticleBurst(type = 'small', customX, customY) {
@@ -75,6 +128,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToast(message, duration = 2500) { if(toastNotification) {toastNotification.textContent = message; toastNotification.classList.add('show'); setTimeout(() => { toastNotification.classList.remove('show'); }, duration); }}
     function autoSetInitialType(text) { const lT = text.toLowerCase().trim(); if (lT.endsWith('?')) return 'question'; const qS = ['what', 'when', 'where', 'who', 'why', 'how', 'is ', 'are ', 'do ', 'does ', 'did ', 'can ', 'could ', 'will ', 'would ', 'should ', 'may ', 'might ']; for (const s of qS) { if (lT.startsWith(s)) return 'question'; } return 'statement'; }
     function triggerPointsFlash() { const mainPointsDisplay = document.querySelector('.header-stats-bar .points-display:first-child'); if(mainPointsDisplay) mainPointsDisplay.classList.add('points-earned-flash'); setTimeout(() => { if(mainPointsDisplay) mainPointsDisplay.classList.remove('points-earned-flash'); }, 500); }
+
+    // --- Theme Logic for index.html ---
     function applyThemeOnIndex(themeId) {
         const themeToApply = themes[themeId] || themes.default;
         if (themeToApply && themeToApply.cssVariables) {
@@ -92,13 +147,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+
+    // --- UI Update Functions ---
     function updateCountersAndPointsDisplay() {
         const reviewedCount = loggedMoments.filter(m => m.userMarkedReviewed).length;
         const reviewedWithAnswersCount = loggedMoments.filter(m => m.userMarkedReviewed && m.answer).length;
         if(reviewedCountDisplay) reviewedCountDisplay.textContent = `(${reviewedCount}/${loggedMoments.length} Reviewed)`;
         if(testKnowledgeButton) testKnowledgeButton.disabled = reviewedWithAnswersCount < 1;
         const selectedCount = loggedMoments.filter(m => m.selectedForBatch).length;
-        if (selectedCountDisplay) { selectedCountDisplay.textContent = `${selectedCount} SEL`; }
+        if (selectedCountDisplay) { selectedCountDisplay.textContent = `${selectedCount} SEL`; } // This line caused the error if selectedCountDisplay was not defined
         if(processSelectedButton) processSelectedButton.disabled = selectedCount === 0;
         if (loggedMoments.length > 0) {
             if(selectAllButton) selectAllButton.textContent = (selectedCount === loggedMoments.length && selectedCount > 0) ? "DESEL. ALL" : "SEL. ALL";
@@ -110,9 +167,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (goldStarsDisplay) { goldStarsDisplay.textContent = deeplyUnderstoodKnowledge.length; }
         if (shopUserPointsDisplay) shopUserPointsDisplay.textContent = userPoints;
     }
+
+    // --- Shop Toolbar Link on index.html ---
     if (shopToolbar && shopToolbarHeader && shopAccordionContent) {
         shopToolbarHeader.addEventListener('click', () => { window.location.href = "shop.html"; });
-        shopAccordionContent.innerHTML = `<div class="theme-item" style="justify-content: center; padding: 10px; cursor:pointer;" onclick="window.location.href='shop.html'"><span class="shop-page-link-button"><i class="fas fa-store"></i> VISIT THEME EMPORIUM</span></div>`;
+        shopAccordionContent.innerHTML = `
+            <div class="theme-item" style="justify-content: center; padding: 10px; cursor:pointer;" onclick="window.location.href='shop.html'">
+                <span class="shop-page-link-button">
+                    <i class="fas fa-store"></i> VISIT THEME EMPORIUM
+                </span>
+            </div>`;
         if (!document.getElementById('shopLinkButtonStyle')) {
             const styleSheet = document.createElement("style"); styleSheet.id = 'shopLinkButtonStyle';
             styleSheet.innerText = `
@@ -123,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.head.appendChild(styleSheet);
         }
     }
-
 
     // --- Core App Logic (Render, Save, Actions) ---
     function renderMoments() {
@@ -156,7 +219,8 @@ document.addEventListener('DOMContentLoaded', () => {
         listItem.querySelector('.moment-text-container').addEventListener('click', () => { const aM = archivedKnowledge.find(am => am.timestamp === moment.timestamp); if(aM) { aM.isAnswerExpanded = !aM.isAnswerExpanded; saveMoments(); renderArchivedKnowledge(); }});
         listItem.querySelector('.deep-dive-button').addEventListener('click', (e) => { e.stopPropagation(); handleDeepDiveClick(moment.timestamp); });
         listItem.querySelector('.archive-revise-button').addEventListener('click', (e) => { e.stopPropagation(); toggleArchiveRevisedStatus(moment.timestamp); });
-        listItem.querySelector('.archive-deep-dive-test-button').addEventListener('click', (e) => { e.stopPropagation(); if(canTakeDeepDiveTest) startDeepDiveQuiz(moment); }); }); // Correctly calls startDeepDiveQuiz
+        listItem.querySelector('.archive-deep-dive-test-button').addEventListener('click', (e) => { e.stopPropagation(); if(canTakeDeepDiveTest) startDeepDiveQuiz(moment); });
+        });
         updateCountersAndPointsDisplay();
     }
     function renderDeeplyUnderstoodKnowledge() {
@@ -271,8 +335,7 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
     }
 
     // --- Quiz Logic ---
-    // THIS IS THE FUNCTION THAT WAS MISSING FROM THE PREVIOUS SCRIPT.JS
-    function startDeepDiveQuiz(archivedMoment) {
+    function startDeepDiveQuiz(archivedMoment) { // Definition was missing
         if (!archivedMoment) {
             console.error("Attempted to start deep dive quiz without a moment.");
             showToast("ERROR: Cannot start deep dive test for this item.");
@@ -280,7 +343,6 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
         }
         startQuiz(true, archivedMoment);
     }
-
     async function startQuiz(isForArchivedItem = false, specificArchivedMoment = null) {
         isDeepDiveQuiz = isForArchivedItem; currentDeepDiveQuizMoment = isForArchivedItem ? specificArchivedMoment : null;
         const itemsForQuizSource = isForArchivedItem ? [specificArchivedMoment] : loggedMoments.filter(m => m.userMarkedReviewed && m.answer);
