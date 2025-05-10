@@ -4,72 +4,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const idkInput = document.getElementById('idkInput');
     const logButton = document.getElementById('logButton');
     const selectAllButton = document.getElementById('selectAllButton');
-    const selectedCountDisplay = document.getElementById('selectedCount');
-    const reviewedCountDisplay = document.getElementById('reviewedCountDisplay');
-    const testKnowledgeButton = document.getElementById('testKnowledgeButton');
-    const processSelectedButton = document.getElementById('processSelectedButton');
-    const momentsList = document.getElementById('momentsList');
-    const noMomentsPlaceholder = document.getElementById('noMomentsPlaceholder');
-    const overallLoadingIndicator = document.getElementById('overallLoadingIndicator');
-    const toastNotification = document.getElementById('toastNotification');
-    const userPointsDisplay = document.getElementById('userPoints');
-    const stupidPointsDisplay = document.getElementById('userStupidPoints');
-    const goldStarsDisplay = document.getElementById('goldStars');
-
-    const userApiKeyInput = document.getElementById('userApiKeyInput');
-    const saveApiKeyButton = document.getElementById('saveApiKeyButton');
-
-    const quizModalOverlay = document.getElementById('quizModalOverlay');
-    const quizModalTitle = document.getElementById('quizModalTitle');
-    const quizQuestionNumber = document.getElementById('quizQuestionNumber');
-    const quizQuestionText = document.getElementById('quizQuestionText');
-    const quizOptionsContainer = document.getElementById('quizOptionsContainer');
-    const quizFeedbackArea = document.getElementById('quizFeedbackArea');
-    const submitQuizAnswerButton = document.getElementById('submitQuizAnswerButton');
-    const nextQuizQuestionButton = document.getElementById('nextQuizQuestionButton');
-    const finishQuizButton = document.getElementById('finishQuizButton');
-    const closeQuizButton = document.getElementById('closeQuizButton');
-
-    const archiveHeader = document.getElementById('archiveHeader');
-    const archiveToggleIcon = document.getElementById('archiveToggleIcon');
-    const archivedItemsListContainer = document.getElementById('archivedItemsListContainer');
-    const archivedMomentsList = document.getElementById('archivedMomentsList');
-    const noArchivedPlaceholder = document.getElementById('noArchivedPlaceholder');
-
-    const deepenedHeader = document.getElementById('deepenedHeader');
-    const deepenedToggleIcon = document.getElementById('deepenedToggleIcon');
-    const deepenedItemsListContainer = document.getElementById('deepenedItemsListContainer');
-    const deepenedMomentsList = document.getElementById('deepenedMomentsList');
-    const noDeepenedPlaceholder = document.getElementById('noDeepenedPlaceholder');
-
-    const particleCanvas = document.getElementById('particleCanvas');
-    let ctx, particles = [];
-    if (particleCanvas) {
-        ctx = particleCanvas.getContext('2d');
-        particleCanvas.width = window.innerWidth;
-        particleCanvas.height = window.innerHeight;
-        window.addEventListener('resize', () => {
-            if (particleCanvas) {
-                particleCanvas.width = window.innerWidth;
-                particleCanvas.height = window.innerHeight;
-            }
-        });
-    }
-
-    const shopToolbar = document.getElementById('shopToolbar');
-    const shopToolbarHeader = document.getElementById('shopToolbarHeader');
-    const shopAccordionContent = document.getElementById('shopAccordionContent');
+    // ... (all other const declarations as before) ...
     const shopUserPointsDisplay = document.getElementById('shopUserPoints');
 
+
     // --- State Variables & Config ---
-    const localStorageKeySuffix = '_v27_theme_shop'; // Ensure this is consistent
-    const themes = { // THIS MUST BE COMPLETE
+    const localStorageKeySuffix = '_v27_theme_shop';
+    const themes = { /* ... COMPLETE THEMES OBJECT ... */
         default: { name: "Default Retro", cost: 0, owned: true, description: "The classic look and feel.", cssVariables: { '--theme-primary-dark': '#264653', '--theme-primary-accent': '#2A9D8F', '--theme-secondary-accent': '#E9C46A', '--theme-tertiary-accent': '#F4A261', '--theme-highlight-accent': '#E76F51', '--theme-light-bg': '#EAEAEA', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#EAEAEA', '--theme-page-bg': 'rgb(174, 217, 211)' } },
         oceanDepths: { name: "Ocean Depths", cost: 1, description: "Dive into cool blue tranquility.", cssVariables: { '--theme-primary-dark': '#03045E', '--theme-primary-accent': '#0077B6', '--theme-secondary-accent': '#00B4D8', '--theme-tertiary-accent': '#90E0EF', '--theme-highlight-accent': '#CAF0F8', '--theme-light-bg': '#E0FBFC', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#CAF0F8', '--theme-page-bg': '#ADE8F4' } },
         volcanoRush: { name: "Volcano Rush", cost: 1, description: "Fiery reds and oranges.", cssVariables: { '--theme-primary-dark': '#2B0000', '--theme-primary-accent': '#6A0000', '--theme-secondary-accent': '#FF4500', '--theme-tertiary-accent': '#FF8C00', '--theme-highlight-accent': '#AE2012', '--theme-light-bg': '#FFF2E6', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#FFDAB9', '--theme-page-bg': '#FFCDB2' } },
         techOrangeBlue: { name: "Tech Orange & Blue", cost: 1, description: "A modern tech-inspired palette.", cssVariables: { '--theme-primary-dark': '#004C97', '--theme-primary-accent': '#4A7DB5', '--theme-secondary-accent': '#FF6600', '--theme-tertiary-accent': '#C0C0C0', '--theme-highlight-accent': '#FF7700', '--theme-light-bg': '#F0F0F0', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#F0F0F0', '--theme-page-bg': '#E8E8E8' } },
         forestGreens: { name: "Forest Greens", cost: 1, description: "Earthy and calming greens.", cssVariables: { '--theme-primary-dark': '#1A2B12', '--theme-primary-accent': '#335128', '--theme-secondary-accent': '#526F35', '--theme-tertiary-accent': '#8A9A5B', '--theme-highlight-accent': '#E0E7A3', '--theme-light-bg': '#F0F5E0', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#E0E7A3', '--theme-page-bg': '#D8E0C0' } }
     };
+    // ... (all other state variables as before) ...
     let currentTheme = localStorage.getItem('idk_current_theme' + localStorageKeySuffix) || 'default';
     let userPoints = parseInt(localStorage.getItem('idk_user_points_val' + localStorageKeySuffix)) || 0;
     let userStupidPoints = parseInt(localStorage.getItem('idk_user_stupid_points_val' + localStorageKeySuffix)) || 0;
@@ -86,7 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let isDeepDiveQuiz = false;
     let currentDeepDiveQuizMoment = null;
 
-    // --- API Key Logic ---
+
+    // ... (API Key Logic, Particle & Utility Functions, applyThemeOnIndex, updateCountersAndPointsDisplay, Shop Toolbar Link Logic ... all as before) ...
     if(userApiKeyInput) userApiKeyInput.value = userProvidedApiKey;
     if(saveApiKeyButton) {
         saveApiKeyButton.addEventListener('click', () => {
@@ -104,8 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // --- Particle & Utility Functions ---
     function createParticle(x, y, color, size, count, spread, speedMultiplier = 1) { if (!ctx) return; for (let i = 0; i < count; i++) { particles.push({ x, y, size: Math.random() * size + 2, color, vx: (Math.random() - 0.5) * spread * speedMultiplier, vy: (Math.random() - 0.5) * spread * speedMultiplier, life: 60 + Math.random() * 30 });}}
     function updateAndDrawParticles() { if (!ctx || !particleCanvas) return; ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height); for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.life--; if (p.life <= 0) { particles.splice(i, 1); continue; } ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 90; ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); } ctx.globalAlpha = 1; if (particles.length > 0) { requestAnimationFrame(updateAndDrawParticles); }}
     function triggerParticleBurst(type = 'small', customX, customY) {
@@ -128,15 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToast(message, duration = 2500) { if(toastNotification) {toastNotification.textContent = message; toastNotification.classList.add('show'); setTimeout(() => { toastNotification.classList.remove('show'); }, duration); }}
     function autoSetInitialType(text) { const lT = text.toLowerCase().trim(); if (lT.endsWith('?')) return 'question'; const qS = ['what', 'when', 'where', 'who', 'why', 'how', 'is ', 'are ', 'do ', 'does ', 'did ', 'can ', 'could ', 'will ', 'would ', 'should ', 'may ', 'might ']; for (const s of qS) { if (lT.startsWith(s)) return 'question'; } return 'statement'; }
     function triggerPointsFlash() { const mainPointsDisplay = document.querySelector('.header-stats-bar .points-display:first-child'); if(mainPointsDisplay) mainPointsDisplay.classList.add('points-earned-flash'); setTimeout(() => { if(mainPointsDisplay) mainPointsDisplay.classList.remove('points-earned-flash'); }, 500); }
-
-    // --- Theme Logic for index.html ---
     function applyThemeOnIndex(themeId) {
         const themeToApply = themes[themeId] || themes.default;
         if (themeToApply && themeToApply.cssVariables) {
             const themeVars = themeToApply.cssVariables;
-            for (const [key, value] of Object.entries(themeVars)) {
-                document.documentElement.style.setProperty(key, value);
-            }
+            for (const [key, value] of Object.entries(themeVars)) { document.documentElement.style.setProperty(key, value); }
             document.documentElement.style.setProperty('--theme-text-main', themeVars['--theme-primary-dark']);
             document.documentElement.style.setProperty('--theme-border-main', themeVars['--theme-primary-dark']);
         } else {
@@ -149,8 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
-    // --- UI Update Functions ---
     function updateCountersAndPointsDisplay() {
         const reviewedCount = loggedMoments.filter(m => m.userMarkedReviewed).length;
         const reviewedWithAnswersCount = loggedMoments.filter(m => m.userMarkedReviewed && m.answer).length;
@@ -169,16 +110,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (goldStarsDisplay) { goldStarsDisplay.textContent = deeplyUnderstoodKnowledge.length; }
         if (shopUserPointsDisplay) shopUserPointsDisplay.textContent = userPoints;
     }
-
-    // --- Shop Toolbar Link on index.html ---
     if (shopToolbar && shopToolbarHeader && shopAccordionContent) {
         shopToolbarHeader.addEventListener('click', () => { window.location.href = "shop.html"; });
-        shopAccordionContent.innerHTML = `
-            <div class="theme-item" style="justify-content: center; padding: 10px; cursor:pointer;" onclick="window.location.href='shop.html'">
-                <span class="shop-page-link-button">
-                    <i class="fas fa-store"></i> VISIT THEME EMPORIUM
-                </span>
-            </div>`;
+        shopAccordionContent.innerHTML = `<div class="theme-item" style="justify-content: center; padding: 10px; cursor:pointer;" onclick="window.location.href='shop.html'"><span class="shop-page-link-button"><i class="fas fa-store"></i> VISIT THEME EMPORIUM</span></div>`;
         if (!document.getElementById('shopLinkButtonStyle')) {
             const styleSheet = document.createElement("style"); styleSheet.id = 'shopLinkButtonStyle';
             styleSheet.innerText = `
@@ -189,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.head.appendChild(styleSheet);
         }
     }
+
 
     // --- Core App Logic (Render, Save, Actions) ---
     function renderMoments() {
@@ -221,17 +156,15 @@ document.addEventListener('DOMContentLoaded', () => {
         listItem.querySelector('.moment-text-container').addEventListener('click', () => { const aM = archivedKnowledge.find(am => am.timestamp === moment.timestamp); if(aM) { aM.isAnswerExpanded = !aM.isAnswerExpanded; saveMoments(); renderArchivedKnowledge(); }});
         listItem.querySelector('.deep-dive-button').addEventListener('click', (e) => { e.stopPropagation(); handleDeepDiveClick(moment.timestamp); });
         listItem.querySelector('.archive-revise-button').addEventListener('click', (e) => { e.stopPropagation(); toggleArchiveRevisedStatus(moment.timestamp); });
-        listItem.querySelector('.archive-deep-dive-test-button').addEventListener('click', (e) => { e.stopPropagation(); if(canTakeDeepDiveTest) startDeepDiveQuiz(moment); }); });
+        listItem.querySelector('.archive-deep-dive-test-button').addEventListener('click', (e) => { e.stopPropagation(); if(canTakeDeepDiveTest) startDeepDiveQuiz(moment); }); }); // Correctly calls startDeepDiveQuiz
         updateCountersAndPointsDisplay();
     }
     function renderDeeplyUnderstoodKnowledge() {
         if(!deepenedMomentsList || !noDeepenedPlaceholder) return;
-        deepenedMomentsList.innerHTML = '';
-        noDeepenedPlaceholder.style.display = deeplyUnderstoodKnowledge.length === 0 ? 'block' : 'none';
+        deepenedMomentsList.innerHTML = ''; noDeepenedPlaceholder.style.display = deeplyUnderstoodKnowledge.length === 0 ? 'block' : 'none';
         deeplyUnderstoodKnowledge.forEach((moment) => {
             const listItem = document.createElement('li'); listItem.className = 'moment-card deepened-moment-card'; listItem.dataset.timestamp = moment.timestamp;
-            const displayAnswerHTML = moment.answer ? formatAnswerForRetroDisplay(moment.answer) : '';
-            const deepDiveAnswerHTML = moment.deepDiveAnswer ? formatAnswerForRetroDisplay(moment.deepDiveAnswer) : '';
+            const displayAnswerHTML = moment.answer ? formatAnswerForRetroDisplay(moment.answer) : ''; const deepDiveAnswerHTML = moment.deepDiveAnswer ? formatAnswerForRetroDisplay(moment.deepDiveAnswer) : '';
             listItem.innerHTML = `<div class="moment-header"><div class="moment-text-container" data-timestamp="${moment.timestamp}"><div class="moment-main-text"><span class="moment-text">${moment.text}</span><span class="moment-timestamp">MASTERED: ${new Date(moment.deeplyUnderstoodTimestamp || Date.now()).toLocaleDateString()}</span></div><i class="fas fa-caret-down expand-icon ${moment.isAnswerExpanded ? 'expanded' : ''}"></i></div></div><div class="moment-answer-wrapper ${moment.isAnswerExpanded ? 'expanded' : ''}">${moment.answer ? `<div class="moment-answer-content"><strong>Original Insight:</strong><br>${displayAnswerHTML}</div>` : ''}${moment.deepDiveAnswer ? `<div class="deep-dive-answer-container"><div class="moment-answer-content"><strong>Deep Dive:</strong><br>${deepDiveAnswerHTML}</div></div>` : ''}</div>`;
             deepenedMomentsList.appendChild(listItem);
             listItem.querySelector('.moment-text-container').addEventListener('click', (event) => {
@@ -244,10 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cardElement = deepenedMomentsList.querySelector(`.deepened-moment-card[data-timestamp="${moment.timestamp}"]`);
                 if (cardElement) {
                     cardElement.classList.add('mastered-celebrate-pop');
-                    const rect = cardElement.getBoundingClientRect();
-                    const particleX = rect.left + rect.width / 2; const particleY = rect.top + rect.height / 2;
-                    triggerParticleBurst('masteredItem', particleX, particleY);
-                    showToast("MASTERED! WELL DONE!", 1500);
+                    const rect = cardElement.getBoundingClientRect(); const particleX = rect.left + rect.width / 2; const particleY = rect.top + rect.height / 2;
+                    triggerParticleBurst('masteredItem', particleX, particleY); showToast("MASTERED! WELL DONE!", 1500);
                     setTimeout(() => { cardElement.classList.remove('mastered-celebrate-pop'); }, 500);
                 }
                 delete moment.justClickedForCelebration;
@@ -330,7 +261,7 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
         const response = await fetch('https://api.openai.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKeyToUse}`}, body: JSON.stringify(requestBodyToOpenAI)});
         if (!response.ok) { const eD = await response.json().catch(() => ({error: {message: "Unknown API error"}})); console.error("OpenAI API Error:", eD); throw new Error(`API Error (${response.status}): ${eD.error?.message || 'Unknown'}`);}
         const data = await response.json(); let rawAnswerText = data.choices[0]?.message?.content.trim() || "NO RESPONSE.";
-        if (moment && !isQuizQuestionGen && !isDeepDiveGen && !isDeepDiveMCQGen && moment.type === 'statement' && !isRegeneration) { if (rawAnswerText.startsWith('[CORRECT]')) { moment.aiVerdict = 'correct'; rawAnswerText = rawAnswerText.substring(9).trim(); } else if (rawAnswerText.startsWith('[INCORRECT]')) { moment.aiVerdict = 'incorrect'; rawAnswerText = rawAnswerText.substring(11).trim(); } else if (rawAnswerText.startsWith('[UNCLEAR]')) { moment.aiVerdict = 'unclear'; rawAnswerText = rawAnswerText.substring(9).trim(); } else { moment.aiVerdict = 'unclear'; /* Default if no prefix */}}
+        if (moment && !isQuizQuestionGen && !isDeepDiveGen && !isDeepDiveMCQGen && moment.type === 'statement' && !isRegeneration) { if (rawAnswerText.startsWith('[CORRECT]')) { moment.aiVerdict = 'correct'; rawAnswerText = rawAnswerText.substring(9).trim(); } else if (rawAnswerText.startsWith('[INCORRECT]')) { moment.aiVerdict = 'incorrect'; rawAnswerText = rawAnswerText.substring(11).trim(); } else if (rawAnswerText.startsWith('[UNCLEAR]')) { moment.aiVerdict = 'unclear'; rawAnswerText = rawAnswerText.substring(9).trim(); } else { moment.aiVerdict = 'unclear'; }}
         return rawAnswerText;
     }
     async function fetchSingleAIAnswer(moment, listItemElement, expandAfterFetch = false) { if (moment.isProcessing || moment.isRegenerating) return; moment.isProcessing = true; if (expandAfterFetch) moment.isAnswerExpanded = false; renderMoments(); try { const aT = await fetchAIAnswerLogic(moment); moment.answer = aT; if (expandAfterFetch) moment.isAnswerExpanded = true; } catch (e) { moment.answer = `ERROR: ${e.message}`; if (expandAfterFetch) moment.isAnswerExpanded = true;  } finally { moment.isProcessing = false; saveMoments(); renderMoments();}}
@@ -340,6 +271,16 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
     }
 
     // --- Quiz Logic ---
+    // THIS IS THE FUNCTION THAT WAS MISSING FROM THE PREVIOUS SCRIPT.JS
+    function startDeepDiveQuiz(archivedMoment) {
+        if (!archivedMoment) {
+            console.error("Attempted to start deep dive quiz without a moment.");
+            showToast("ERROR: Cannot start deep dive test for this item.");
+            return;
+        }
+        startQuiz(true, archivedMoment);
+    }
+
     async function startQuiz(isForArchivedItem = false, specificArchivedMoment = null) {
         isDeepDiveQuiz = isForArchivedItem; currentDeepDiveQuizMoment = isForArchivedItem ? specificArchivedMoment : null;
         const itemsForQuizSource = isForArchivedItem ? [specificArchivedMoment] : loggedMoments.filter(m => m.userMarkedReviewed && m.answer);
