@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const themes = {
         default: {
             name: "Default Retro",
-            cost: 0,
+            cost: 0, // Default is free
             owned: true,
             cssVariables: {
                 '--theme-primary-dark': '#264653',
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         oceanDepths: {
             name: "Ocean Depths",
-            cost: 50,
+            cost: 1, // Price changed for testing
             cssVariables: {
                 '--theme-primary-dark': '#03045E',
                 '--theme-primary-accent': '#0077B6',
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         volcanoRush: {
             name: "Volcano Rush",
-            cost: 75,
+            cost: 1, // Price changed for testing
             cssVariables: {
                 '--theme-primary-dark': '#2B0000',
                 '--theme-primary-accent': '#6A0000',
@@ -110,10 +110,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 '--theme-text-on-dark': '#FFDAB9',
                 '--theme-page-bg': '#FFCDB2'
             }
+        },
+        techOrangeBlue: { // New Theme
+            name: "Tech Orange & Blue",
+            cost: 1, // Price for testing
+            cssVariables: {
+                '--theme-primary-dark': '#004C97',    // Darker Blue for primary dark / text
+                '--theme-primary-accent': '#4A7DB5', // Medium Blue for primary accent
+                '--theme-secondary-accent': '#FF6600',// Bright Orange for secondary accent
+                '--theme-tertiary-accent': '#C0C0C0', // Medium Gray for tertiary actions/borders
+                '--theme-highlight-accent': '#FF7700',// Slightly different orange for highlights (or use secondary)
+                '--theme-light-bg': '#F0F0F0',       // Very Light Gray for light backgrounds
+                '--theme-card-bg': '#FFFFFF',        // White for cards
+                '--theme-text-on-dark': '#F0F0F0',   // Light gray text on dark blue
+                '--theme-page-bg': '#E8E8E8'         // Light gray for overall page background
+            }
         }
     };
     let ownedThemes = JSON.parse(localStorage.getItem('idk_owned_themes' + localStorageKeySuffix)) || ['default'];
     let currentTheme = localStorage.getItem('idk_current_theme' + localStorageKeySuffix) || 'default';
+
 
 
     let currentQuizQuestionsData = [];
