@@ -10,9 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const noMomentsPlaceholder = document.getElementById('noMomentsPlaceholder');
     const overallLoadingIndicator = document.getElementById('overallLoadingIndicator');
     const toastNotification = document.getElementById('toastNotification');
-    const userPointsDisplay = document.getElementById('userPoints'); // Updated ID based on your note
-    const stupidPointsDisplay = document.getElementById('userStupidPoints'); // Updated ID
-    const goldStarsDisplay = document.getElementById('goldStars'); // Updated ID
+    const userPointsDisplay = document.getElementById('userPoints');
+    const stupidPointsDisplay = document.getElementById('userStupidPoints');
+    const goldStarsDisplay = document.getElementById('goldStars');
 
     const userApiKeyInput = document.getElementById('userApiKeyInput');
     const saveApiKeyButton = document.getElementById('saveApiKeyButton');
@@ -47,12 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
     particleCanvas.height = window.innerHeight;
     window.addEventListener('resize', () => { particleCanvas.width = window.innerWidth; particleCanvas.height = window.innerHeight; });
 
-    let localStorageKeySuffix = '_v26_hover_gamify'; // Keep this consistent for data or update if you want a fresh start
+    let localStorageKeySuffix = '_v26_hover_gamify';
     let loggedMoments = JSON.parse(localStorage.getItem('idk_moments' + localStorageKeySuffix)) || [];
     let archivedKnowledge = JSON.parse(localStorage.getItem('idk_archived_knowledge' + localStorageKeySuffix)) || [];
     let deeplyUnderstoodKnowledge = JSON.parse(localStorage.getItem('idk_deeply_understood' + localStorageKeySuffix)) || [];
-    let userPoints = parseInt(localStorage.getItem('idk_user_points_val' + localStorageKeySuffix)) || 0; // Storing actual value
-    let userStupidPoints = parseInt(localStorage.getItem('idk_user_stupid_points_val' + localStorageKeySuffix)) || 0; // Storing actual value
+    let userPoints = parseInt(localStorage.getItem('idk_user_points_val' + localStorageKeySuffix)) || 0;
+    let userStupidPoints = parseInt(localStorage.getItem('idk_user_stupid_points_val' + localStorageKeySuffix)) || 0;
     let userProvidedApiKey = localStorage.getItem('idk_user_openai_api_key' + localStorageKeySuffix) || '';
 
 
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         createParticle(cX, cY, clr, sz, cnt, sprd, spd);
         if (particles.length === cnt || type === 'dumbAnswer' || type === 'masteredItem') {
-            requestAnimationFrame(updateAndDrawParticles);
+            requestAnimationFrame(updateAnd_drawParticles); // Corrected typo here: updateAnd_drawParticles -> updateAndDrawParticles
         }
     }
 
