@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I Don't Know, Yet! - Retro Points Layout</title>
+    <title>I DON'T KNOW, YET! - Retro Points Layout</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
@@ -43,7 +43,7 @@
         }
         .app-title-bar {
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* Center title container */
             align-items: center;
             margin-bottom: 10px;
             padding-bottom: 5px;
@@ -51,13 +51,22 @@
         }
         .app-title-container { display: flex; align-items: center; }
         .app-title-container i.title-icon { font-size: 24px; color: var(--retro-teal); margin-right: 8px; text-shadow: 1px 1px 0px var(--retro-dark); }
-        .app-title-container h1 { font-size: 28px; font-weight: normal; color: var(--retro-text); }
-
-        .title-bar-points-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .app-title-container h1 {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--retro-text);
+            text-transform: uppercase; /* All caps title */
         }
+
+        .header-stats-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0; /* Removed padding */
+            margin-bottom: 10px;
+            margin-top: 5px; /* Add some top margin if padding is removed */
+        }
+
         .points-display {
             font-size: 16px;
             color: var(--retro-text);
@@ -65,17 +74,19 @@
             transition: transform 0.1s ease-out, color 0.1s ease-out;
             line-height: 1.2;
             white-space: nowrap;
+            display: flex;
+            align-items: center;
         }
         .points-display.points-earned-flash { animation: pointsFlash 0.5s ease-in-out; }
         @keyframes pointsFlash { 0%, 100% { transform: scale(1); color: var(--retro-text); } 50% { transform: scale(1.15); color: var(--retro-yellow); } }
         .points-display i.points-icon { margin-right: 4px; text-shadow: 1px 1px 0px var(--retro-dark); }
         .points-display i.fa-coins { color: var(--retro-yellow); }
         .points-display i.fa-poo { color: var(--retro-coral); }
-        .points-display i.gold-star-icon { color: var(--retro-yellow); } /* Gold star icon color */
+        .points-display i.gold-star-icon { color: var(--retro-yellow); }
 
 
         .api-key-area {
-            margin-top: 10px; padding-top: 10px;
+            padding-top: 10px;
             border-top: var(--pixel-border-width) dashed #bbb;
             display: flex; gap: 8px; align-items: center;
         }
@@ -195,7 +206,7 @@
         .accordion-content-container { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out, border 0.4s ease-in-out, padding 0.4s ease-in-out; border: none; padding: 0;}
         .accordion-content-container.expanded { max-height: 1000px; border: var(--pixel-border-width) solid var(--retro-border-color); border-top: none; padding: 10px; background-color: var(--retro-light-bg); }
         .archived-moment-card, .deepened-moment-card { background-color: var(--retro-card-bg); margin-bottom: 8px; border: var(--pixel-border-width) solid var(--retro-teal); padding: 8px; animation: retroFadeIn 0.4s ease-out forwards; opacity: 0; }
-        .deepened-moment-card { border-color: var(--retro-yellow); transition: box-shadow 0.2s ease-out; } /* Added transition for smooth box-shadow clear */
+        .deepened-moment-card { border-color: var(--retro-yellow); transition: box-shadow 0.2s ease-out; }
         .archived-moment-card .moment-text-container, .deepened-moment-card .moment-text-container { cursor: pointer; }
         .archived-moment-card .moment-text, .deepened-moment-card .moment-text { font-size: 16px; color: var(--retro-text); }
         .archived-moment-card .moment-timestamp, .deepened-moment-card .moment-timestamp { font-size: 12px; color: #666; }
@@ -205,7 +216,6 @@
             border: none;
             box-shadow: none;
         }
-        /* Celebratory animation for mastered cards */
         .deepened-moment-card.mastered-celebrate-pop {
             animation: masteredPop 0.5s ease-out;
         }
@@ -219,7 +229,15 @@
         .quiz-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000; animation: fadeInBg 0.3s ease; }
         .quiz-modal-overlay.show { display: flex; }
         .quiz-modal { background-color: var(--retro-card-bg); padding: 15px; border: var(--pixel-border-width) solid var(--retro-dark); box-shadow: 4px 4px 0 var(--retro-dark); width: 90%; max-width: 500px; animation: zoomInModal 0.3s ease-out; }
-        .quiz-modal h2 { font-size: 22px; margin-bottom: 10px; color: var(--retro-teal); text-align: center; border-bottom: 1px dashed var(--retro-teal); padding-bottom: 5px;}
+        .quiz-modal h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: var(--retro-teal);
+            text-align: center;
+            border-bottom: 1px dashed var(--retro-teal);
+            padding-bottom: 5px;
+            font-weight: bold;
+        }
         .quiz-question-area { margin-bottom: 10px; font-size: 18px; line-height: 1.4; }
         .quiz-question-text { margin-bottom: 10px; font-weight: normal;}
         .quiz-options-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;}
@@ -256,16 +274,16 @@
                 <div class="app-title-container">
                     <i class="fas fa-microchip title-icon"></i><h1>I Don't Know, Yet!</h1>
                 </div>
-                <div class="points-section">
-                    <div class="points-display">
-                        <i class="fas fa-coins points-icon"></i> <span id="userPointsDisplay">0</span> PTS
-                    </div>
-                    <div class="points-display">
-                        <i class="fas fa-poo points-icon"></i> <span id="userStupidPointsDisplay">0</span> SILLY
-                    </div>
-                    <div class="points-display">
-                        <i class="fas fa-star points-icon gold-star-icon"></i> <span id="goldStarsDisplay">0</span> STARS
-                    </div>
+            </div>
+            <div class="header-stats-bar">
+                <div class="points-display">
+                    <i class="fas fa-coins points-icon"></i> <span id="userPointsDisplay">0</span> PTS
+                </div>
+                <div class="points-display">
+                    <i class="fas fa-poo points-icon"></i> <span id="userStupidPointsDisplay">0</span> SILLY
+                </div>
+                <div class="points-display">
+                    <i class="fas fa-star points-icon gold-star-icon"></i> <span id="goldStarsDisplay">0</span> STARS
                 </div>
             </div>
             <div class="api-key-area">
@@ -351,10 +369,9 @@
             const noMomentsPlaceholder = document.getElementById('noMomentsPlaceholder');
             const overallLoadingIndicator = document.getElementById('overallLoadingIndicator');
             const toastNotification = document.getElementById('toastNotification');
-            const userPointsDisplayContainer = document.querySelector('.points-section .points-display:first-child');
             const userPointsDisplay = document.getElementById('userPointsDisplay');
             const stupidPointsDisplay = document.getElementById('userStupidPointsDisplay');
-            const goldStarsDisplay = document.getElementById('goldStarsDisplay'); // Gold Stars display
+            const goldStarsDisplay = document.getElementById('goldStarsDisplay');
 
             const userApiKeyInput = document.getElementById('userApiKeyInput');
             const saveApiKeyButton = document.getElementById('saveApiKeyButton');
@@ -389,7 +406,7 @@
             particleCanvas.height = window.innerHeight;
             window.addEventListener('resize', () => { particleCanvas.width = window.innerWidth; particleCanvas.height = window.innerHeight; });
 
-            let localStorageKeySuffix = '_v24_mastery_celebrate';
+            let localStorageKeySuffix = '_v25_header_layout_caps'; // Updated suffix
             let loggedMoments = JSON.parse(localStorage.getItem('idk_moments' + localStorageKeySuffix)) || [];
             let archivedKnowledge = JSON.parse(localStorage.getItem('idk_archived_knowledge' + localStorageKeySuffix)) || [];
             let deeplyUnderstoodKnowledge = JSON.parse(localStorage.getItem('idk_deeply_understood' + localStorageKeySuffix)) || [];
@@ -427,7 +444,7 @@
 
             function createParticle(x, y, color, size, count, spread, speedMultiplier = 1) { for (let i = 0; i < count; i++) { particles.push({ x, y, size: Math.random() * size + 2, color, vx: (Math.random() - 0.5) * spread * speedMultiplier, vy: (Math.random() - 0.5) * spread * speedMultiplier, life: 60 + Math.random() * 30 });}}
             function updateAndDrawParticles() { ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height); for (let i = particles.length - 1; i >= 0; i--) { const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.life--; if (p.life <= 0) { particles.splice(i, 1); continue; } ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 90; ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); } ctx.globalAlpha = 1; if (particles.length > 0) { requestAnimationFrame(updateAndDrawParticles); }}
-            
+
             function triggerParticleBurst(type = 'small', customX, customY) {
                 const cX = customX !== undefined ? customX : window.innerWidth / 2;
                 const cY = customY !== undefined ? customY : window.innerHeight / 3;
@@ -435,10 +452,10 @@
                 if (type === 'perfectQuiz') { clr = 'var(--retro-yellow)'; sz = 8; cnt = 100; sprd = 8; spd = 1.5; }
                 else if (type === 'correctAnswer') { clr = 'var(--retro-teal)'; sz = 6; cnt = 50; sprd = 5; spd = 1; }
                 else if (type === 'dumbAnswer') { clr = 'var(--retro-coral)'; sz = 5; cnt = 30; sprd = 4; spd = 0.8;}
-                else if (type === 'masteredItem') { clr = 'var(--retro-yellow)'; sz = 7; cnt = 40; sprd = 6; spd = 1.2; } // For mastered item clicks
+                else if (type === 'masteredItem') { clr = 'var(--retro-yellow)'; sz = 7; cnt = 40; sprd = 6; spd = 1.2; }
 
                 createParticle(cX, cY, clr, sz, cnt, sprd, spd);
-                if (particles.length === cnt || type === 'dumbAnswer' || type === 'masteredItem') { // Ensure new types also start animation loop
+                if (particles.length === cnt || type === 'dumbAnswer' || type === 'masteredItem') {
                     requestAnimationFrame(updateAndDrawParticles);
                 }
             }
@@ -447,7 +464,7 @@
             function showToast(message, duration = 2500) { toastNotification.textContent = message; toastNotification.classList.add('show'); setTimeout(() => { toastNotification.classList.remove('show'); }, duration); }
             function autoSetInitialType(text) { const lT = text.toLowerCase().trim(); if (lT.endsWith('?')) return 'question'; const qS = ['what', 'when', 'where', 'who', 'why', 'how', 'is ', 'are ', 'do ', 'does ', 'did ', 'can ', 'could ', 'will ', 'would ', 'should ', 'may ', 'might ']; for (const s of qS) { if (lT.startsWith(s)) return 'question'; } return 'statement'; }
             function triggerPointsFlash() {
-                const mainPointsDisplay = document.querySelector('.points-section .points-display:first-child');
+                const mainPointsDisplay = document.querySelector('.header-stats-bar .points-display:first-child');
                 if(mainPointsDisplay) mainPointsDisplay.classList.add('points-earned-flash');
                 setTimeout(() => { if(mainPointsDisplay) mainPointsDisplay.classList.remove('points-earned-flash'); }, 500);
             }
@@ -469,7 +486,7 @@
                 }
                 if(userPointsDisplay) userPointsDisplay.textContent = userPoints;
                 if (stupidPointsDisplay) { stupidPointsDisplay.textContent = userStupidPoints; }
-                if (goldStarsDisplay) { goldStarsDisplay.textContent = deeplyUnderstoodKnowledge.length; } // Update gold stars
+                if (goldStarsDisplay) { goldStarsDisplay.textContent = deeplyUnderstoodKnowledge.length; }
             }
 
             function renderMoments() {
@@ -509,7 +526,7 @@
                 listItem.querySelector('.archive-deep-dive-test-button').addEventListener('click', (e) => { e.stopPropagation(); if(canTakeDeepDiveTest) startDeepDiveQuiz(moment); }); });
                 updateCountersAndPointsDisplay();
             }
-            function renderDeeplyUnderstoodKnowledge() {
+             function renderDeeplyUnderstoodKnowledge() {
                 if(!deepenedMomentsList || !noDeepenedPlaceholder) return;
                 deepenedMomentsList.innerHTML = '';
                 noDeepenedPlaceholder.style.display = deeplyUnderstoodKnowledge.length === 0 ? 'block' : 'none';
@@ -517,8 +534,7 @@
                 deeplyUnderstoodKnowledge.forEach((moment) => {
                     const listItem = document.createElement('li');
                     listItem.className = 'moment-card deepened-moment-card';
-                    // Ensure data-timestamp is set on the card for querying later
-                    listItem.dataset.timestamp = moment.timestamp; 
+                    listItem.dataset.timestamp = moment.timestamp;
                     const displayAnswerHTML = moment.answer ? formatAnswerForRetroDisplay(moment.answer) : '';
                     const deepDiveAnswerHTML = moment.deepDiveAnswer ? formatAnswerForRetroDisplay(moment.deepDiveAnswer) : '';
                     listItem.innerHTML = `<div class="moment-header"><div class="moment-text-container" data-timestamp="${moment.timestamp}"><div class="moment-main-text"><span class="moment-text">${moment.text}</span><span class="moment-timestamp">MASTERED: ${new Date(moment.deeplyUnderstoodTimestamp || Date.now()).toLocaleDateString()}</span></div><i class="fas fa-caret-down expand-icon ${moment.isAnswerExpanded ? 'expanded' : ''}"></i></div></div><div class="moment-answer-wrapper ${moment.isAnswerExpanded ? 'expanded' : ''}">${moment.answer ? `<div class="moment-answer-content"><strong>Original Insight:</strong><br>${displayAnswerHTML}</div>` : ''}${moment.deepDiveAnswer ? `<div class="deep-dive-answer-container"><div class="moment-answer-content"><strong>Deep Dive:</strong><br>${deepDiveAnswerHTML}</div></div>` : ''}</div>`;
@@ -528,17 +544,15 @@
                         const deepMoment = deeplyUnderstoodKnowledge.find(dm => dm.timestamp === moment.timestamp);
                         if (deepMoment) {
                             deepMoment.isAnswerExpanded = !deepMoment.isAnswerExpanded;
-                            deepMoment.justClickedForCelebration = true; // Mark for celebration on next render
+                            deepMoment.justClickedForCelebration = true;
                             saveMoments();
-                            renderDeeplyUnderstoodKnowledge(); // This will re-render and pick up the flag
+                            renderDeeplyUnderstoodKnowledge();
                         }
                     });
                 });
 
-                // After all items are appended, apply celebration effects if flagged
                 deeplyUnderstoodKnowledge.forEach(moment => {
                     if (moment.justClickedForCelebration) {
-                        // Query using the card's data-timestamp now
                         const cardElement = deepenedMomentsList.querySelector(`.deepened-moment-card[data-timestamp="${moment.timestamp}"]`);
                         if (cardElement) {
                             cardElement.classList.add('mastered-celebrate-pop');
@@ -546,19 +560,17 @@
                             const particleX = rect.left + rect.width / 2;
                             const particleY = rect.top + rect.height / 2;
                             triggerParticleBurst('masteredItem', particleX, particleY);
+                            showToast("MASTERED! WELL DONE!", 1500);
 
                             setTimeout(() => {
                                 cardElement.classList.remove('mastered-celebrate-pop');
-                            }, 500); // Duration of masteredPop animation
+                            }, 500);
                         }
-                        delete moment.justClickedForCelebration; // Clean up flag
+                        delete moment.justClickedForCelebration;
+                        saveMoments();
                     }
                 });
-                if (deeplyUnderstoodKnowledge.some(m => m.justClickedForCelebration === undefined && Object.keys(m).includes('justClickedForCelebration'))) {
-                    // This condition means a flag was deleted, so we might want to save.
-                    // However, this flag is purely transient for UI effect. Not critical to save its deletion.
-                }
-                updateCountersAndPointsDisplay(); // Ensure star count is up-to-date
+                updateCountersAndPointsDisplay();
             }
 
             function handleCheckboxChange(event) { const ts = parseInt(event.target.dataset.timestamp); const mom = loggedMoments.find(m => m.timestamp === ts); if (mom) mom.selectedForBatch = event.target.checked; saveMoments(); updateCountersAndPointsDisplay(); }
@@ -568,8 +580,11 @@
             function toggleAnswerExpansion(timestamp) { const m = loggedMoments.find(mo => mo.timestamp === timestamp); if (m) {m.isAnswerExpanded = !m.isAnswerExpanded; saveMoments(); renderMoments();}}
 
             function saveMoments() {
-                // Clean up any transient flags before saving
-                deeplyUnderstoodKnowledge.forEach(m => delete m.justClickedForCelebration);
+                deeplyUnderstoodKnowledge.forEach(m => {
+                    if (Object.prototype.hasOwnProperty.call(m, 'justClickedForCelebration')) {
+                        delete m.justClickedForCelebration;
+                    }
+                });
 
                 localStorage.setItem('idk_moments' + localStorageKeySuffix, JSON.stringify(loggedMoments));
                 localStorage.setItem('idk_archived_knowledge' + localStorageKeySuffix, JSON.stringify(archivedKnowledge));
@@ -698,16 +713,16 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
                 if (prepButton) { prepButton.disabled = true; prepButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';}
 
                 if (isForArchivedItem) {
-                    for (let i = 0; i < 3; i++) { 
+                    for (let i = 0; i < 3; i++) {
                         try {
                             const mcqText = await fetchAIAnswerLogic(null, false, false, null, false, specificArchivedMoment, true, i + 1);
                             const qMatch = mcqText.match(/Q:\s*([\s\S]*?)\nC:/i); const cMatch = mcqText.match(/C:\s*([\s\S]*?)\nD1:/i); const d1Match = mcqText.match(/D1:\s*([\s\S]*?)\nD2:/i); const d2Match = mcqText.match(/D2:\s*([\s\S]*?)$/i);
                             if (qMatch && cMatch && d1Match && d2Match) { let opts = [cMatch[1].trim(), d1Match[1].trim(), d2Match[1].trim()]; opts.sort(() => 0.5 - Math.random()); currentQuizQuestionsData.push({ question: qMatch[1].trim(), options: opts, correctAnswerText: cMatch[1].trim(), originalMomentTimestamp: specificArchivedMoment.timestamp, isDumb: false }); } else { console.warn(`Deep Dive MCQ PARSE FAIL (Q${i+1}):`, mcqText); currentQuizQuestionsData.push(null); }
                         } catch (e) { console.error(`Error gen deep dive MCQ (Q${i+1}):`, e); currentQuizQuestionsData.push(null); }
                     }
-                    currentQuizQuestionsData = currentQuizQuestionsData.filter(q => q !== null); 
-                } else { 
-                    const shuffled = itemsForQuizSource.sort(() => 0.5 - Math.random()); const itemsForThisQuiz = shuffled.slice(0, 3); 
+                    currentQuizQuestionsData = currentQuizQuestionsData.filter(q => q !== null);
+                } else {
+                    const shuffled = itemsForQuizSource.sort(() => 0.5 - Math.random()); const itemsForThisQuiz = shuffled.slice(0, 3);
                     for (const item of itemsForThisQuiz) {
                         try {
                             const mcqText = await fetchAIAnswerLogic(null, false, true, item);
@@ -750,11 +765,11 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
                     quizOptionsContainer.querySelectorAll('.quiz-option').forEach(opt => { if (opt.textContent === qData.correctAnswerText) { opt.classList.add('correct'); }});
                 } else if (isCorrect) {
                     quizFeedbackArea.textContent = `CORRECT! +${pointsForThisQuestion} PTS!`; quizFeedbackArea.className = 'quiz-feedback-area correct'; selectedQuizOptionElement.classList.add('correct'); currentQuizCorrectAnswersCount++; userPoints += pointsForThisQuestion; triggerPointsFlash(); triggerParticleBurst('correctAnswer'); showToast(`CORRECT! +${pointsForThisQuestion} PTS!`);
-                    if (!isDeepDiveQuiz) { 
+                    if (!isDeepDiveQuiz) {
                         const momentToArchiveIndex = loggedMoments.findIndex(m => m.timestamp === qData.originalMomentTimestamp);
                         if (momentToArchiveIndex > -1) { const momentToArchive = loggedMoments.splice(momentToArchiveIndex, 1)[0]; const cardElement = document.getElementById(`moment-item-${qData.originalMomentTimestamp}`); if(cardElement) cardElement.classList.add('archiving'); setTimeout(() => { momentToArchive.isArchived = true; momentToArchive.archivedTimestamp = Date.now(); momentToArchive.isAnswerExpanded = false; archivedKnowledge.unshift(momentToArchive); saveMoments(); renderMoments(); renderArchivedKnowledge(); renderDeeplyUnderstoodKnowledge(); }, 500);} else { saveMoments(); updateCountersAndPointsDisplay(); }
                     } else { saveMoments(); updateCountersAndPointsDisplay(); }
-                } else { 
+                } else {
                     quizFeedbackArea.textContent = `INCORRECT. Correct was: ${qData.correctAnswerText}`; quizFeedbackArea.className = 'quiz-feedback-area incorrect'; selectedQuizOptionElement.classList.add('incorrect'); quizOptionsContainer.querySelectorAll('.quiz-option').forEach(opt => { if (opt.textContent === qData.correctAnswerText) { opt.classList.add('correct'); }});
                 }
                 quizOptionsContainer.querySelectorAll('.quiz-option').forEach(opt => { opt.style.pointerEvents = 'none'; }); submitQuizAnswerButton.style.display = 'none';
@@ -789,7 +804,7 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
                         }
                     }
                 }
-                saveMoments(); renderMoments(); renderArchivedKnowledge(); renderDeeplyUnderstoodKnowledge(); // This will update star count via updateCountersAndPointsDisplay
+                saveMoments(); renderMoments(); renderArchivedKnowledge(); renderDeeplyUnderstoodKnowledge();
                 quizFeedbackArea.innerHTML = quizResultText.replace(/\n/g, '<br>');
                 showToast(earnedPerfectBonus ? `PERFECT QUIZ! +${perfectScoreBonus} BONUS PTS!` : `QUIZ DONE. ${currentQuizCorrectAnswersCount}/${currentQuizQuestionsData.length}.`);
                 submitQuizAnswerButton.style.display = 'none'; nextQuizQuestionButton.style.display = 'none';
