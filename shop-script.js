@@ -17,13 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- SHARED DATA & CONFIG (Could be moved to a shared utility JS file later) ---
+    // --- SHARED DATA & CONFIG ---
     const localStorageKeySuffix = '_v27_theme_shop'; // MUST MATCH script.js
 
-    const themes = { // MUST MATCH themes object in script.js
+    const themes = {
         default: {
             name: "Default Retro", cost: 0, owned: true,
-            description: "The classic look and feel.",
+            description: "The classic look and feel of IDKY, with its signature teal and orange accents.",
             cssVariables: {
                 '--theme-primary-dark': '#264653', '--theme-primary-accent': '#2A9D8F',
                 '--theme-secondary-accent': '#E9C46A', '--theme-tertiary-accent': '#F4A261',
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         oceanDepths: {
             name: "Ocean Depths", cost: 1,
-            description: "Dive into cool blue tranquility.",
+            description: "Dive into cool blue tranquility with shades of the deep sea and clear waters.",
             cssVariables: {
                 '--theme-primary-dark': '#03045E', '--theme-primary-accent': '#0077B6',
                 '--theme-secondary-accent': '#00B4D8', '--theme-tertiary-accent': '#90E0EF',
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         volcanoRush: {
             name: "Volcano Rush", cost: 1,
-            description: "Fiery reds and oranges for a hot learning session.",
+            description: "Fiery reds and oranges evoke the heat of a volcanic eruption for intense focus.",
             cssVariables: {
                 '--theme-primary-dark': '#2B0000', '--theme-primary-accent': '#6A0000',
                 '--theme-secondary-accent': '#FF4500', '--theme-tertiary-accent': '#FF8C00',
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         techOrangeBlue: {
             name: "Tech Orange & Blue", cost: 1,
-            description: "A modern tech-inspired palette.",
+            description: "A modern, sleek palette combining energetic orange with professional blues and grays.",
             cssVariables: {
                 '--theme-primary-dark': '#004C97', '--theme-primary-accent': '#4A7DB5',
                 '--theme-secondary-accent': '#FF6600', '--theme-tertiary-accent': '#C0C0C0',
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         forestGreens: {
             name: "Forest Greens", cost: 1,
-            description: "Earthy greens for a natural study vibe.",
+            description: "Earthy and calming greens, from deep forest shades to light mossy tones.",
             cssVariables: {
                 '--theme-primary-dark': '#1A2B12', '--theme-primary-accent': '#335128',
                 '--theme-secondary-accent': '#526F35', '--theme-tertiary-accent': '#8A9A5B',
@@ -83,32 +83,42 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTheme = localStorage.getItem('idk_current_theme' + localStorageKeySuffix) || 'default';
     // --- END SHARED DATA & CONFIG ---
 
-    function showToast(message, duration = 2500) { // Simple toast for this page
-        const existingToast = document.querySelector('.shop-toast');
+    function showToast(message, duration = 2500) {
+        const existingToast = document.querySelector('.shop-toast-notification'); // Unique class
         if (existingToast) existingToast.remove();
 
         const toast = document.createElement('div');
-        toast.className = 'shop-toast'; // Use a different class to avoid conflict if main toast CSS is complex
+        toast.className = 'shop-toast-notification'; // Use a distinct class
         toast.textContent = message;
         document.body.appendChild(toast);
 
-        // Simple toast styling (can be moved to shop-style.css)
+        // Apply styles similar to main app's toast, but ensure they use theme variables
         toast.style.position = 'fixed';
-        toast.style.bottom = '20px';
+        toast.style.bottom = '70px'; // Above shop toolbar if it were visible
         toast.style.left = '50%';
         toast.style.transform = 'translateX(-50%)';
         toast.style.backgroundColor = 'var(--theme-primary-dark)';
         toast.style.color = 'var(--theme-text-on-dark)';
         toast.style.padding = '10px 20px';
-        toast.style.borderRadius = '4px';
-        toast.style.zIndex = '2000';
         toast.style.fontFamily = "'VT323', monospace";
         toast.style.fontSize = "16px";
         toast.style.border = `var(--pixel-border-width) solid var(--theme-primary-accent)`;
+        toast.style.boxShadow = `2px 2px 0px var(--theme-primary-accent)`;
+        toast.style.zIndex = '4000'; // High z-index
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease-out, bottom 0.3s ease-out';
+
+        // Trigger animation
+        setTimeout(() => {
+            toast.style.opacity = '1';
+            toast.style.bottom = '80px';
+        }, 10);
 
 
         setTimeout(() => {
-            toast.remove();
+            toast.style.opacity = '0';
+            toast.style.bottom = '70px';
+            setTimeout(() => toast.remove(), 300);
         }, duration);
     }
 
@@ -118,19 +128,20 @@ document.addEventListener('DOMContentLoaded', () => {
             for (const [key, value] of Object.entries(themeVars)) {
                 document.documentElement.style.setProperty(key, value);
             }
+            // Ensure derived variables are also set
             document.documentElement.style.setProperty('--theme-text-main', themeVars['--theme-primary-dark']);
             document.documentElement.style.setProperty('--theme-border-main', themeVars['--theme-primary-dark']);
 
             currentTheme = themeId;
             localStorage.setItem('idk_current_theme' + localStorageKeySuffix, currentTheme);
-            renderShopPageThemes(); // Re-render shop to update "Equipped" status
+            renderShopPageThemes();
         }
     }
 
     function saveShopData() {
         localStorage.setItem('idk_user_points_val' + localStorageKeySuffix, userPoints.toString());
         localStorage.setItem('idk_owned_themes' + localStorageKeySuffix, JSON.stringify(ownedThemes));
-        localStorage.setItem('idk_current_theme' + localStorageKeySuffix, currentTheme);
+        localStorage.setItem('idk_current_theme' + localStorageKeySuffix, currentTheme); // Current theme also saved here
     }
 
     function renderShopPageThemes() {
@@ -153,17 +164,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const isOwned = ownedThemes.includes(themeId);
             const isActive = currentTheme === themeId;
             let buttonHTML;
-            let statusHTML = `<div class="shop-theme-cost"><i class="fas fa-coins"></i> ${themeData.cost} PTS</div>`;
+            let statusHTML = ''; // Default to empty
 
             if (isActive) {
                 buttonHTML = `<button class="shop-theme-button equipped-button" disabled>EQUIPPED</button>`;
-                statusHTML = `<div class="shop-theme-status">CURRENTLY ACTIVE</div>`;
+                statusHTML = `<div class="shop-theme-status active">CURRENTLY ACTIVE</div>`;
             } else if (isOwned) {
                 buttonHTML = `<button class="shop-theme-button apply-button" data-action="apply">APPLY</button>`;
-                statusHTML = `<div class="shop-theme-status">OWNED</div>`;
+                statusHTML = `<div class="shop-theme-status owned">OWNED</div>`;
             } else {
                 buttonHTML = `<button class="shop-theme-button buy-button" data-action="buy" ${userPoints < themeData.cost ? 'disabled' : ''}>BUY</button>`;
-                // statusHTML for cost is already set
+                // For non-owned, show cost below description, not in status area
+                statusHTML = `<div class="shop-theme-cost"><i class="fas fa-coins"></i> ${themeData.cost} PTS</div>`;
             }
 
             card.innerHTML = `
@@ -172,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="shop-theme-description">
                     ${themeData.description || `A stylish '${themeData.name}' experience.`}
                 </p>
-                ${statusHTML}
+                ${statusHTML} 
                 ${buttonHTML}
             `;
             themeGallery.appendChild(card);
@@ -186,34 +198,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleShopPageThemeAction(themeId, themeData, action) {
+        const cardElement = themeGallery.querySelector(`.shop-theme-card[data-theme-id="${themeId}"]`);
+        let particleColor = themeData.cssVariables['--theme-secondary-accent']; // Default particle color
+
         if (action === 'apply') {
             applyThemeOnPage(themeId);
             showToast(`${themeData.name} theme APPLIED!`);
-            // Optional: particle burst on apply
-            const card = themeGallery.querySelector(`.shop-theme-card[data-theme-id="${themeId}"]`);
-            if(card && particleCanvasShop) {
-                const rect = card.getBoundingClientRect();
-                createShopParticle(rect.left + rect.width/2, rect.top + rect.height/2, themeData.cssVariables['--theme-secondary-accent'], 5, 30, 5);
+            if(cardElement && particleCanvasShop) {
+                const rect = cardElement.getBoundingClientRect();
+                createShopParticle(rect.left + rect.width/2, rect.top + rect.height/2, particleColor, 5, 30, 5, 1.2);
             }
-
         } else if (action === 'buy') {
             if (userPoints >= themeData.cost) {
                 userPoints -= themeData.cost;
                 ownedThemes.push(themeId);
-                saveShopData(); // Save points and owned themes
-                applyThemeOnPage(themeId); // Apply directly after buying
+                saveShopData(); 
+                applyThemeOnPage(themeId); 
                 showToast(`Purchased & Applied ${themeData.name}!`);
-                // Optional: particle burst on buy
-                const card = themeGallery.querySelector(`.shop-theme-card[data-theme-id="${themeId}"]`);
-                if(card && particleCanvasShop) {
-                    const rect = card.getBoundingClientRect();
-                    createShopParticle(rect.left + rect.width/2, rect.top + rect.height/2, themeData.cssVariables['--theme-secondary-accent'], 8, 50, 8);
+                if(cardElement && particleCanvasShop) {
+                    const rect = cardElement.getBoundingClientRect();
+                    createShopParticle(rect.left + rect.width/2, rect.top + rect.height/2, particleColor, 8, 60, 8, 1.5); // Bigger burst for purchase
                 }
             } else {
                 showToast("Not enough PTS!");
             }
         }
-        renderShopPageThemes(); // Always re-render shop page items after action
+        // Re-render needed to update button states (e.g., BUY -> APPLY, enable/disable)
+        // and points display on the shop page itself.
+        renderShopPageThemes(); 
     }
 
     // Particle effects for shop page
@@ -222,44 +234,50 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < count; i++) {
             shopParticles.push({
                 x, y,
-                size: Math.random() * size + 1, // smaller base size for shop
+                size: Math.random() * size + 2, 
                 color,
                 vx: (Math.random() - 0.5) * spread * speedMultiplier,
-                vy: (Math.random() * -1.5 - 0.5) * speedMultiplier, // more upward thrust
-                life: 30 + Math.random() * 20 // shorter life
+                vy: (Math.random() * -2 - 1) * speedMultiplier, 
+                life: 40 + Math.random() * 25 
             });
         }
-        if (shopParticles.length > 0 && shopParticles.length <= count) {
-            requestAnimationFrame(updateAndDrawParticlesShop);
+        // Ensure animation loop starts if it's not already running for shopParticles
+        if (shopParticles.length > 0 && !shopParticles.some(p => p.isAnimating)) { // A bit simplistic check
+             shopParticles.forEach(p => p.isAnimating = true); // Mark them to avoid re-triggering loop unnecessarily
+             requestAnimationFrame(updateAndDrawParticlesShop);
         }
     }
 
     function updateAndDrawParticlesShop() {
         if (!particleCanvasShop || !shopCtx) return;
         shopCtx.clearRect(0, 0, particleCanvasShop.width, particleCanvasShop.height);
+        let stillAnimating = false;
         for (let i = shopParticles.length - 1; i >= 0; i--) {
             const p = shopParticles[i];
             p.x += p.vx;
             p.y += p.vy;
-            p.vy += 0.08; // slightly stronger gravity or different effect
+            p.vy += 0.08; 
             p.life--;
             if (p.life <= 0) {
                 shopParticles.splice(i, 1);
                 continue;
             }
             shopCtx.fillStyle = p.color;
-            shopCtx.globalAlpha = p.life / 50; // faster fade
+            shopCtx.globalAlpha = Math.max(0, p.life / 65); // Ensure alpha doesn't go negative
             shopCtx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+            stillAnimating = true; // If any particle is still alive, we need to keep animating
         }
         shopCtx.globalAlpha = 1;
-        if (shopParticles.length > 0) {
+        if (stillAnimating) {
             requestAnimationFrame(updateAndDrawParticlesShop);
+        } else {
+            shopParticles.forEach(p => delete p.isAnimating); // Clear animation flag
         }
     }
 
     // Initial setup for shop page
-    document.body.classList.add('shop-active'); // To apply body-level shop styles if any
+    document.body.classList.add('shop-active');
     if(shopPageUserPointsDisplay) shopPageUserPointsDisplay.textContent = userPoints;
     applyThemeOnPage(currentTheme); // Apply current theme immediately
-    renderShopPageThemes(); // Then render the shop items based on that theme and ownership
+    // renderShopPageThemes(); // This is called by applyThemeOnPage, so it's redundant here
 });
