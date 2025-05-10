@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THEME SHOP - I DON'T KNOW, YET!</title>
+    <link rel="stylesheet" href="style.css"> <!-- Main styles -->
+    <link rel="stylesheet" href="shop-style.css"> <!-- Shop-specific styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <canvas id="particleCanvasShop"></canvas>
+
+    <div class="shop-page-container">
+        <header class="shop-header">
+            <a href="index.html" class="back-to-app-link">
+                <i class="fas fa-arrow-left"></i> BACK TO APP
+            </a>
+            <h1><i class="fas fa-store"></i> THEME EMPORIUM <i class="fas fa-store"></i></h1>
+            <div class="shop-header-pts">
+                <i class="fas fa-coins points-icon"></i> <span id="shopPageUserPoints">0</span> PTS
+            </div>
+        </header>
+
+        <main class="shop-main-content">
+            <p class="shop-intro-text">
+                WELCOME, KNOWLEDGE SEEKER! SPEND YOUR HARD-EARNED POINTS TO CUSTOMIZE YOUR REALM!
+            </p>
+
+            <div class="theme-gallery" id="themeGallery">
+                <!-- Theme cards will be dynamically inserted here by JavaScript -->
+            </div>
+        </main>
+
+        <footer class="shop-footer">
+            <p>© 2023 IDKY - Pixelated Perfection Inc.</p>
+        </footer>
+    </div>
+
+    <script src="shop-script.js"></script> <!-- Link to new shop-specific script -->
+</body>
+</html>
