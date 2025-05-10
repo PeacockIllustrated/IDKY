@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM fully loaded and parsed"); // General check
+    console.log("DOM fully loaded and parsed");
 
     const idkInput = document.getElementById('idkInput');
     const logButton = document.getElementById('logButton');
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const AMBIENT_PARTICLE_RATE = 2;
     const AMBIENT_PARTICLE_LIFESPAN_FACTOR = 4;
 
-    let localStorageKeySuffix = '_v28_ambient_particles_final_accordion';
+    let localStorageKeySuffix = '_v29_independent_dropdowns'; // New suffix for fresh test
     let loggedMoments = JSON.parse(localStorage.getItem('idk_moments' + localStorageKeySuffix)) || [];
     let archivedKnowledge = JSON.parse(localStorage.getItem('idk_archived_knowledge' + localStorageKeySuffix)) || [];
     let deeplyUnderstoodKnowledge = JSON.parse(localStorage.getItem('idk_deeply_understood' + localStorageKeySuffix)) || [];
@@ -351,53 +351,31 @@ document.addEventListener('DOMContentLoaded', () => {
         ambientEmitters.push({ id: 'deepenedItemsListContainer', element: deepenedItemsListContainer, isActive: false, colorVar: '--theme-secondary-accent' });
     }
 
-    // ACCORDION CLICK HANDLERS (FINAL VERSION)
+    // INDEPENDENT DROPDOWN (Accordion) CLICK HANDLERS
     if (archiveHeader) {
-        console.log("Attaching listener to archiveHeader");
         archiveHeader.addEventListener('click', () => {
             console.log("Archive header clicked.");
-            const isOpeningThisOne = !archivedItemsListContainer.classList.contains('expanded');
-
-            // Toggle this accordion
             archivedItemsListContainer.classList.toggle('expanded');
             archiveToggleIcon.classList.toggle('expanded');
             console.log("Archive expanded state:", archivedItemsListContainer.classList.contains('expanded'));
-
-            // If this one just opened, and the other is also open, close the other
-            if (isOpeningThisOne && deepenedItemsListContainer.classList.contains('expanded')) {
-                deepenedItemsListContainer.classList.remove('expanded');
-                deepenedToggleIcon.classList.remove('expanded');
-                console.log("Closed deepened because archive was opened.");
-            }
-            updateAmbientEmitters();
+            updateAmbientEmitters(); // Update emitters based on current state
         });
     } else {
         console.error("archiveHeader not found!");
     }
 
     if (deepenedHeader) {
-        console.log("Attaching listener to deepenedHeader");
         deepenedHeader.addEventListener('click', () => {
             console.log("Deepened header clicked.");
-            const isOpeningThisOne = !deepenedItemsListContainer.classList.contains('expanded');
-
-            // Toggle this accordion
             deepenedItemsListContainer.classList.toggle('expanded');
             deepenedToggleIcon.classList.toggle('expanded');
             console.log("Deepened expanded state:", deepenedItemsListContainer.classList.contains('expanded'));
-
-            // If this one just opened, and the other is also open, close the other
-            if (isOpeningThisOne && archivedItemsListContainer.classList.contains('expanded')) {
-                archivedItemsListContainer.classList.remove('expanded');
-                archiveToggleIcon.classList.remove('expanded');
-                console.log("Closed archive because deepened was opened.");
-            }
-            updateAmbientEmitters();
+            updateAmbientEmitters(); // Update emitters based on current state
         });
     } else {
         console.error("deepenedHeader not found!");
     }
-
+    
 
     function renderMoments() {
          if (!momentsList) return;
@@ -721,54 +699,33 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
         finishQuizButton.style.display = 'none'; closeQuizButton.style.display = 'inline-block';
         currentDeepDiveQuizMoment = null;
     }
-
+    
     // Initial Setup & Event Listeners for Accordions
     applyTheme(currentTheme);
 
-    if (archiveHeader) {
+    if (archiveHeader && archivedItemsListContainer && archiveToggleIcon) {
         archiveHeader.addEventListener('click', () => {
-            console.log("Archive header clicked. Initial state (expanded?):", archivedItemsListContainer.classList.contains('expanded'));
-            const isOpeningThisOne = !archivedItemsListContainer.classList.contains('expanded');
-
             archivedItemsListContainer.classList.toggle('expanded');
             archiveToggleIcon.classList.toggle('expanded');
-            console.log("Archive toggled. Now expanded:", archivedItemsListContainer.classList.contains('expanded'));
-
-            if (isOpeningThisOne && deepenedItemsListContainer.classList.contains('expanded')) {
-                deepenedItemsListContainer.classList.remove('expanded');
-                deepenedToggleIcon.classList.remove('expanded');
-                console.log("Closed deepened because archive was opened.");
-            }
-            updateAmbientEmitters();
+            updateAmbientEmitters(); 
         });
     } else {
-        console.error("archiveHeader element not found!");
+        console.error("Archive accordion elements not all found!");
     }
 
-    if (deepenedHeader) {
+    if (deepenedHeader && deepenedItemsListContainer && deepenedToggleIcon) {
         deepenedHeader.addEventListener('click', () => {
-            console.log("Deepened header clicked. Initial state (expanded?):", deepenedItemsListContainer.classList.contains('expanded'));
-            const isOpeningThisOne = !deepenedItemsListContainer.classList.contains('expanded');
-            
             deepenedItemsListContainer.classList.toggle('expanded');
             deepenedToggleIcon.classList.toggle('expanded');
-            console.log("Deepened toggled. Now expanded:", deepenedItemsListContainer.classList.contains('expanded'));
-
-            if (isOpeningThisOne && archivedItemsListContainer.classList.contains('expanded')) {
-                archivedItemsListContainer.classList.remove('expanded');
-                archiveToggleIcon.classList.remove('expanded');
-                console.log("Archive closed because deepened was opened.");
-            }
             updateAmbientEmitters();
         });
     } else {
-        console.error("deepenedHeader element not found!");
+        console.error("Deepened accordion elements not all found!");
     }
     
-    // Initial renders
     renderMoments();
     renderArchivedKnowledge();
     renderDeeplyUnderstoodKnowledge();
     requestAnimationFrame(updateAndDrawParticles);
-    updateAmbientEmitters(); // Call once after initial renders to set particle emitter states
+    updateAmbientEmitters();
 });
