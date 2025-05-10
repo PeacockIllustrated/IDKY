@@ -3,7 +3,7 @@
 body.shop-active {
     /* Let's give the shop page a consistent darker base if themes make it too light */
     /* This will be overridden by specific theme variables for '--theme-page-bg' if explicitly set by applyThemeOnPage */
-    background-color: var(--theme-primary-dark, #264653); /* Fallback to a default dark */
+    background-color: var(--theme-light-bg, #264653); /* Fallback to a default dark */
     color: var(--theme-text-on-dark, #EAEAEA); /* Default text for the shop page itself */
     /* If you want the radial gradients on shop page too: 
     background-image:
