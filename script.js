@@ -126,13 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 '--theme-page-bg': '#E8E8E8'         // Light gray for overall page background
             }
         },
-        
-    // Theme-related state
-    const themes = {
-        default: { /* ... existing default theme ... */ },
-        oceanDepths: { /* ... existing oceanDepths theme ... */ },
-        volcanoRush: { /* ... existing volcanoRush theme ... */ },
-        techOrangeBlue: { /* ... existing techOrangeBlue theme ... */ },
         forestGreens: { // New Theme
             name: "Forest Greens",
             cost: 1, // Price for testing
