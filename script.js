@@ -47,18 +47,16 @@ document.addEventListener('DOMContentLoaded', () => {
     particleCanvas.height = window.innerHeight;
     window.addEventListener('resize', () => { particleCanvas.width = window.innerWidth; particleCanvas.height = window.innerHeight; });
 
-    // Shop UI Elements
     const shopToolbar = document.getElementById('shopToolbar');
     const shopToolbarHeader = document.getElementById('shopToolbarHeader');
     const shopAccordionContent = document.getElementById('shopAccordionContent');
     const shopUserPointsDisplay = document.getElementById('shopUserPoints');
 
-    // Ambient Particle Effect Variables
     let ambientEmitters = [];
     const AMBIENT_PARTICLE_RATE = 2;
     const AMBIENT_PARTICLE_LIFESPAN_FACTOR = 4;
 
-    let localStorageKeySuffix = '_v28_ambient_particles_fix'; // Updated suffix
+    let localStorageKeySuffix = '_v28_ambient_particles_fix2'; // New suffix for fresh test
     let loggedMoments = JSON.parse(localStorage.getItem('idk_moments' + localStorageKeySuffix)) || [];
     let archivedKnowledge = JSON.parse(localStorage.getItem('idk_archived_knowledge' + localStorageKeySuffix)) || [];
     let deeplyUnderstoodKnowledge = JSON.parse(localStorage.getItem('idk_deeply_understood' + localStorageKeySuffix)) || [];
@@ -150,10 +148,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
 
         ambientEmitters.forEach(emitter => {
-            if (emitter.isActive && emitter.element) {
+            if (emitter.isActive && emitter.element && emitter.element.classList.contains('expanded')) {
                 const rect = emitter.element.getBoundingClientRect();
-                // Check if the element is actually visible and has dimensions
-                if (rect.height > 0 && rect.width > 0 && emitter.element.classList.contains('expanded')) {
+                if (rect.height > 0 && rect.width > 0) {
                     const themeColor = getComputedStyle(document.documentElement).getPropertyValue(emitter.colorVar).trim() || themes.default.cssVariables[emitter.colorVar];
                     
                     for (let i = 0; i < AMBIENT_PARTICLE_RATE; i++) {
@@ -223,11 +220,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (type === 'masteredItem') {
             clr = getComputedStyle(document.documentElement).getPropertyValue('--theme-secondary-accent').trim() || themes.default.cssVariables[defaultColorVar];
             sz = 7; cnt = 40; sprd = 6; spd = 1.2;
-        } else { // Default burst if type not recognized
+        } else {
              clr = getComputedStyle(document.documentElement).getPropertyValue('--theme-tertiary-accent').trim() || themes.default.cssVariables['--theme-tertiary-accent'];
              sz = 4; cnt = 20; sprd = 3; spd = 1;
         }
-
         createParticle(cX, cY, clr, sz, cnt, sprd, spd, "burst");
     }
 
@@ -336,19 +332,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    function updateAmbientEmitters(targetEmitterContainerId, isExpanding) {
+    // Corrected Ambient Emitter Update Logic
+    function updateAmbientEmitters() {
         ambientEmitters.forEach(emitter => {
-            if (emitter.id === targetEmitterContainerId) {
-                emitter.isActive = isExpanding;
-                if (isExpanding) {
-                    emitter.element = document.getElementById(targetEmitterContainerId); // Ensure element ref is current
-                }
+            if (emitter.element) { // Check if element reference exists
+                emitter.isActive = emitter.element.classList.contains('expanded');
             } else {
-                emitter.isActive = false;
+                emitter.isActive = false; // Should ideally not happen if initialized correctly
             }
         });
     }
     
+    // Initialize Emitters
     if (archivedItemsListContainer) {
         ambientEmitters.push({ id: 'archivedItemsListContainer', element: archivedItemsListContainer, isActive: false, colorVar: '--theme-primary-accent' });
     }
@@ -356,31 +351,37 @@ document.addEventListener('DOMContentLoaded', () => {
         ambientEmitters.push({ id: 'deepenedItemsListContainer', element: deepenedItemsListContainer, isActive: false, colorVar: '--theme-secondary-accent' });
     }
 
+    // Corrected Accordion Click Handlers
     if (archiveHeader) {
         archiveHeader.addEventListener('click', () => {
-            const isNowExpanded = archivedItemsListContainer.classList.toggle('expanded');
+            const isCurrentlyExpanded = archivedItemsListContainer.classList.contains('expanded');
+            archivedItemsListContainer.classList.toggle('expanded');
             archiveToggleIcon.classList.toggle('expanded');
-            updateAmbientEmitters('archivedItemsListContainer', isNowExpanded);
-            if (isNowExpanded && deepenedItemsListContainer.classList.contains('expanded')) {
+            
+            // If we just expanded archive, and deepened is also open, close deepened
+            if (!isCurrentlyExpanded && deepenedItemsListContainer.classList.contains('expanded')) {
                 deepenedItemsListContainer.classList.remove('expanded');
                 deepenedToggleIcon.classList.remove('expanded');
-                updateAmbientEmitters('deepenedItemsListContainer', false);
             }
+            updateAmbientEmitters(); // Update all emitters based on current DOM state
         });
     }
 
     if (deepenedHeader) {
         deepenedHeader.addEventListener('click', () => {
-            const isNowExpanded = deepenedItemsListContainer.classList.toggle('expanded');
+            const isCurrentlyExpanded = deepenedItemsListContainer.classList.contains('expanded');
+            deepenedItemsListContainer.classList.toggle('expanded');
             deepenedToggleIcon.classList.toggle('expanded');
-            updateAmbientEmitters('deepenedItemsListContainer', isNowExpanded);
-            if (isNowExpanded && archivedItemsListContainer.classList.contains('expanded')) {
+
+            // If we just expanded deepened, and archive is also open, close archive
+            if (!isCurrentlyExpanded && archivedItemsListContainer.classList.contains('expanded')) {
                 archivedItemsListContainer.classList.remove('expanded');
                 archiveToggleIcon.classList.remove('expanded');
-                updateAmbientEmitters('archivedItemsListContainer', false);
             }
+            updateAmbientEmitters(); // Update all emitters based on current DOM state
         });
     }
+
 
     function renderMoments() {
          if (!momentsList) return;
@@ -705,31 +706,43 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
         currentDeepDiveQuizMoment = null;
     }
 
-    archiveHeader.addEventListener('click', () => {
-        const isNowExpanded = archivedItemsListContainer.classList.toggle('expanded');
-        archiveToggleIcon.classList.toggle('expanded');
-        updateAmbientEmitters('archivedItemsListContainer', isNowExpanded);
-        if (isNowExpanded && deepenedItemsListContainer.classList.contains('expanded')) {
-            deepenedItemsListContainer.classList.remove('expanded');
-            deepenedToggleIcon.classList.remove('expanded');
-            updateAmbientEmitters('deepenedItemsListContainer', false);
-        }
-    });
-    deepenedHeader.addEventListener('click', () => {
-        const isNowExpanded = deepenedItemsListContainer.classList.toggle('expanded');
-        deepenedToggleIcon.classList.toggle('expanded');
-        updateAmbientEmitters('deepenedItemsListContainer', isNowExpanded);
-        if (isNowExpanded && archivedItemsListContainer.classList.contains('expanded')) {
-            archivedItemsListContainer.classList.remove('expanded');
-            archiveToggleIcon.classList.remove('expanded');
-            updateAmbientEmitters('archivedItemsListContainer', false);
-        }
-    });
+    // Corrected Accordion Click Handlers
+    if (archiveHeader) {
+        archiveHeader.addEventListener('click', () => {
+            const isCurrentlyExpanded = archivedItemsListContainer.classList.contains('expanded');
+            // Toggle the current accordion
+            archivedItemsListContainer.classList.toggle('expanded');
+            archiveToggleIcon.classList.toggle('expanded');
+            
+            // If we just expanded this one, and the other is open, close the other one
+            if (!isCurrentlyExpanded && deepenedItemsListContainer.classList.contains('expanded')) {
+                deepenedItemsListContainer.classList.remove('expanded');
+                deepenedToggleIcon.classList.remove('expanded');
+            }
+            updateAmbientEmitters(); // Update all emitters based on the new DOM state
+        });
+    }
+
+    if (deepenedHeader) {
+        deepenedHeader.addEventListener('click', () => {
+            const isCurrentlyExpanded = deepenedItemsListContainer.classList.contains('expanded');
+            // Toggle the current accordion
+            deepenedItemsListContainer.classList.toggle('expanded');
+            deepenedToggleIcon.classList.toggle('expanded');
+
+            // If we just expanded this one, and the other is open, close the other one
+            if (!isCurrentlyExpanded && archivedItemsListContainer.classList.contains('expanded')) {
+                archivedItemsListContainer.classList.remove('expanded');
+                archiveToggleIcon.classList.remove('expanded');
+            }
+            updateAmbientEmitters(); // Update all emitters based on the new DOM state
+        });
+    }
 
     // Initial Setup
     applyTheme(currentTheme);
     renderMoments();
     renderArchivedKnowledge();
-    renderDeeplyUnderstoodKnowledge();
-    requestAnimationFrame(updateAndDrawParticles);
+    renderDeeplyUnderstoodKnowledge(); // This also calls updateCountersAndPointsDisplay which calls renderShopItems
+    requestAnimationFrame(updateAndDrawParticles); // Start particle animation loop
 });
