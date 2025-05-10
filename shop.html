@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THEME VENDO-MATIC - I DON'T KNOW, YET!</title>
-    <link rel="stylesheet" href="style.css"> <!-- Main shared styles -->
-    <link rel="stylesheet" href="shop-style.css"> <!-- Shop-specific styles -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="shop-style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
@@ -15,16 +15,14 @@
     <canvas id="particleCanvasShop"></canvas>
 
     <div class="vending-machine-page-container">
-        <a href="index.html" class="vending-back-to-app-link">
+        <a href="index.html" class="vending-back-to-app-link"> <!-- This is the main back link -->
             <i class="fas fa-arrow-left"></i> EXIT VENDO-MATIC
         </a>
 
         <div class="vending-machine">
             <header class="vending-machine-header">
-                <a href="index.html" class="back-to-app-link visually-hidden-on-mobile"> <!-- Re-added for structure, CSS controls visibility -->
-                    <i class="fas fa-arrow-left"></i> BACK
-                </a>
-                <div class="brand-logo"> <!-- Wrapper for H1 -->
+                <!-- Removed the inner back-to-app-link from here -->
+                <div class="brand-logo">
                     <h1><i class="fas fa-store"></i> THEME VENDO-MATIC 9000 <i class="fas fa-store"></i></h1>
                 </div>
                 <div class="coin-slot-display">
@@ -36,22 +34,6 @@
 
             <main class="vending-machine-display-window" id="themeGalleryWindow">
                 <!-- Themes will be dynamically inserted here by JavaScript -->
-                <!-- Example structure for one item (JS will generate this) -->
-                <!--
-                <div class="vending-item-slot" data-theme-id="default">
-                    <div class="vending-item-preview">
-                        <span></span><span></span><span></span><span></span><span></span>
-                    </div>
-                    <div class="vending-item-info">
-                        <h3 class="vending-item-name">Default Retro</h3>
-                        <p class="vending-item-description">The classic!</p>
-                    </div>
-                    <div class="vending-item-purchase-area">
-                        <span class="vending-item-status">OWNED</span>
-                        <button class="vending-item-button apply-button">APPLY</button>
-                    </div>
-                </div>
-                -->
             </main>
 
             <footer class="vending-machine-footer">
