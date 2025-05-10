@@ -47,13 +47,73 @@ document.addEventListener('DOMContentLoaded', () => {
     particleCanvas.height = window.innerHeight;
     window.addEventListener('resize', () => { particleCanvas.width = window.innerWidth; particleCanvas.height = window.innerHeight; });
 
-    let localStorageKeySuffix = '_v26_hover_gamify';
+    // Shop UI Elements
+    const shopToolbar = document.getElementById('shopToolbar');
+    const shopToolbarHeader = document.getElementById('shopToolbarHeader');
+    // const shopToggleIcon = document.getElementById('shopToggleIcon'); // Already declared for accordion
+    const shopAccordionContent = document.getElementById('shopAccordionContent');
+    const shopUserPointsDisplay = document.getElementById('shopUserPoints');
+
+
+    let localStorageKeySuffix = '_v27_theme_shop'; // Or your preferred suffix
     let loggedMoments = JSON.parse(localStorage.getItem('idk_moments' + localStorageKeySuffix)) || [];
     let archivedKnowledge = JSON.parse(localStorage.getItem('idk_archived_knowledge' + localStorageKeySuffix)) || [];
     let deeplyUnderstoodKnowledge = JSON.parse(localStorage.getItem('idk_deeply_understood' + localStorageKeySuffix)) || [];
     let userPoints = parseInt(localStorage.getItem('idk_user_points_val' + localStorageKeySuffix)) || 0;
     let userStupidPoints = parseInt(localStorage.getItem('idk_user_stupid_points_val' + localStorageKeySuffix)) || 0;
     let userProvidedApiKey = localStorage.getItem('idk_user_openai_api_key' + localStorageKeySuffix) || '';
+
+    // Theme-related state
+    const themes = {
+        default: {
+            name: "Default Retro",
+            cost: 0,
+            owned: true,
+            cssVariables: {
+                '--theme-primary-dark': '#264653',
+                '--theme-primary-accent': '#2A9D8F',
+                '--theme-secondary-accent': '#E9C46A',
+                '--theme-tertiary-accent': '#F4A261',
+                '--theme-highlight-accent': '#E76F51',
+                '--theme-light-bg': '#EAEAEA',
+                '--theme-card-bg': '#FFFFFF',
+                '--theme-text-on-dark': '#EAEAEA',
+                '--theme-page-bg': 'rgb(174, 217, 211)'
+            }
+        },
+        oceanDepths: {
+            name: "Ocean Depths",
+            cost: 50,
+            cssVariables: {
+                '--theme-primary-dark': '#03045E',
+                '--theme-primary-accent': '#0077B6',
+                '--theme-secondary-accent': '#00B4D8',
+                '--theme-tertiary-accent': '#90E0EF',
+                '--theme-highlight-accent': '#CAF0F8',
+                '--theme-light-bg': '#E0FBFC',
+                '--theme-card-bg': '#FFFFFF',
+                '--theme-text-on-dark': '#CAF0F8',
+                '--theme-page-bg': '#ADE8F4'
+            }
+        },
+        volcanoRush: {
+            name: "Volcano Rush",
+            cost: 75,
+            cssVariables: {
+                '--theme-primary-dark': '#2B0000',
+                '--theme-primary-accent': '#6A0000',
+                '--theme-secondary-accent': '#FF4500',
+                '--theme-tertiary-accent': '#FF8C00',
+                '--theme-highlight-accent': '#AE2012',
+                '--theme-light-bg': '#FFF2E6',
+                '--theme-card-bg': '#FFFFFF',
+                '--theme-text-on-dark': '#FFDAB9',
+                '--theme-page-bg': '#FFCDB2'
+            }
+        }
+    };
+    let ownedThemes = JSON.parse(localStorage.getItem('idk_owned_themes' + localStorageKeySuffix)) || ['default'];
+    let currentTheme = localStorage.getItem('idk_current_theme' + localStorageKeySuffix) || 'default';
 
 
     let currentQuizQuestionsData = [];
@@ -91,14 +151,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const cX = customX !== undefined ? customX : window.innerWidth / 2;
         const cY = customY !== undefined ? customY : window.innerHeight / 3;
         let clr, sz, cnt, sprd, spd;
-        if (type === 'perfectQuiz') { clr = 'var(--retro-yellow)'; sz = 8; cnt = 100; sprd = 8; spd = 1.5; }
-        else if (type === 'correctAnswer') { clr = 'var(--retro-teal)'; sz = 6; cnt = 50; sprd = 5; spd = 1; }
-        else if (type === 'dumbAnswer') { clr = 'var(--retro-coral)'; sz = 5; cnt = 30; sprd = 4; spd = 0.8;}
-        else if (type === 'masteredItem') { clr = 'var(--retro-yellow)'; sz = 7; cnt = 40; sprd = 6; spd = 1.2; }
+        if (type === 'perfectQuiz') { clr = 'var(--theme-secondary-accent)'; sz = 8; cnt = 100; sprd = 8; spd = 1.5; } // Use theme var
+        else if (type === 'correctAnswer') { clr = 'var(--theme-primary-accent)'; sz = 6; cnt = 50; sprd = 5; spd = 1; } // Use theme var
+        else if (type === 'dumbAnswer') { clr = 'var(--theme-highlight-accent)'; sz = 5; cnt = 30; sprd = 4; spd = 0.8;} // Use theme var
+        else if (type === 'masteredItem') { clr = 'var(--theme-secondary-accent)'; sz = 7; cnt = 40; sprd = 6; spd = 1.2; } // Use theme var
 
         createParticle(cX, cY, clr, sz, cnt, sprd, spd);
         if (particles.length === cnt || type === 'dumbAnswer' || type === 'masteredItem') {
-            requestAnimationFrame(updateAnd_drawParticles); // Corrected typo here: updateAnd_drawParticles -> updateAndDrawParticles
+            requestAnimationFrame(updateAndDrawParticles);
         }
     }
 
@@ -129,7 +189,85 @@ document.addEventListener('DOMContentLoaded', () => {
         if(userPointsDisplay) userPointsDisplay.textContent = userPoints;
         if (stupidPointsDisplay) { stupidPointsDisplay.textContent = userStupidPoints; }
         if (goldStarsDisplay) { goldStarsDisplay.textContent = deeplyUnderstoodKnowledge.length; }
+        if (shopUserPointsDisplay) shopUserPointsDisplay.textContent = userPoints; // Update shop points
+        renderShopItems(); // Update shop button states based on points
     }
+
+    function applyTheme(themeId) {
+        if (themes[themeId]) {
+            const themeVars = themes[themeId].cssVariables;
+            for (const [key, value] of Object.entries(themeVars)) {
+                document.documentElement.style.setProperty(key, value);
+            }
+            document.documentElement.style.setProperty('--theme-text-main', themeVars['--theme-primary-dark']);
+            document.documentElement.style.setProperty('--theme-border-main', themeVars['--theme-primary-dark']);
+
+            currentTheme = themeId;
+            localStorage.setItem('idk_current_theme' + localStorageKeySuffix, currentTheme);
+            renderShopItems();
+            // showToast(`${themes[themeId].name} theme applied!`); // Toast can be a bit much on every apply
+        }
+    }
+
+    function renderShopItems() {
+        if (!shopAccordionContent) return;
+        document.querySelectorAll('.theme-item').forEach(item => {
+            const themeId = item.dataset.themeId;
+            const themeData = themes[themeId];
+            const button = item.querySelector('.theme-button');
+            const costSpan = item.querySelector('.theme-cost');
+            const statusSpan = item.querySelector('.theme-status');
+
+            if (ownedThemes.includes(themeId)) {
+                if (costSpan) costSpan.style.display = 'none';
+                if (statusSpan) {
+                    statusSpan.style.display = 'inline';
+                    statusSpan.textContent = (currentTheme === themeId) ? "EQUIPPED" : "";
+                }
+                button.textContent = "APPLY";
+                button.classList.add('apply-button');
+                button.disabled = (currentTheme === themeId);
+            } else {
+                if (costSpan) costSpan.style.display = 'inline-block';
+                if (statusSpan) statusSpan.style.display = 'none';
+                button.textContent = "BUY";
+                button.classList.remove('apply-button');
+                button.disabled = (userPoints < themeData.cost);
+            }
+        });
+        if(shopUserPointsDisplay) shopUserPointsDisplay.textContent = userPoints;
+    }
+
+    if (shopToolbarHeader) {
+        shopToolbarHeader.addEventListener('click', () => {
+            shopToolbar.classList.toggle('expanded');
+        });
+    }
+
+    document.querySelectorAll('.theme-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const themeId = e.target.dataset.themeId;
+            const themeData = themes[themeId];
+
+            if (ownedThemes.includes(themeId)) {
+                applyTheme(themeId);
+                showToast(`${themes[themeId].name} theme APPLIED!`);
+            } else {
+                if (userPoints >= themeData.cost) {
+                    userPoints -= themeData.cost;
+                    ownedThemes.push(themeId);
+                    localStorage.setItem('idk_owned_themes' + localStorageKeySuffix, JSON.stringify(ownedThemes));
+                    saveMoments(); // Saves points
+                    updateCountersAndPointsDisplay(); // Updates main header and re-renders shop via renderShopItems
+                    applyTheme(themeId);
+                    showToast(`Purchased & Applied ${themeData.name}!`);
+                } else {
+                    showToast("Not enough PTS!");
+                }
+            }
+        });
+    });
+
 
     function renderMoments() {
          if (!momentsList) return;
@@ -457,7 +595,9 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
     archiveHeader.addEventListener('click', () => { archivedItemsListContainer.classList.toggle('expanded'); archiveToggleIcon.classList.toggle('expanded'); });
     deepenedHeader.addEventListener('click', () => { deepenedItemsListContainer.classList.toggle('expanded'); deepenedToggleIcon.classList.toggle('expanded'); });
 
+    // Initial Renders & Theme Application
+    applyTheme(currentTheme);
     renderMoments();
     renderArchivedKnowledge();
-    renderDeeplyUnderstoodKnowledge();
+    renderDeeplyUnderstoodKnowledge(); // This also calls updateCountersAndPointsDisplay which calls renderShopItems
 });
