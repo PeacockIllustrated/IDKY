@@ -62,13 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const shopUserPointsDisplay = document.getElementById('shopUserPoints');
 
     // --- State Variables & Config ---
-    const localStorageKeySuffix = '_v27_theme_shop';
-    const themes = {
-        default: { name: "Default Retro", cost: 0, owned: true, description: "The classic look and feel of IDKY, with its signature teal and orange accents.", cssVariables: { '--theme-primary-dark': '#264653', '--theme-primary-accent': '#2A9D8F', '--theme-secondary-accent': '#E9C46A', '--theme-tertiary-accent': '#F4A261', '--theme-highlight-accent': '#E76F51', '--theme-light-bg': '#EAEAEA', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#EAEAEA', '--theme-page-bg': 'rgb(174, 217, 211)' } },
-        oceanDepths: { name: "Ocean Depths", cost: 1, description: "Dive into cool blue tranquility with shades of the deep sea and clear waters.", cssVariables: { '--theme-primary-dark': '#03045E', '--theme-primary-accent': '#0077B6', '--theme-secondary-accent': '#00B4D8', '--theme-tertiary-accent': '#90E0EF', '--theme-highlight-accent': '#CAF0F8', '--theme-light-bg': '#E0FBFC', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#CAF0F8', '--theme-page-bg': '#ADE8F4' } },
-        volcanoRush: { name: "Volcano Rush", cost: 1, description: "Fiery reds and oranges evoke the heat of a volcanic eruption for intense focus.", cssVariables: { '--theme-primary-dark': '#2B0000', '--theme-primary-accent': '#6A0000', '--theme-secondary-accent': '#FF4500', '--theme-tertiary-accent': '#FF8C00', '--theme-highlight-accent': '#AE2012', '--theme-light-bg': '#FFF2E6', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#FFDAB9', '--theme-page-bg': '#FFCDB2' } },
-        techOrangeBlue: { name: "Tech Orange & Blue", cost: 1, description: "A modern, sleek palette combining energetic orange with professional blues and grays.", cssVariables: { '--theme-primary-dark': '#004C97', '--theme-primary-accent': '#4A7DB5', '--theme-secondary-accent': '#FF6600', '--theme-tertiary-accent': '#C0C0C0', '--theme-highlight-accent': '#FF7700', '--theme-light-bg': '#F0F0F0', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#F0F0F0', '--theme-page-bg': '#E8E8E8' } },
-        forestGreens: { name: "Forest Greens", cost: 1, description: "Earthy and calming greens, from deep forest shades to light mossy tones.", cssVariables: { '--theme-primary-dark': '#1A2B12', '--theme-primary-accent': '#335128', '--theme-secondary-accent': '#526F35', '--theme-tertiary-accent': '#8A9A5B', '--theme-highlight-accent': '#E0E7A3', '--theme-light-bg': '#F0F5E0', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#E0E7A3', '--theme-page-bg': '#D8E0C0' } }
+    const localStorageKeySuffix = '_v27_theme_shop'; // Ensure this is consistent
+    const themes = { // THIS MUST BE COMPLETE
+        default: { name: "Default Retro", cost: 0, owned: true, description: "The classic look and feel.", cssVariables: { '--theme-primary-dark': '#264653', '--theme-primary-accent': '#2A9D8F', '--theme-secondary-accent': '#E9C46A', '--theme-tertiary-accent': '#F4A261', '--theme-highlight-accent': '#E76F51', '--theme-light-bg': '#EAEAEA', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#EAEAEA', '--theme-page-bg': 'rgb(174, 217, 211)' } },
+        oceanDepths: { name: "Ocean Depths", cost: 1, description: "Dive into cool blue tranquility.", cssVariables: { '--theme-primary-dark': '#03045E', '--theme-primary-accent': '#0077B6', '--theme-secondary-accent': '#00B4D8', '--theme-tertiary-accent': '#90E0EF', '--theme-highlight-accent': '#CAF0F8', '--theme-light-bg': '#E0FBFC', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#CAF0F8', '--theme-page-bg': '#ADE8F4' } },
+        volcanoRush: { name: "Volcano Rush", cost: 1, description: "Fiery reds and oranges.", cssVariables: { '--theme-primary-dark': '#2B0000', '--theme-primary-accent': '#6A0000', '--theme-secondary-accent': '#FF4500', '--theme-tertiary-accent': '#FF8C00', '--theme-highlight-accent': '#AE2012', '--theme-light-bg': '#FFF2E6', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#FFDAB9', '--theme-page-bg': '#FFCDB2' } },
+        techOrangeBlue: { name: "Tech Orange & Blue", cost: 1, description: "A modern tech-inspired palette.", cssVariables: { '--theme-primary-dark': '#004C97', '--theme-primary-accent': '#4A7DB5', '--theme-secondary-accent': '#FF6600', '--theme-tertiary-accent': '#C0C0C0', '--theme-highlight-accent': '#FF7700', '--theme-light-bg': '#F0F0F0', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#F0F0F0', '--theme-page-bg': '#E8E8E8' } },
+        forestGreens: { name: "Forest Greens", cost: 1, description: "Earthy and calming greens.", cssVariables: { '--theme-primary-dark': '#1A2B12', '--theme-primary-accent': '#335128', '--theme-secondary-accent': '#526F35', '--theme-tertiary-accent': '#8A9A5B', '--theme-highlight-accent': '#E0E7A3', '--theme-light-bg': '#F0F5E0', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#E0E7A3', '--theme-page-bg': '#D8E0C0' } }
     };
     let currentTheme = localStorage.getItem('idk_current_theme' + localStorageKeySuffix) || 'default';
     let userPoints = parseInt(localStorage.getItem('idk_user_points_val' + localStorageKeySuffix)) || 0;
@@ -114,20 +114,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const cY = customY !== undefined ? customY : window.innerHeight / 3;
         let clr, sz, cnt, sprd, spd;
         const themeVarsToUse = themes[currentTheme]?.cssVariables || themes.default.cssVariables;
-
         if (type === 'perfectQuiz') { clr = themeVarsToUse['--theme-secondary-accent']; sz = 8; cnt = 100; sprd = 8; spd = 1.5; }
         else if (type === 'correctAnswer') { clr = themeVarsToUse['--theme-primary-accent']; sz = 6; cnt = 50; sprd = 5; spd = 1; }
         else if (type === 'dumbAnswer') { clr = themeVarsToUse['--theme-highlight-accent']; sz = 5; cnt = 30; sprd = 4; spd = 0.8;}
         else if (type === 'masteredItem') { clr = themeVarsToUse['--theme-secondary-accent']; sz = 7; cnt = 40; sprd = 6; spd = 1.2; }
         createParticle(cX, cY, clr, sz, cnt, sprd, spd);
-        if ((particles.length > 0 && particles.length <= cnt) || type === 'dumbAnswer' || type === 'masteredItem') {
-             if (!particles.isAnimatingLoop) { // Simple flag to prevent multiple rAF loops
-                particles.isAnimatingLoop = true;
-                requestAnimationFrame(() => {
-                    updateAndDrawParticles();
-                    particles.isAnimatingLoop = false; // Reset after loop iteration
-                });
-            }
+        if ((particles.length > 0 && particles.length <= cnt && !particles.isAnimatingLoop) || type === 'dumbAnswer' || type === 'masteredItem') {
+             particles.isAnimatingLoop = true;
+             requestAnimationFrame(() => { updateAndDrawParticles(); particles.isAnimatingLoop = false; });
         }
     }
     function formatAnswerForRetroDisplay(text) { if (!text || typeof text !== 'string') return text; const p = '     > '; let h = text.split('\n').map(l => l.trim() === '' ? '' : p + l).join('<br>'); h = h.replace(/^<br>\s*/, '').replace(/\s*<br>$/, ''); h = h.replace(/(<br>\s*){2,}/g, '<br>'); return h; }
@@ -146,14 +140,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.documentElement.style.setProperty('--theme-text-main', themeVars['--theme-primary-dark']);
             document.documentElement.style.setProperty('--theme-border-main', themeVars['--theme-primary-dark']);
         } else {
-            console.warn(`Theme ID "${themeId}" not found or missing cssVariables. Applying default.`);
+            console.warn(`Theme ID "${themeId}" not found or missing cssVariables in script.js. Applying default explicitly.`);
             if (themes.default && themes.default.cssVariables) {
                  const defaultVars = themes.default.cssVariables;
-                 for (const [key, value] of Object.entries(defaultVars)) {
-                    document.documentElement.style.setProperty(key, value);
-                }
-                document.documentElement.style.setProperty('--theme-text-main', defaultVars['--theme-primary-dark']);
-                document.documentElement.style.setProperty('--theme-border-main', defaultVars['--theme-primary-dark']);
+                 for (const [key, value] of Object.entries(defaultVars)) { document.documentElement.style.setProperty(key, value); }
+                 document.documentElement.style.setProperty('--theme-text-main', defaultVars['--theme-primary-dark']);
+                 document.documentElement.style.setProperty('--theme-border-main', defaultVars['--theme-primary-dark']);
             }
         }
     }
@@ -180,9 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Shop Toolbar Link on index.html ---
     if (shopToolbar && shopToolbarHeader && shopAccordionContent) {
-        shopToolbarHeader.addEventListener('click', (e) => {
-             window.location.href = "shop.html";
-        });
+        shopToolbarHeader.addEventListener('click', () => { window.location.href = "shop.html"; });
         shopAccordionContent.innerHTML = `
             <div class="theme-item" style="justify-content: center; padding: 10px; cursor:pointer;" onclick="window.location.href='shop.html'">
                 <span class="shop-page-link-button">
@@ -202,14 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Core App Logic (Render, Save, Actions) ---
     function renderMoments() {
-         if (!momentsList) return;
-         momentsList.innerHTML = '';
-         const anyMoments = loggedMoments.length > 0;
+         if (!momentsList) return; momentsList.innerHTML = ''; const anyMoments = loggedMoments.length > 0;
          if(noMomentsPlaceholder) noMomentsPlaceholder.style.display = anyMoments ? 'none' : 'block';
          if(processSelectedButton) processSelectedButton.style.display = anyMoments ? 'block' : 'none';
-         const listControlsBar = document.querySelector('.list-controls-bar');
-         if (listControlsBar) listControlsBar.style.display = anyMoments ? 'flex' : 'none';
-
+         const listControlsBar = document.querySelector('.list-controls-bar'); if (listControlsBar) listControlsBar.style.display = anyMoments ? 'flex' : 'none';
          loggedMoments.forEach((moment) => {
             const listItem = document.createElement('li'); listItem.className = `moment-card type-${moment.type}`; listItem.id = `moment-item-${moment.timestamp}`;
             if (moment.newlyAdded) { listItem.classList.add('newly-added'); setTimeout(() => { const el = document.getElementById(`moment-item-${moment.timestamp}`); if (el) el.classList.remove('newly-added'); moment.newlyAdded = false; }, 2000); }
@@ -264,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast("MASTERED! WELL DONE!", 1500);
                     setTimeout(() => { cardElement.classList.remove('mastered-celebrate-pop'); }, 500);
                 }
-                delete moment.justClickedForCelebration; // No need to save this transient flag again here
+                delete moment.justClickedForCelebration;
             }
         });
         updateCountersAndPointsDisplay();
@@ -275,11 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleRegenerateButtonClick(event) { const ts = parseInt(event.currentTarget.dataset.timestamp); const mom = loggedMoments.find(m => m.timestamp === ts); const liEl = document.getElementById(`moment-item-${ts}`); if (mom && liEl && !mom.hasBeenRegenerated) { regenerateAIAnswer(mom, liEl); } }
     function toggleAnswerExpansion(timestamp) { const m = loggedMoments.find(mo => mo.timestamp === timestamp); if (m) {m.isAnswerExpanded = !m.isAnswerExpanded; saveMoments(); renderMoments();}}
     function saveMoments() {
-        deeplyUnderstoodKnowledge.forEach(m => {
-            if (Object.prototype.hasOwnProperty.call(m, 'justClickedForCelebration')) {
-                delete m.justClickedForCelebration;
-            }
-        });
+        deeplyUnderstoodKnowledge.forEach(m => { if (Object.prototype.hasOwnProperty.call(m, 'justClickedForCelebration')) { delete m.justClickedForCelebration; }});
         localStorage.setItem('idk_moments' + localStorageKeySuffix, JSON.stringify(loggedMoments));
         localStorage.setItem('idk_archived_knowledge' + localStorageKeySuffix, JSON.stringify(archivedKnowledge));
         localStorage.setItem('idk_deeply_understood' + localStorageKeySuffix, JSON.stringify(deeplyUnderstoodKnowledge));
@@ -294,9 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const moment = archivedKnowledge.find(m => m.timestamp === timestamp);
         if (!moment || moment.isDeepDiveProcessing) return;
         moment.isDeepDiveProcessing = true; moment.isAnswerExpanded = true; renderArchivedKnowledge();
-        try {
-            const deepDiveText = await fetchAIAnswerLogic(null, false, false, null, true, moment);
-            moment.deepDiveAnswer = deepDiveText; showToast("Knowledge Deepened!");
+        try { const deepDiveText = await fetchAIAnswerLogic(null, false, false, null, true, moment); moment.deepDiveAnswer = deepDiveText; showToast("Knowledge Deepened!");
         } catch (e) { console.error("Error fetching deep dive:", e); moment.deepDiveAnswer = `DEEP DIVE ERROR: ${e.message}`; }
         finally { moment.isDeepDiveProcessing = false; saveMoments(); renderArchivedKnowledge(); }
     }
@@ -367,7 +347,7 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
         currentQuizQuestionsData = []; const prepButton = isForArchivedItem && specificArchivedMoment ? document.querySelector(`.archive-deep-dive-test-button[data-timestamp="${specificArchivedMoment.timestamp}"]`) : testKnowledgeButton;
         if (prepButton) { prepButton.disabled = true; prepButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';}
         if (isForArchivedItem && specificArchivedMoment) {
-            for (let i = 0; i < 3; i++) { try { const mcqText = await fetchAIAnswerLogic(null, false, false, null, false, specificArchivedMoment, true, i + 1); const qMatch = mcqText.match(/Q:\s*([\s\S]*?)\nC:/i); const cMatch = mcqText.match(/C:\s*([\s\S]*?)\nD1:/i); const d1Match = mcqText.match(/D1:\s*([\s\S]*?)\nD2:/i); const d2Match = mcqText.match(/D2:\s*([\s\S]*?)$/i); if (qMatch && cMatch && d1Match && d2Match) { let opts = [cMatch[1].trim(), d1Match[1].trim(), d2Match[1].trim()]; opts.sort(() => 0.5 - Math.random()); currentQuizQuestionsData.push({ question: qMatch[1].trim(), options: opts, correctAnswerText: cMatch[1].trim(), originalMomentTimestamp: specificArchivedMoment.timestamp, isDumb: false }); } else { console.warn(`Deep Dive MCQ PARSE FAIL (Q${i+1}):`, mcqText); currentQuizQuestionsData.push(null); } } catch (e) { console.error(`Error gen deep dive MCQ (Q${i+1}):`, e); currentQuizQuestionsData.push(null); } }
+            for (let i = 0; i < 3; i++) { try { const mcqText = await fetchAIAnswerLogic(null, false, false, null, false, specificArchivedMoment, true, i + 1); const qMatch = mcqText.match(/Q:\s*([\s\S]*?)\nC:/i); const cMatch = mcqText.match(/C:\s*([\s\S]*?)\nD1:/i); const d1Match = mcqText.match(/D1:\s*([\s\S]*?)\nD2:/i); const d2Match = mcqText.match(/D2:\s*([\s\S]*?)$/i); if (qMatch && cMatch && d1Match && d2Match) { let opts = [cMatch[1].trim(), d1Match[1].trim(), d2Match[1].trim()]; opts.sort(() => 0.5 - Math.random()); currentQuizQuestionsData.push({ question: qMatch[1].trim(), options: opts, correctAnswerText: cMatch[1].trim(), originalMomentTimestamp: specificArchivedMoment.timestamp, isDumb: false }); } else { console.warn(`Deep Dive MCQ PARSE FAIL (Q${i+1}):`, mcqText); } } catch (e) { console.error(`Error gen deep dive MCQ (Q${i+1}):`, e); } }
             currentQuizQuestionsData = currentQuizQuestionsData.filter(q => q !== null);
         } else {
             const shuffled = itemsForQuizSource.sort(() => 0.5 - Math.random()); const itemsForThisQuiz = shuffled.slice(0, Math.min(itemsForQuizSource.length, 3));
@@ -377,9 +357,8 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
         if (currentQuizQuestionsData.length > 0) { currentQuizQuestionIndex = 0; currentQuizCorrectAnswersCount = 0; if(quizModalTitle) quizModalTitle.textContent = isForArchivedItem && specificArchivedMoment ? `DEEP DIVE: ${specificArchivedMoment.text.substring(0,20)}...` : "KNOWLEDGE TEST!"; displayMCQQuestion(); if(quizModalOverlay) quizModalOverlay.classList.add('show'); if(closeQuizButton) closeQuizButton.style.display = 'none'; if(finishQuizButton) finishQuizButton.style.display = 'none'; } else { showToast("COULDN'T PREPARE QUIZ QUESTIONS. TRY AGAIN."); }
     }
     if(testKnowledgeButton) testKnowledgeButton.addEventListener('click', () => startQuiz(false, null));
-    // startDeepDiveQuiz is called directly from archived item buttons, not a global listener here.
 
-    function displayMCQQuestion() { if (currentQuizQuestionIndex < currentQuizQuestionsData.length) { const qD = currentQuizQuestionsData[currentQuizQuestionIndex]; if(quizQuestionNumber) quizQuestionNumber.textContent = `QUESTION ${currentQuizQuestionIndex + 1} OF ${currentQuizQuestionsData.length}`; if(quizQuestionText) quizQuestionText.textContent = qD.question; if(quizOptionsContainer) quizOptionsContainer.innerHTML = ''; qD.options.forEach(oT => { const oD = document.createElement('div'); oD.classList.add('quiz-option'); oD.textContent = oT; oD.addEventListener('click', () => selectQuizOption(oD, oT)); if(quizOptionsContainer) quizOptionsContainer.appendChild(oD); }); if(quizFeedbackArea) {quizFeedbackArea.textContent = 'CHOOSE AN OPTION.'; quizFeedbackArea.className = 'quiz-feedback-area';} if(submitQuizAnswerButton) {submitQuizAnswerButton.style.display = 'inline-block'; submitQuizAnswerButton.disabled = true;} if(nextQuizQuestionButton) nextQuizQuestionButton.style.display = 'none'; if(finishQuizButton) finishQuizButton.style.display = 'none'; selectedQuizOptionElement = null; } else { finishMCQQuiz(); }}
+    function displayMCQQuestion() { if(!quizModalOverlay) return; if (currentQuizQuestionIndex < currentQuizQuestionsData.length) { const qD = currentQuizQuestionsData[currentQuizQuestionIndex]; if(quizQuestionNumber) quizQuestionNumber.textContent = `QUESTION ${currentQuizQuestionIndex + 1} OF ${currentQuizQuestionsData.length}`; if(quizQuestionText) quizQuestionText.textContent = qD.question; if(quizOptionsContainer) quizOptionsContainer.innerHTML = ''; qD.options.forEach(oT => { const oD = document.createElement('div'); oD.classList.add('quiz-option'); oD.textContent = oT; oD.addEventListener('click', () => selectQuizOption(oD, oT)); if(quizOptionsContainer) quizOptionsContainer.appendChild(oD); }); if(quizFeedbackArea) {quizFeedbackArea.textContent = 'CHOOSE AN OPTION.'; quizFeedbackArea.className = 'quiz-feedback-area';} if(submitQuizAnswerButton) {submitQuizAnswerButton.style.display = 'inline-block'; submitQuizAnswerButton.disabled = true;} if(nextQuizQuestionButton) nextQuizQuestionButton.style.display = 'none'; if(finishQuizButton) finishQuizButton.style.display = 'none'; selectedQuizOptionElement = null; } else { finishMCQQuiz(); }}
     function selectQuizOption(optionDiv, optionText) { if (submitQuizAnswerButton && submitQuizAnswerButton.style.display === 'none') return; if (selectedQuizOptionElement) { selectedQuizOptionElement.classList.remove('selected'); } optionDiv.classList.add('selected'); selectedQuizOptionElement = optionDiv; if(submitQuizAnswerButton) submitQuizAnswerButton.disabled = false; }
     if(submitQuizAnswerButton) submitQuizAnswerButton.addEventListener('click', () => {
         if (!selectedQuizOptionElement) return; const userAnswerText = selectedQuizOptionElement.textContent; const qData = currentQuizQuestionsData[currentQuizQuestionIndex]; const isCorrect = userAnswerText === qData.correctAnswerText; const isDumbSelection = !isDeepDiveQuiz && qData.dumbAnswerText && userAnswerText === qData.dumbAnswerText; const pointsForThisQuestion = isDeepDiveQuiz ? 3 : 2;
