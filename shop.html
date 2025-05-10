@@ -4,36 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>THEME VENDO-MATIC - I DON'T KNOW, YET!</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="shop-style.css">
+    <link rel="stylesheet" href="style.css"> <!-- Main shared styles -->
+    <link rel="stylesheet" href="shop-style.css"> <!-- Shop-specific styles (will be heavily modified) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- particleCanvasShop can be used for background effects if desired -->
     <canvas id="particleCanvasShop"></canvas>
 
     <div class="vending-machine-page-container">
-        <a href="index.html" class="vending-back-to-app-link"> <!-- This is the main back link -->
+        <a href="index.html" class="vending-back-to-app-link">
             <i class="fas fa-arrow-left"></i> EXIT VENDO-MATIC
         </a>
 
         <div class="vending-machine">
             <header class="vending-machine-header">
-                <!-- Removed the inner back-to-app-link from here -->
                 <div class="brand-logo">
-                    <h1><i class="fas fa-store"></i> THEME VENDO-MATIC 9000 <i class="fas fa-store"></i></h1>
+                    <h1>THEME VENDO-MATIC 9000</h1>
                 </div>
                 <div class="coin-slot-display">
                     <span class="coin-icon-area"><i class="fas fa-coins"></i></span>
-                    <span id="shopPageUserPoints" class="points-readout">0</span>
+                    <span id="shopPageUserPoints" class="points- readout">0</span>
                     <span class="pts-label">PTS</span>
                 </div>
             </header>
 
             <main class="vending-machine-display-window" id="themeGalleryWindow">
-                <!-- Themes will be dynamically inserted here by JavaScript -->
+                <!-- Themes will be inserted here by shop-script.js -->
+                <!-- Example structure for one item (JS will generate this) -->
+                <!--
+                <div class="vending-item-slot" data-theme-id="default">
+                    <div class="vending-item-preview">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                    <div class="vending-item-info">
+                        <h3 class="vending-item-name">Default Retro</h3>
+                        <p class="vending-item-description">The classic!</p>
+                    </div>
+                    <div class="vending-item-purchase-area">
+                        <span class="vending-item-status">OWNED</span>
+                        <button class="vending-item-button apply-button">APPLY</button>
+                    </div>
+                </div>
+                -->
             </main>
 
             <footer class="vending-machine-footer">
