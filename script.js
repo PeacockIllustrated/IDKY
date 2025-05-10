@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const AMBIENT_PARTICLE_RATE = 2;
     const AMBIENT_PARTICLE_LIFESPAN_FACTOR = 4;
 
-    let localStorageKeySuffix = '_v28_ambient_particles_fix3'; // New suffix for fresh test
+    let localStorageKeySuffix = '_v28_ambient_particles_final_accordion';
     let loggedMoments = JSON.parse(localStorage.getItem('idk_moments' + localStorageKeySuffix)) || [];
     let archivedKnowledge = JSON.parse(localStorage.getItem('idk_archived_knowledge' + localStorageKeySuffix)) || [];
     let deeplyUnderstoodKnowledge = JSON.parse(localStorage.getItem('idk_deeply_understood' + localStorageKeySuffix)) || [];
@@ -351,41 +351,53 @@ document.addEventListener('DOMContentLoaded', () => {
         ambientEmitters.push({ id: 'deepenedItemsListContainer', element: deepenedItemsListContainer, isActive: false, colorVar: '--theme-secondary-accent' });
     }
 
+    // ACCORDION CLICK HANDLERS (FINAL VERSION)
     if (archiveHeader) {
+        console.log("Attaching listener to archiveHeader");
         archiveHeader.addEventListener('click', () => {
-            console.log("Archive header clicked"); // DIAGNOSTIC
-            const isCurrentlyExpanded = archivedItemsListContainer.classList.contains('expanded');
-            
+            console.log("Archive header clicked.");
+            const isOpeningThisOne = !archivedItemsListContainer.classList.contains('expanded');
+
+            // Toggle this accordion
             archivedItemsListContainer.classList.toggle('expanded');
             archiveToggleIcon.classList.toggle('expanded');
-            console.log("Archive 'expanded' class toggled. Now:", archivedItemsListContainer.classList.contains('expanded')); // DIAGNOSTIC
-            
-            if (archivedItemsListContainer.classList.contains('expanded') && deepenedItemsListContainer.classList.contains('expanded')) {
+            console.log("Archive expanded state:", archivedItemsListContainer.classList.contains('expanded'));
+
+            // If this one just opened, and the other is also open, close the other
+            if (isOpeningThisOne && deepenedItemsListContainer.classList.contains('expanded')) {
                 deepenedItemsListContainer.classList.remove('expanded');
                 deepenedToggleIcon.classList.remove('expanded');
-                console.log("Closed deepened understanding because archive opened."); // DIAGNOSTIC
+                console.log("Closed deepened because archive was opened.");
             }
             updateAmbientEmitters();
         });
+    } else {
+        console.error("archiveHeader not found!");
     }
 
     if (deepenedHeader) {
+        console.log("Attaching listener to deepenedHeader");
         deepenedHeader.addEventListener('click', () => {
-            console.log("Deepened header clicked"); // DIAGNOSTIC
-            const isCurrentlyExpanded = deepenedItemsListContainer.classList.contains('expanded');
+            console.log("Deepened header clicked.");
+            const isOpeningThisOne = !deepenedItemsListContainer.classList.contains('expanded');
 
+            // Toggle this accordion
             deepenedItemsListContainer.classList.toggle('expanded');
             deepenedToggleIcon.classList.toggle('expanded');
-            console.log("Deepened 'expanded' class toggled. Now:", deepenedItemsListContainer.classList.contains('expanded')); // DIAGNOSTIC
+            console.log("Deepened expanded state:", deepenedItemsListContainer.classList.contains('expanded'));
 
-            if (deepenedItemsListContainer.classList.contains('expanded') && archivedItemsListContainer.classList.contains('expanded')) {
+            // If this one just opened, and the other is also open, close the other
+            if (isOpeningThisOne && archivedItemsListContainer.classList.contains('expanded')) {
                 archivedItemsListContainer.classList.remove('expanded');
                 archiveToggleIcon.classList.remove('expanded');
-                console.log("Closed archived knowledge because deepened opened."); // DIAGNOSTIC
+                console.log("Closed archive because deepened was opened.");
             }
             updateAmbientEmitters();
         });
+    } else {
+        console.error("deepenedHeader not found!");
     }
+
 
     function renderMoments() {
          if (!momentsList) return;
@@ -711,20 +723,21 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
     }
 
     // Initial Setup & Event Listeners for Accordions
-    applyTheme(currentTheme); // Apply the initial or saved theme
+    applyTheme(currentTheme);
 
     if (archiveHeader) {
-        console.log("Adding click listener to archiveHeader");
         archiveHeader.addEventListener('click', () => {
-            console.log("Archive header clicked. Current expanded state:", archivedItemsListContainer.classList.contains('expanded'));
-            const isNowExpanded = archivedItemsListContainer.classList.toggle('expanded');
-            archiveToggleIcon.classList.toggle('expanded');
-            console.log("Archive toggled. Now expanded:", isNowExpanded);
+            console.log("Archive header clicked. Initial state (expanded?):", archivedItemsListContainer.classList.contains('expanded'));
+            const isOpeningThisOne = !archivedItemsListContainer.classList.contains('expanded');
 
-            if (isNowExpanded && deepenedItemsListContainer.classList.contains('expanded')) {
+            archivedItemsListContainer.classList.toggle('expanded');
+            archiveToggleIcon.classList.toggle('expanded');
+            console.log("Archive toggled. Now expanded:", archivedItemsListContainer.classList.contains('expanded'));
+
+            if (isOpeningThisOne && deepenedItemsListContainer.classList.contains('expanded')) {
                 deepenedItemsListContainer.classList.remove('expanded');
                 deepenedToggleIcon.classList.remove('expanded');
-                console.log("Deepened section closed because Archive opened.");
+                console.log("Closed deepened because archive was opened.");
             }
             updateAmbientEmitters();
         });
@@ -733,17 +746,18 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
     }
 
     if (deepenedHeader) {
-        console.log("Adding click listener to deepenedHeader");
         deepenedHeader.addEventListener('click', () => {
-            console.log("Deepened header clicked. Current expanded state:", deepenedItemsListContainer.classList.contains('expanded'));
-            const isNowExpanded = deepenedItemsListContainer.classList.toggle('expanded');
+            console.log("Deepened header clicked. Initial state (expanded?):", deepenedItemsListContainer.classList.contains('expanded'));
+            const isOpeningThisOne = !deepenedItemsListContainer.classList.contains('expanded');
+            
+            deepenedItemsListContainer.classList.toggle('expanded');
             deepenedToggleIcon.classList.toggle('expanded');
-            console.log("Deepened toggled. Now expanded:", isNowExpanded);
+            console.log("Deepened toggled. Now expanded:", deepenedItemsListContainer.classList.contains('expanded'));
 
-            if (isNowExpanded && archivedItemsListContainer.classList.contains('expanded')) {
+            if (isOpeningThisOne && archivedItemsListContainer.classList.contains('expanded')) {
                 archivedItemsListContainer.classList.remove('expanded');
                 archiveToggleIcon.classList.remove('expanded');
-                console.log("Archive section closed because Deepened opened.");
+                console.log("Archive closed because deepened was opened.");
             }
             updateAmbientEmitters();
         });
@@ -754,7 +768,7 @@ Provide ONE correct answer and TWO plausible but incorrect distractor answers. F
     // Initial renders
     renderMoments();
     renderArchivedKnowledge();
-    renderDeeplyUnderstoodKnowledge(); // This also calls updateCountersAndPointsDisplay which calls renderShopItems
-    requestAnimationFrame(updateAndDrawParticles); // Start particle animation loop
-    updateAmbientEmitters(); // Set initial state for ambient emitters after first render
+    renderDeeplyUnderstoodKnowledge();
+    requestAnimationFrame(updateAndDrawParticles);
+    updateAmbientEmitters(); // Call once after initial renders to set particle emitter states
 });
