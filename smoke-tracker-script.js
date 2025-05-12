@@ -2,18 +2,15 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Constants and State Variables ---
-    const localStorageKeySuffix = '_v27_theme_shop'; // Keep consistent
+    const localStorageKeySuffix = '_v27_theme_shop';
 
-    // --- Element Selectors ---
-    // Header & General UI
+    // --- Element Selectors (Checked against HTML) ---
     const userPointsDisplay = document.getElementById('userPoints');
     const smokeFreeStreakDisplay = document.getElementById('smokeFreeStreak');
     const streakDisplay = document.getElementById('streakDisplay');
     const healthMilestonesDisplay = document.getElementById('healthMilestones');
-    const shopUserPointsDisplay = document.getElementById('shopUserPoints'); // In toolbar
+    const shopUserPointsDisplay = document.getElementById('shopUserPoints');
     const toastNotification = document.getElementById('toastNotification');
-
-    // Smoking/Vaping Elements
     const logCigaretteButton = document.getElementById('logCigaretteButton');
     const todayCigaretteCountDisplay = document.getElementById('todayCigaretteCount');
     const cigaretteLimitDisplay = document.getElementById('cigaretteLimitDisplay');
@@ -30,21 +27,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveDailyVapeTimeLimitButton = document.getElementById('saveDailyVapeTimeLimitButton');
     const smokeLogList = document.getElementById('smokeLogList');
     const noLogsPlaceholder = document.getElementById('noLogsPlaceholder');
-
-    // Reason Modal Elements
     const reasonModalOverlay = document.getElementById('reasonModalOverlay');
     const reasonInput = document.getElementById('reasonInput');
     const reasonLogTimestampInput = document.getElementById('reasonLogTimestamp');
     const saveReasonButton = document.getElementById('saveReasonButton');
     const cancelReasonButton = document.getElementById('cancelReasonButton');
-
-    // Shop Toolbar Elements
     const shopToolbar = document.getElementById('shopToolbar');
     const shopToolbarHeader = document.getElementById('shopToolbarHeader');
     const shopAccordionContent = document.getElementById('shopAccordionContent');
-    const shopToggleIcon = document.getElementById('shopToggleIcon'); // Assumed ID for chevron
+    const shopToggleIcon = document.getElementById('shopToggleIcon');
 
-    // --- State ---
+    // --- State Variables ---
     let userPoints = 0;
     let smokeFreeStreak = 0;
     let healthMilestones = 0;
@@ -56,14 +49,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let todayCigaretteCount = 0;
     let todayTotalVapeTime = 0;
     let lastDayStreakIncremented = '';
-    // Timer State
-    let isVapeTimerRunning = false; let vapeTimerStartTime = null; let vapeTimerIntervalId = null;
-    let vapeTimerTargetEndTime = null; let vapeTimerMode = 'up';
-    // --- Theme State ---
+    let isVapeTimerRunning = false;
+    let vapeTimerStartTime = null;
+    let vapeTimerIntervalId = null;
+    let vapeTimerTargetEndTime = null;
+    let vapeTimerMode = 'up';
     let ownedThemes = ['default'];
     let currentTheme = 'default';
 
-    // --- Theme Data Object (MUST MATCH other JS files) ---
+    // --- Theme Data Object (Ensure this is COMPLETE and correct) ---
     const themes = {
         default: { name: "Default Retro", cost: 0, owned: true, description: "The classic look and feel.", cssVariables: { '--theme-primary-dark': '#264653', '--theme-primary-accent': '#2A9D8F', '--theme-secondary-accent': '#E9C46A', '--theme-tertiary-accent': '#F4A261', '--theme-highlight-accent': '#E76F51', '--theme-light-bg': '#EAEAEA', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#EAEAEA', '--theme-page-bg': 'rgb(174, 217, 211)' } },
         oceanDepths: { name: "Ocean Depths", cost: 1, description: "Dive into cool blue tranquility.", cssVariables: { '--theme-primary-dark': '#03045E', '--theme-primary-accent': '#0077B6', '--theme-secondary-accent': '#00B4D8', '--theme-tertiary-accent': '#90E0EF', '--theme-highlight-accent': '#CAF0F8', '--theme-light-bg': '#E0FBFC', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#CAF0F8', '--theme-page-bg': '#ADE8F4' } },
@@ -72,8 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         forestGreens: { name: "Forest Greens", cost: 1, description: "Earthy and calming greens.", cssVariables: { '--theme-primary-dark': '#1A2B12', '--theme-primary-accent': '#335128', '--theme-secondary-accent': '#526F35', '--theme-tertiary-accent': '#8A9A5B', '--theme-highlight-accent': '#E0E7A3', '--theme-light-bg': '#F0F5E0', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#E0E7A3', '--theme-page-bg': '#D8E0C0' } }
     };
 
-
-    // --- Helper Functions (formatTime, formatTimerDisplay, parseMMSS, showToast, triggerPointsFlash, addPoints, getCurrentDateString - Unchanged) ---
+    // --- Helper Functions ---
     function formatTime(totalSeconds) { if (isNaN(totalSeconds) || totalSeconds < 0) return "0m 0s"; const m = Math.floor(totalSeconds / 60); const s = Math.floor(totalSeconds % 60); return `${m}m ${s}s`; }
     function formatTimerDisplay(totalSeconds) { if (isNaN(totalSeconds) || totalSeconds < 0) return "00:00"; const m = Math.floor(totalSeconds / 60); const s = Math.floor(totalSeconds % 60); return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`; }
     function parseMMSS(timeString) { if (!timeString || typeof timeString !== 'string') return null; const p = timeString.split(':'); if (p.length !== 2) return null; const m = parseInt(p[0], 10); const s = parseInt(p[1], 10); if (isNaN(m) || isNaN(s) || m < 0 || s < 0 || s >= 60) return null; return (m * 60) + s; }
@@ -97,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         todayTotalVapeTime = parseInt(localStorage.getItem('smoketrack_today_vape_time' + localStorageKeySuffix)) || 0;
         lastDayStreakIncremented = localStorage.getItem('smoketrack_last_streak_date' + localStorageKeySuffix) || '';
 
-        // --- Load Theme State ---
+        // Load Theme State
         ownedThemes = JSON.parse(localStorage.getItem('idk_owned_themes' + localStorageKeySuffix)) || ['default'];
         currentTheme = localStorage.getItem('idk_current_theme' + localStorageKeySuffix) || 'default';
 
@@ -121,12 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('smoketrack_today_vape_time' + localStorageKeySuffix, todayTotalVapeTime.toString());
         localStorage.setItem('smoketrack_last_streak_date' + localStorageKeySuffix, lastDayStreakIncremented);
 
-        // --- Save Theme State ---
-        localStorage.setItem('idk_owned_themes' + localStorageKeySuffix, JSON.stringify(ownedThemes)); // Needed? Maybe not here.
+        // Save Theme State
+        localStorage.setItem('idk_owned_themes' + localStorageKeySuffix, JSON.stringify(ownedThemes));
         localStorage.setItem('idk_current_theme' + localStorageKeySuffix, currentTheme);
     }
 
-     // --- Theme Application Logic ---
+    // --- Theme Application Logic ---
     function applyThemeOnPage(themeId) {
         const themeToApply = themes[themeId] || themes.default;
         currentTheme = themeId; // Update state
@@ -140,49 +133,240 @@ document.addEventListener('DOMContentLoaded', () => {
             document.documentElement.style.setProperty('--theme-border-main', themeVars['--theme-primary-dark']);
         } else {
             console.warn(`Theme ID "${themeId}" not found. Applying default.`);
-            applyThemeOnPage('default');
-            return;
+            applyThemeOnPage('default'); // Apply default explicitly
+            return; // Exit after applying default
         }
         saveState(); // Save the new theme choice
+         // Re-render toolbar if it's open to update the 'CURRENT' indicator
+        if (shopToolbar && shopToolbar.classList.contains('expanded')) {
+             renderThemeOptionsInToolbar();
+        }
     }
 
-    // --- Core Logic (checkDateAndResetCounts, logCigaretteEvent, startVapeTimer, stopVapeTimer, checkAndWarnLimits - Unchanged) ---
-    function checkDateAndResetCounts() { const d=getCurrentDateString(); if(d!==lastLogDate&&lastLogDate!==''){console.log(`Date changed from ${lastLogDate} to ${d}. Checking limits.`); const y=new Date();y.setDate(y.getDate()-1); const yS=getCurrentDateString(y); const cU=todayCigaretteCount<=dailyCigaretteLimit; const vU=todayTotalVapeTime<=dailyTotalVapeTimeLimit; const yWUL=cU&&vU; if(yWUL){smokeFreeStreak++;lastDayStreakIncremented=d;showToast(`Streak Extended! ${smokeFreeStreak} Days!`);addPoints(5,`Streak: ${smokeFreeStreak} Days`); if([1,3,7,14,30,60,90].includes(smokeFreeStreak)){healthMilestones++;addPoints(Math.max(10,smokeFreeStreak*2),`Milestone: ${smokeFreeStreak}-Day Streak!`);showToast(`MILESTONE! ${smokeFreeStreak}-Day Streak Achieved!`);}}else{smokeFreeStreak=0;lastDayStreakIncremented='';showToast("Streak Reset. Keep trying!",3000);} todayCigaretteCount=0;todayTotalVapeTime=0;lastLogDate=d;saveState();}else if(lastLogDate===''){lastLogDate=d;saveState();}}
-    function logCigaretteEvent() { checkDateAndResetCounts(); todayCigaretteCount++; const lE={type:'cigarette',timestamp:Date.now(),reason:''}; smokeLog.unshift(lE); if(smokeLog.length>100)smokeLog.pop(); showToast("Cigarette logged."); checkAndWarnLimits(); updateStatusDisplay(); renderSmokeLog(); saveState(); }
-    function startVapeTimer() { if(isVapeTimerRunning)return; checkDateAndResetCounts(); isVapeTimerRunning=true; vapeTimerStartTime=Date.now(); startVapeTimerButton.disabled=true; stopVapeTimerButton.disabled=false; stopVapeTimerButton.style.display='inline-block'; vapeTimerDisplay.classList.remove('warning','counting-down'); if(vapeSessionDurationLimit>0){vapeTimerMode='down';vapeTimerTargetEndTime=vapeTimerStartTime+vapeSessionDurationLimit*1000;vapeTimerDisplay.textContent=formatTimerDisplay(vapeSessionDurationLimit);vapeTimerDisplay.classList.add('counting-down');showToast(`Vape timer started (Counting down from ${formatTimerDisplay(vapeSessionDurationLimit)})!`);}else{vapeTimerMode='up';vapeTimerTargetEndTime=null;vapeTimerDisplay.textContent=formatTimerDisplay(0);showToast("Vape timer started (Counting up)!");} vapeTimerIntervalId=setInterval(()=>{if(vapeTimerMode==='down'){const rM=vapeTimerTargetEndTime-Date.now();if(rM<=0){vapeTimerDisplay.textContent="00:00";showToast("Vape session limit reached!",3000);vapeTimerDisplay.classList.add('warning');stopVapeTimer(true);}else{const rS=Math.ceil(rM/1000);vapeTimerDisplay.textContent=formatTimerDisplay(rS);}}else{const eM=Date.now()-vapeTimerStartTime;const eS=Math.floor(eM/1000);vapeTimerDisplay.textContent=formatTimerDisplay(eS);}},1000);}
-    function stopVapeTimer(autoStopped=false) { if(!isVapeTimerRunning)return; clearInterval(vapeTimerIntervalId); isVapeTimerRunning=false; const eT=Date.now(); let dS; if(vapeTimerMode==='down'){if(autoStopped){dS=vapeSessionDurationLimit;}else{dS=Math.max(1,Math.round((eT-vapeTimerStartTime)/1000));dS=Math.min(dS,vapeSessionDurationLimit);}}else{dS=Math.max(1,Math.round((eT-vapeTimerStartTime)/1000));} todayTotalVapeTime+=dS; const lE={type:'vape',timestamp:eT,duration:dS,reason:''}; smokeLog.unshift(lE); if(smokeLog.length>100)smokeLog.pop(); vapeTimerStartTime=null;vapeTimerTargetEndTime=null;vapeTimerIntervalId=null;vapeTimerMode='up'; startVapeTimerButton.disabled=false; stopVapeTimerButton.disabled=true;stopVapeTimerButton.style.display='none'; vapeTimerDisplay.textContent=formatTimerDisplay(0); vapeTimerDisplay.classList.remove('warning','counting-down'); if(!autoStopped){showToast(`Vape session logged: ${formatTime(dS)}`);} checkAndWarnLimits(); updateStatusDisplay(); renderSmokeLog(); saveState();}
-    function checkAndWarnLimits() { const cO=todayCigaretteCount>dailyCigaretteLimit;const vO=todayTotalVapeTime>dailyTotalVapeTimeLimit; if(cO){showToast(`Warning: Cigarette limit (${dailyCigaretteLimit}) exceeded!`,3000);} if(vO){showToast(`Warning: Daily vape time limit (${formatTime(dailyTotalVapeTimeLimit)}) exceeded!`,3000);}}
 
+    // --- Core Logic Functions (Restored Readable Version) ---
+    function checkDateAndResetCounts() {
+        const currentDate = getCurrentDateString();
+        if (currentDate !== lastLogDate && lastLogDate !== '') { // Only process if date changed AND there was a previous date
+            console.log(`Date changed from ${lastLogDate} to ${currentDate}. Checking yesterday's limits and resetting counts.`);
+
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            // const yesterdayStr = getCurrentDateString(yesterday); // Not strictly needed if comparing counts directly
+
+            const yesterdayCigsUnder = todayCigaretteCount <= dailyCigaretteLimit;
+            const yesterdayVapeUnder = todayTotalVapeTime <= dailyTotalVapeTimeLimit;
+            const yesterdayWasUnderLimit = yesterdayCigsUnder && yesterdayVapeUnder;
+
+            if (yesterdayWasUnderLimit) {
+                smokeFreeStreak++;
+                lastDayStreakIncremented = currentDate;
+                showToast(`Streak Extended! ${smokeFreeStreak} Days!`);
+                addPoints(5, `Streak: ${smokeFreeStreak} Days`);
+
+                if ([1, 3, 7, 14, 30, 60, 90].includes(smokeFreeStreak)) {
+                    healthMilestones++;
+                    addPoints(Math.max(10, smokeFreeStreak * 2), `Milestone: ${smokeFreeStreak}-Day Streak!`);
+                    showToast(`MILESTONE! ${smokeFreeStreak}-Day Streak Achieved!`);
+                }
+            } else {
+                smokeFreeStreak = 0;
+                lastDayStreakIncremented = '';
+                showToast("Streak Reset. Keep trying!", 3000);
+            }
+
+            todayCigaretteCount = 0;
+            todayTotalVapeTime = 0;
+            lastLogDate = currentDate;
+
+            saveState();
+        } else if (lastLogDate === '') {
+             lastLogDate = currentDate;
+             saveState();
+        }
+    }
+
+    function logCigaretteEvent() {
+        checkDateAndResetCounts();
+        todayCigaretteCount++;
+        const logEntry = { type: 'cigarette', timestamp: Date.now(), reason: '' };
+        smokeLog.unshift(logEntry);
+        if (smokeLog.length > 100) smokeLog.pop();
+
+        showToast("Cigarette logged.");
+        checkAndWarnLimits();
+        updateStatusDisplay();
+        renderSmokeLog();
+        saveState();
+    }
+
+    function startVapeTimer() {
+        if (isVapeTimerRunning) return;
+        checkDateAndResetCounts();
+
+        isVapeTimerRunning = true;
+        vapeTimerStartTime = Date.now();
+        startVapeTimerButton.disabled = true;
+        stopVapeTimerButton.disabled = false;
+        stopVapeTimerButton.style.display = 'inline-block';
+        vapeTimerDisplay.classList.remove('warning', 'counting-down');
+
+        if (vapeSessionDurationLimit > 0) {
+            vapeTimerMode = 'down';
+            vapeTimerTargetEndTime = vapeTimerStartTime + vapeSessionDurationLimit * 1000;
+            vapeTimerDisplay.textContent = formatTimerDisplay(vapeSessionDurationLimit);
+            vapeTimerDisplay.classList.add('counting-down');
+            showToast(`Vape timer started (Counting down from ${formatTimerDisplay(vapeSessionDurationLimit)})!`);
+        } else {
+            vapeTimerMode = 'up';
+            vapeTimerTargetEndTime = null;
+            vapeTimerDisplay.textContent = formatTimerDisplay(0);
+            showToast("Vape timer started (Counting up)!");
+        }
+
+        vapeTimerIntervalId = setInterval(() => {
+            if (vapeTimerMode === 'down') {
+                const remainingMillis = vapeTimerTargetEndTime - Date.now();
+                if (remainingMillis <= 0) {
+                    vapeTimerDisplay.textContent = "00:00";
+                    showToast("Vape session limit reached!", 3000);
+                    vapeTimerDisplay.classList.add('warning');
+                    stopVapeTimer(true); // Auto-stop
+                } else {
+                    const remainingSeconds = Math.ceil(remainingMillis / 1000);
+                    vapeTimerDisplay.textContent = formatTimerDisplay(remainingSeconds);
+                }
+            } else { // Count 'up' mode
+                const elapsedMillis = Date.now() - vapeTimerStartTime;
+                const elapsedSeconds = Math.floor(elapsedMillis / 1000);
+                vapeTimerDisplay.textContent = formatTimerDisplay(elapsedSeconds);
+            }
+        }, 1000);
+    }
+
+    function stopVapeTimer(autoStopped = false) {
+        if (!isVapeTimerRunning) return;
+
+        clearInterval(vapeTimerIntervalId);
+        isVapeTimerRunning = false;
+        const endTime = Date.now();
+
+        let durationSeconds;
+        if (vapeTimerMode === 'down') {
+            if (autoStopped) { durationSeconds = vapeSessionDurationLimit; }
+            else {
+                durationSeconds = Math.max(1, Math.round((endTime - vapeTimerStartTime) / 1000));
+                durationSeconds = Math.min(durationSeconds, vapeSessionDurationLimit);
+            }
+        } else { durationSeconds = Math.max(1, Math.round((endTime - vapeTimerStartTime) / 1000)); }
+
+        todayTotalVapeTime += durationSeconds;
+        const logEntry = { type: 'vape', timestamp: endTime, duration: durationSeconds, reason: '' };
+        smokeLog.unshift(logEntry);
+        if (smokeLog.length > 100) smokeLog.pop();
+
+        // Reset UI
+        vapeTimerStartTime = null; vapeTimerTargetEndTime = null; vapeTimerIntervalId = null; vapeTimerMode = 'up';
+        startVapeTimerButton.disabled = false;
+        stopVapeTimerButton.disabled = true; stopVapeTimerButton.style.display = 'none';
+        vapeTimerDisplay.textContent = formatTimerDisplay(0);
+        vapeTimerDisplay.classList.remove('warning', 'counting-down');
+
+        if (!autoStopped) { showToast(`Vape session logged: ${formatTime(durationSeconds)}`); }
+        checkAndWarnLimits();
+        updateStatusDisplay();
+        renderSmokeLog();
+        saveState();
+    }
+
+    function checkAndWarnLimits() {
+        const cigOver = todayCigaretteCount > dailyCigaretteLimit;
+        const vapeOver = todayTotalVapeTime > dailyTotalVapeTimeLimit;
+        if (cigOver) { showToast(`Warning: Cigarette limit (${dailyCigaretteLimit}) exceeded!`, 3000); }
+        if (vapeOver) { showToast(`Warning: Daily vape time limit (${formatTime(dailyTotalVapeTimeLimit)}) exceeded!`, 3000); }
+    }
 
     // --- UI Update Functions ---
-    // updateHeaderDisplays - Unchanged
-    function updateHeaderDisplays() { if (userPointsDisplay) userPointsDisplay.textContent = userPoints; if (smokeFreeStreakDisplay) smokeFreeStreakDisplay.textContent = smokeFreeStreak; if (streakDisplay) streakDisplay.textContent = `${smokeFreeStreak} Days`; if (healthMilestonesDisplay) healthMilestonesDisplay.textContent = healthMilestones; if (shopUserPointsDisplay) shopUserPointsDisplay.textContent = userPoints; } // Updated points in toolbar too
-    // updateStatusDisplay - Unchanged
-    function updateStatusDisplay() { if(todayCigaretteCountDisplay)todayCigaretteCountDisplay.textContent=todayCigaretteCount; if(cigaretteLimitDisplay)cigaretteLimitDisplay.textContent=dailyCigaretteLimit; if(todayCigaretteCountDisplay)todayCigaretteCountDisplay.parentElement.classList.toggle('over-limit',todayCigaretteCount>dailyCigaretteLimit); if(todayTotalVapeTimeDisplay)todayTotalVapeTimeDisplay.textContent=formatTime(todayTotalVapeTime); if(dailyVapeTimeLimitDisplay)dailyVapeTimeLimitDisplay.textContent=formatTime(dailyTotalVapeTimeLimit); if(todayTotalVapeTimeDisplay)todayTotalVapeTimeDisplay.parentElement.classList.toggle('over-limit',todayTotalVapeTime>dailyTotalVapeTimeLimit); if(startVapeTimerButton)startVapeTimerButton.disabled=isVapeTimerRunning; if(stopVapeTimerButton){stopVapeTimerButton.disabled=!isVapeTimerRunning;stopVapeTimerButton.style.display=isVapeTimerRunning?'inline-block':'none';} if(vapeTimerDisplay&&!isVapeTimerRunning){vapeTimerDisplay.textContent=formatTimerDisplay(0);vapeTimerDisplay.classList.remove('warning','counting-down');} }
+    function updateHeaderDisplays() {
+        if (userPointsDisplay) userPointsDisplay.textContent = userPoints;
+        if (smokeFreeStreakDisplay) smokeFreeStreakDisplay.textContent = smokeFreeStreak;
+        if (streakDisplay) streakDisplay.textContent = `${smokeFreeStreak} Days`;
+        if (healthMilestonesDisplay) healthMilestonesDisplay.textContent = healthMilestones;
+        if (shopUserPointsDisplay) shopUserPointsDisplay.textContent = userPoints; // Update points in toolbar
+    }
 
-    // renderSmokeLog - Unchanged (renders reason icon)
-    function renderSmokeLog() { if (!smokeLogList) return; smokeLogList.innerHTML = ''; const lTR = smokeLog.slice(0, 30); if (lTR.length === 0) { if(noLogsPlaceholder)noLogsPlaceholder.style.display='block'; return; } else { if(noLogsPlaceholder)noLogsPlaceholder.style.display='none'; } lTR.forEach(log => { const lI = document.createElement('li'); lI.className = 'moment-card'; lI.style.opacity='1';lI.style.animation='none';lI.style.padding='8px';lI.style.marginBottom='8px'; const lT = new Date(log.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); const lD = new Date(log.timestamp).toLocaleDateString([],{month:'short',day:'numeric'}); let iC='';let iCo='';let t='';let d=''; let rIC=log.reason?'fas fa-comment-dots has-reason':'far fa-comment-dots'; if(log.type==='cigarette'){iC='fas fa-smoking';iCo='var(--theme-highlight-accent)';t='Cigarette';}else if(log.type==='vape'){iC='fas fa-vial';iCo='var(--theme-primary-accent)';t='Vape Session';d=log.duration?`(${formatTime(log.duration)})`:'';} lI.innerHTML=`<div class="log-item-content"><div class="log-item-details"><i class="${iC}" style="color: ${iCo}; margin-right: 8px; font-size: 18px;"></i><span>${t} ${d}</span></div><div class="log-item-reason-icon-container"><span class="log-item-time">${lD} @ ${lT}</span><i class="${rIC} add-reason-icon" data-timestamp="${log.timestamp}" title="${log.reason?'Edit Reason':'Add Reason'}"></i></div></div>`; smokeLogList.appendChild(lI); }); }
+    function updateStatusDisplay() {
+        if (todayCigaretteCountDisplay) todayCigaretteCountDisplay.textContent = todayCigaretteCount;
+        if (cigaretteLimitDisplay) cigaretteLimitDisplay.textContent = dailyCigaretteLimit;
+        if (todayCigaretteCountDisplay) todayCigaretteCountDisplay.parentElement.classList.toggle('over-limit', todayCigaretteCount > dailyCigaretteLimit);
+        if (todayTotalVapeTimeDisplay) todayTotalVapeTimeDisplay.textContent = formatTime(todayTotalVapeTime);
+        if (dailyVapeTimeLimitDisplay) dailyVapeTimeLimitDisplay.textContent = formatTime(dailyTotalVapeTimeLimit);
+        if (todayTotalVapeTimeDisplay) todayTotalVapeTimeDisplay.parentElement.classList.toggle('over-limit', todayTotalVapeTime > dailyTotalVapeTimeLimit);
+        if (startVapeTimerButton) startVapeTimerButton.disabled = isVapeTimerRunning;
+        if (stopVapeTimerButton) { stopVapeTimerButton.disabled = !isVapeTimerRunning; stopVapeTimerButton.style.display = isVapeTimerRunning ? 'inline-block' : 'none'; }
+        if (vapeTimerDisplay && !isVapeTimerRunning) { vapeTimerDisplay.textContent = formatTimerDisplay(0); vapeTimerDisplay.classList.remove('warning', 'counting-down'); }
+    }
 
-    // --- Reason Modal Logic (handleOpenReasonModal, handleCloseReasonModal, handleSaveReason - Unchanged) ---
-    function handleOpenReasonModal(timestamp){const lE=smokeLog.find(log=>log.timestamp===timestamp);if(!lE||!reasonModalOverlay)return; reasonInput.value=lE.reason||'';reasonLogTimestampInput.value=timestamp;reasonModalOverlay.classList.add('show');reasonInput.focus();}
-    function handleCloseReasonModal(){if(reasonModalOverlay)reasonModalOverlay.classList.remove('show'); reasonInput.value='';reasonLogTimestampInput.value='';}
-    function handleSaveReason(){const t=parseInt(reasonLogTimestampInput.value);const nR=reasonInput.value.trim();if(isNaN(t))return; const lE=smokeLog.find(log=>log.timestamp===t);if(lE){lE.reason=nR;saveState();renderSmokeLog();showToast(nR?"Reason Saved!":"Reason Cleared.");} handleCloseReasonModal();}
+    function renderSmokeLog() {
+        if (!smokeLogList) return;
+        smokeLogList.innerHTML = '';
+        const logsToRender = smokeLog.slice(0, 30);
 
+        if (logsToRender.length === 0) {
+            if (noLogsPlaceholder) noLogsPlaceholder.style.display = 'block'; return;
+        } else {
+            if (noLogsPlaceholder) noLogsPlaceholder.style.display = 'none';
+        }
 
-    // --- NEW: Shop Toolbar Rendering and Interaction ---
+        logsToRender.forEach(log => {
+            const listItem = document.createElement('li');
+            listItem.className = 'moment-card';
+            listItem.style.cssText = 'opacity:1; animation:none; padding:8px; margin-bottom:8px;'; // Inline for simplicity
+
+            const logTime = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const logDate = new Date(log.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+            let iconClass = '', iconColor = '', text = '', details = '';
+            let reasonIconClass = log.reason ? 'fas fa-comment-dots has-reason' : 'far fa-comment-dots';
+
+            if (log.type === 'cigarette') { iconClass = 'fas fa-smoking'; iconColor = 'var(--theme-highlight-accent)'; text = 'Cigarette'; }
+            else if (log.type === 'vape') { iconClass = 'fas fa-vial'; iconColor = 'var(--theme-primary-accent)'; text = 'Vape Session'; details = log.duration ? `(${formatTime(log.duration)})` : ''; }
+
+            listItem.innerHTML = `
+                <div class="log-item-content">
+                    <div class="log-item-details">
+                        <i class="${iconClass}" style="color: ${iconColor}; margin-right: 8px; font-size: 18px;"></i>
+                        <span>${text} ${details}</span>
+                    </div>
+                    <div class="log-item-reason-icon-container">
+                         <span class="log-item-time">${logDate} @ ${logTime}</span>
+                         <i class="${reasonIconClass} add-reason-icon" data-timestamp="${log.timestamp}" title="${log.reason ? 'Edit Reason' : 'Add Reason'}"></i>
+                    </div>
+                </div>`;
+            smokeLogList.appendChild(listItem);
+        });
+    }
+
+    // --- Reason Modal Logic ---
+    function handleOpenReasonModal(timestamp) { const lE = smokeLog.find(log => log.timestamp === timestamp); if (!lE || !reasonModalOverlay) return; reasonInput.value = lE.reason || ''; reasonLogTimestampInput.value = timestamp; reasonModalOverlay.classList.add('show'); reasonInput.focus(); }
+    function handleCloseReasonModal() { if (reasonModalOverlay) reasonModalOverlay.classList.remove('show'); reasonInput.value = ''; reasonLogTimestampInput.value = ''; }
+    function handleSaveReason() { const t = parseInt(reasonLogTimestampInput.value); const nR = reasonInput.value.trim(); if (isNaN(t)) return; const lE = smokeLog.find(log => log.timestamp === t); if (lE) { lE.reason = nR; saveState(); renderSmokeLog(); showToast(nR ? "Reason Saved!" : "Reason Cleared."); } handleCloseReasonModal(); }
+
+    // --- Shop Toolbar Rendering and Interaction ---
     function renderThemeOptionsInToolbar() {
-        if (!shopAccordionContent) return;
-        shopAccordionContent.innerHTML = ''; // Clear previous options
+        if (!shopAccordionContent) { console.error("Shop accordion content not found!"); return; }
+        shopAccordionContent.innerHTML = ''; // Clear previous
 
         Object.entries(themes).forEach(([themeId, themeData]) => {
-            if (ownedThemes.includes(themeId)) { // Only show owned themes
+            // Only show themes the user actually owns
+            if (ownedThemes.includes(themeId)) {
                 const themeItem = document.createElement('div');
                 themeItem.className = 'theme-item-toolbar';
 
                 let previewHTML = '<div class="theme-item-toolbar-preview">';
-                const colorKeys = ['--theme-primary-dark', '--theme-primary-accent', '--theme-secondary-accent']; // Show 3 colors
+                const colorKeys = ['--theme-primary-dark', '--theme-primary-accent', '--theme-secondary-accent'];
                 for (let i = 0; i < 3; i++) {
-                    previewHTML += `<span style="background-color: ${themeData.cssVariables[colorKeys[i]]};"></span>`;
+                    previewHTML += `<span style="background-color: ${themeData.cssVariables[colorKeys[i % colorKeys.length]]};"></span>`;
                 }
                 previewHTML += '</div>';
 
@@ -202,20 +386,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const applyButton = themeItem.querySelector('button');
                 if (applyButton) {
                     applyButton.addEventListener('click', (e) => {
-                        e.stopPropagation(); // Prevent header click
-                        applyThemeOnPage(themeId);
+                        e.stopPropagation();
+                        applyThemeOnPage(themeId); // Apply and save
                         showToast(`${themeData.name} theme applied!`);
-                        // Re-render options to update 'CURRENT' indicator
-                        renderThemeOptionsInToolbar();
-                         // Optionally collapse toolbar after selection
-                         // shopToolbar.classList.remove('expanded');
-                         // shopToggleIcon.classList.remove('expanded');
+                        // No need to re-render here, applyThemeOnPage handles it if toolbar is open
                     });
                 }
                 shopAccordionContent.appendChild(themeItem);
             }
         });
-         if (shopAccordionContent.children.length === 0) { // Handle case where only default is owned?
+        if (shopAccordionContent.children.length === 0) {
              shopAccordionContent.innerHTML = '<div style="text-align:center; padding: 10px; color: #888;">Visit Shop for more themes!</div>';
          }
     }
@@ -237,25 +417,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cancelReasonButton) cancelReasonButton.addEventListener('click', handleCloseReasonModal);
     if (reasonModalOverlay) reasonModalOverlay.addEventListener('click', (event) => { if(event.target===reasonModalOverlay){handleCloseReasonModal();}});
 
-    // --- NEW: Shop Toolbar Listener ---
+    // Shop Toolbar Listener
     if (shopToolbarHeader && shopToolbar && shopToggleIcon) {
         shopToolbarHeader.addEventListener('click', () => {
             const isExpanded = shopToolbar.classList.toggle('expanded');
-            shopToggleIcon.classList.toggle('expanded', isExpanded); // Sync icon
+            shopToggleIcon.classList.toggle('expanded', isExpanded);
             if (isExpanded) {
-                renderThemeOptionsInToolbar(); // Render/update themes when opened
+                renderThemeOptionsInToolbar(); // Render themes when opened
             }
         });
+    } else {
+        console.error("Shop toolbar elements not found!"); // Added error check
     }
 
 
     // --- Initial Setup ---
-    loadState();
-    applyThemeOnPage(currentTheme); // Apply theme *after* loading state
-    checkDateAndResetCounts();
-    updateHeaderDisplays(); // Includes toolbar points display
-    updateStatusDisplay();
-    renderSmokeLog();
+    loadState(); // Load all data first
+    applyThemeOnPage(currentTheme); // Apply the loaded theme
+    checkDateAndResetCounts(); // Check date after loading state
+    updateHeaderDisplays(); // Update UI with loaded/calculated values
+    updateStatusDisplay(); // Update UI with loaded/calculated values
+    renderSmokeLog(); // Render log with loaded data
 
-    console.log("Smoke Tracker Initialized (v4 - Inline Theme Change).");
+    console.log("Smoke Tracker Initialized (v4.1 - Debugged).");
+    console.log("Initial Theme:", currentTheme); // Log initial theme
+    console.log("Owned Themes:", ownedThemes); // Log owned themes
+
 }); // End DOMContentLoaded
