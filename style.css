@@ -541,6 +541,75 @@ input[type="number"]:focus {
 }
 
 /* ==========================================================================
+   SECTION: CHARTS (e.g., Smoke Tracker Daily Progress)
+   ========================================================================== */
+.daily-progress-chart-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end; /* Bars grow upwards from bottom */
+    height: 130px; /* Overall height of the chart plotting area */
+    border: var(--pixel-border-width) solid var(--theme-border-main);
+    padding: 10px 5px 0px 5px; /* Padding, no bottom padding to align labels */
+    background-color: var(--theme-light-bg);
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);
+    overflow-x: auto; /* In case of many days, though 7 should fit */
+    margin-bottom: 10px; /* Space below chart before streak text */
+}
+
+.chart-day-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end; /* Content (bar wrapper, label) aligns to bottom */
+    text-align: center;
+    flex-basis: 13%; /* Approximate width for 7 columns */
+    max-width: 50px; /* Max width for a column */
+    height: 100%; /* Take full height of parent for alignment */
+    position: relative;
+}
+
+.chart-bar-wrapper {
+    display: flex;
+    flex-direction: column-reverse; /* Bar at bottom, value text on top of it */
+    align-items: center;
+    width: 100%;
+    height: calc(100% - 20px); /* Reserve 20px for label below */
+    position: relative;
+}
+
+.chart-bar {
+    width: 60%; /* Width of the bar within its column */
+    min-height: 2px; /* Visible even if value is 0, or style border */
+    background-color: var(--theme-primary-accent); /* Default bar color */
+    border: 1px solid var(--theme-primary-dark);
+    box-shadow: 1px 1px 0px var(--theme-primary-dark);
+    transition: height 0.3s ease-out;
+    position: relative; /* For potential future ::before/::after decorations */
+}
+.chart-bar.cigarette-bar {
+    background-color: var(--theme-highlight-accent);
+}
+.chart-bar:hover {
+    filter: brightness(1.1);
+}
+
+.chart-bar-value {
+    font-size: 12px;
+    color: var(--theme-text-main);
+    margin-bottom: 1px; /* Space between value and top of bar */
+    font-weight: bold;
+    /* Position this on top of the bar if desired, or above wrapper */
+}
+
+.chart-day-label {
+    font-size: 12px;
+    margin-top: 4px; /* Space between bar area and label */
+    color: var(--theme-text-main);
+    height: 18px; /* Fixed height for labels */
+    line-height: 18px;
+}
+
+/* ==========================================================================
    SECTION: MISCELLANEOUS UTILITY CLASSES (If any)
    - e.g., .hidden, .text-center
    ========================================================================== */
