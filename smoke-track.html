@@ -1,1 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smoke Tracker - IDKY Retro</title>
+    <!-- Link to the EXISTING style.css -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Keep the same font and icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Optional: Include particle canvas for consistency -->
+    <canvas id="particleCanvas"></canvas>
 
+    <div class="app-container">
+        <!-- Reuse Header Section Structure -->
+        <div class="header-section">
+            <div class="app-title-bar">
+                <div class="app-title-container">
+                    <!-- Keep icon, adapt title -->
+                    <i class="fas fa-smoking title-icon"></i>
+                    <h1>Smoke Tracker</h1>
+                </div>
+            </div>
+            <!-- Reuse Stats Bar Structure -->
+            <div class="header-stats-bar">
+                <div class="points-display">
+                    <i class="fas fa-coins points-icon"></i> <span id="userPoints">0</span> PTS
+                </div>
+                <!-- Add a new stat relevant to smoking -->
+                <div class="points-display">
+                    <i class="fas fa-calendar-check points-icon"></i> <span id="smokeFreeStreak">0</span> DAY STREAK
+                </div>
+                <div class="points-display">
+                    <i class="fas fa-star points-icon gold-star-icon"></i> <span id="healthMilestones">0</span> ACHIEVED
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content for Smoke Tracker -->
+        <div class="smoke-tracker-content">
+
+            <!-- Section for Quick Logging -->
+            <div class="log-actions-section moment-card" style="padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center;">
+                 <button class="log-button" id="logCigaretteButton" style="width: 45%; font-size: 16px; padding: 10px;">
+                    <i class="fas fa-smoking"></i> LOG CIGARETTE
+                 </button>
+                 <button class="log-button" id="logVapeButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-primary-accent);">
+                    <i class="fas fa-vial"></i> LOG VAPE HIT
+                 </button>
+                 <!-- Add Start/Stop for vape session later if needed -->
+            </div>
+
+            <!-- Section for Status & Limits -->
+            <div class="status-limit-section moment-card" style="padding: 10px; margin-bottom: 15px;">
+                <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px; border-bottom: var(--pixel-border-width) dashed var(--theme-primary-accent); padding-bottom: 5px;">DAILY STATUS</h2>
+                <div style="display: flex; justify-content: space-around; margin-bottom: 10px;">
+                    <span style="font-size: 18px;">CIGARETTES: <strong id="todayCigaretteCount">2</strong> / <span id="cigaretteLimitDisplay">5</span></span>
+                    <span style="font-size: 18px;">VAPE HITS: <strong id="todayVapeCount">8</strong> / <span id="vapeLimitDisplay">15</span></span>
+                </div>
+                <div class="limit-setting" style="display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 10px; padding-top: 10px; border-top: var(--pixel-border-width) dotted #bbb;">
+                    <label for="setLimitInput" style="font-size: 16px;">Set Daily Cig Limit:</label>
+                    <input type="number" id="setLimitInput" min="0" value="5" style="width: 60px; padding: 4px; font-family: 'VT323', monospace; font-size: 16px; border: var(--pixel-border-width) solid var(--theme-border-main); background-color: var(--theme-light-bg); color: var(--theme-text-main); text-align: center;">
+                    <button class="action-button" id="saveLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button>
+                     <!-- Add similar input for vape limit -->
+                </div>
+            </div>
+
+            <!-- Section for Log History -->
+            <div class="log-history-section">
+                 <h2 style="text-align: center; color: var(--theme-secondary-accent); font-size: 20px; margin-bottom: 10px;">RECENT LOG</h2>
+                 <!-- Reuse moments-list styling -->
+                 <ul class="moments-list" id="smokeLogList">
+                    <!-- Example Log Item (Use moment-card styling) -->
+                    <li class="moment-card" style="padding: 8px; margin-bottom: 8px; opacity: 1; animation: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fas fa-smoking" style="color: var(--theme-highlight-accent); margin-right: 5px;"></i> Cigarette Logged</span>
+                            <span style="font-size: 14px; color: #666;">Today @ 10:32 AM</span>
+                        </div>
+                    </li>
+                    <li class="moment-card" style="padding: 8px; margin-bottom: 8px; opacity: 1; animation: none;">
+                         <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fas fa-vial" style="color: var(--theme-primary-accent); margin-right: 5px;"></i> Vape Hit Logged</span>
+                            <span style="font-size: 14px; color: #666;">Today @ 09:15 AM</span>
+                        </div>
+                    </li>
+                     <li class="moment-card" style="padding: 8px; margin-bottom: 8px; opacity: 1; animation: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fas fa-smoking" style="color: var(--theme-highlight-accent); margin-right: 5px;"></i> Cigarette Logged</span>
+                            <span style="font-size: 14px; color: #666;">Today @ 08:01 AM</span>
+                        </div>
+                    </li>
+                    <!-- Add more placeholder items -->
+                 </ul>
+            </div>
+
+             <!-- Placeholder for Progress Charts/Streaks Visualization -->
+            <div class="progress-section moment-card" style="padding: 10px; margin-top: 20px; text-align: center; background-color: var(--theme-light-bg);">
+                <h2 style="font-size: 18px; color: var(--theme-primary-dark); margin-bottom: 10px;">PROGRESS OVERVIEW</h2>
+                <p style="color: #666;">[Charts/Streak Visuals Here]</p>
+                 <!-- E.g., Placeholder for a simple streak display -->
+                 <div style="margin-top: 15px; padding: 8px; border: var(--pixel-border-width) dashed var(--theme-primary-accent);">
+                     <span style="font-size: 18px;">Current 'Under Limit' Streak: <strong style="color: var(--theme-primary-accent);">3 Days</strong></span> <i class="fas fa-fire" style="color: var(--theme-highlight-accent);"></i>
+                 </div>
+            </div>
+
+        </div> <!-- End smoke-tracker-content -->
+
+    </div> <!-- End app-container -->
+
+    <!-- Optional: Reuse Shop Toolbar Link for consistent navigation -->
+     <div class="shop-toolbar-fixed" id="shopToolbar">
+        <div class="shop-toolbar-header" id="shopToolbarHeader" onclick="window.location.href='shop.html'">
+            <span><i class="fas fa-palette"></i> THEME SHOP</span>
+            <span class="shop-pts-display">
+                <i class="fas fa-coins points-icon"></i> <span id="shopUserPoints">0</span> PTS
+            </span>
+            <!-- Use a simple link/indicator instead of accordion toggle for prototype -->
+             <i class="fas fa-arrow-right"></i>
+        </div>
+         <!-- Minimal content just showing it's a link -->
+        <div class="shop-accordion-content" id="shopAccordionContent">
+             <div class="theme-item" style="justify-content: center; padding: 10px;">
+                <span>Visit Theme Emporium...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add a minimal script part if needed for basic interactions later, or link to a new JS file -->
+    <!-- <script src="smoke-tracker-script.js"></script> -->
+    <!-- Include particle script if canvas is used -->
+    <!-- <script> /* Basic particle setup if needed */ </script> -->
+
+</body>
+</html>
