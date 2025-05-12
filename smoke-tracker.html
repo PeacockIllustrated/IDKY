@@ -47,29 +47,37 @@
             border-top: var(--pixel-border-width) solid var(--theme-border-main);
             box-shadow: 0 -2px 5px rgba(0,0,0,0.2); z-index: 1000;
         }
-        /* Make the header itself clickable as a link */
         .shop-toolbar-header-link {
             display: flex; justify-content: space-between; align-items: center;
             padding: 8px 15px; font-size: 18px;
-            color: var(--theme-text-on-dark); /* Ensure link text color */
-            text-decoration: none; /* Remove underline */
+            color: var(--theme-text-on-dark); 
+            text-decoration: none; 
             cursor: pointer;
         }
         .shop-toolbar-header-link:hover { background-color: color-mix(in srgb, var(--theme-primary-dark) 85%, white); }
         .shop-toolbar-header-link i { margin-right: 5px; }
         .shop-pts-display { font-size: 16px; margin-left: auto; margin-right: 15px; }
-        /* No need for accordion content styles anymore */
 
         /* Necessary animations if not in style.css */
         @keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
         @keyframes zoomInModal { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes pointsFlash { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); color: var(--theme-secondary-accent); } }
 
+        /* Ensure particle canvas is correctly styled to be behind other content but visible */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none; /* Important */
+            z-index: -1; /* Or a low positive value if you have other background elements */
+        }
     </style>
 </head>
 <body>
     <canvas id="particleCanvas"></canvas>
-    <div class="app-container" style="padding-bottom: 60px;"> <!-- Add padding to prevent overlap with fixed toolbar -->
+    <div class="app-container" style="padding-bottom: 70px;"> <!-- Increased padding slightly -->
 
         <!-- Header Section (Unchanged) -->
         <div class="header-section">
@@ -91,18 +99,15 @@
         </div> <!-- End smoke-tracker-content -->
     </div> <!-- End app-container -->
 
-    <!-- Shop Toolbar - Now a Link Bar -->
+    <!-- Shop Toolbar - Link Bar -->
      <div class="shop-toolbar-fixed" id="shopToolbar">
-        <!-- Make the whole header an anchor tag -->
         <a href="shop.html" class="shop-toolbar-header-link" id="shopToolbarHeaderLink">
-            <span><i class="fas fa-store"></i> THEME SHOP</span> <!-- Changed icon and text -->
+            <span><i class="fas fa-store"></i> THEME SHOP</span>
             <span class="shop-pts-display">
                 <i class="fas fa-coins points-icon"></i> <span id="shopUserPoints">0</span> PTS
             </span>
-             <!-- Removed chevron, added right arrow for link indication -->
              <i class="fas fa-arrow-right"></i>
         </a>
-         <!-- Accordion content removed -->
     </div>
 
     <!-- Reason Modal (Unchanged) -->
@@ -111,6 +116,6 @@
     <!-- Toast Notification (Unchanged) -->
     <div class="toast-notification" id="toastNotification">Toast message</div>
 
-    <script src="smoke-tracker-script.js"></script> <!-- Ensure this script is updated -->
+    <script src="smoke-tracker-script.js"></script>
 </body>
 </html>
