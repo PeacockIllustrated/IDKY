@@ -10,16 +10,63 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Add styles for the new navigation area if not covered by shop-style.css */
+        .shop-navigation-area {
+            position: absolute;
+            top: -50px; /* Adjust as needed */
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px; /* Space between buttons */
+            z-index: 100;
+        }
+
+        .shop-nav-button { /* Style similar to vending-back-to-app-link */
+            font-size: 16px;
+            color: var(--theme-secondary-accent, #E9C46A);
+            text-decoration: none;
+            padding: 8px 15px;
+            border: var(--pixel-border-width) solid var(--theme-secondary-accent, #E9C46A);
+            background-color: rgba(from var(--theme-primary-dark, #000) r g b / 0.7);
+            box-shadow: 2px 2px 0 var(--theme-secondary-accent, #E9C46A);
+            transition: all 0.2s ease;
+            white-space: nowrap; /* Prevent line breaks */
+        }
+        .shop-nav-button:hover {
+            background-color: var(--theme-secondary-accent, #E9C46A);
+            color: var(--theme-primary-dark, #264653);
+            transform: translateY(-2px);
+            box-shadow: 3px 3px 0 var(--theme-primary-dark, #264653);
+        }
+        .shop-nav-button i { margin-right: 8px; }
+
+        /* Responsive adjustments for nav buttons */
+        @media (max-width: 600px) {
+            .shop-navigation-area {
+                position: static;
+                transform: none;
+                flex-direction: column; /* Stack buttons on small screens */
+                align-items: center;
+                margin: 0 auto 20px auto;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- particleCanvasShop can be used for background effects if desired -->
     <canvas id="particleCanvasShop"></canvas>
 
     <div class="vending-machine-page-container">
-        <!-- **** UPDATED href HERE **** -->
-        <a href="smoke-tracker.html" class="vending-back-to-app-link">
-            <i class="fas fa-arrow-left"></i> EXIT VENDO-MATIC
-        </a>
+
+        <!-- **** UPDATED Navigation Area **** -->
+        <div class="shop-navigation-area">
+            <a href="smoke-tracker.html" class="shop-nav-button">
+                <i class="fas fa-smoking"></i> Smoke Tracker
+            </a>
+            <a href="index.html" class="shop-nav-button">
+                <i class="fas fa-microchip"></i> IDKY App
+            </a>
+        </div>
 
         <div class="vending-machine">
             <header class="vending-machine-header">
