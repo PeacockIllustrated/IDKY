@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Constants and State Variables ---
-    const localStorageKeySuffix = '_v27_theme_shop';
+    const localStorageKeySuffix = '_v27_theme_shop'; // Keep consistent
 
     // --- Element Selectors (Checked against HTML) ---
     const userPointsDisplay = document.getElementById('userPoints');
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('smoketrack_last_streak_date' + localStorageKeySuffix, lastDayStreakIncremented);
 
         // Save Theme State
-        localStorage.setItem('idk_owned_themes' + localStorageKeySuffix, JSON.stringify(ownedThemes));
+        localStorage.setItem('idk_owned_themes' + localStorageKeySuffix, JSON.stringify(ownedThemes)); // Also save owned themes (though modified in shop)
         localStorage.setItem('idk_current_theme' + localStorageKeySuffix, currentTheme);
     }
 
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- Core Logic Functions (Restored Readable Version) ---
+    // --- Core Logic Functions ---
     function checkDateAndResetCounts() {
         const currentDate = getCurrentDateString();
         if (currentDate !== lastLogDate && lastLogDate !== '') { // Only process if date changed AND there was a previous date
@@ -286,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (vapeOver) { showToast(`Warning: Daily vape time limit (${formatTime(dailyTotalVapeTimeLimit)}) exceeded!`, 3000); }
     }
 
+
     // --- UI Update Functions ---
     function updateHeaderDisplays() {
         if (userPointsDisplay) userPointsDisplay.textContent = userPoints;
@@ -307,6 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (vapeTimerDisplay && !isVapeTimerRunning) { vapeTimerDisplay.textContent = formatTimerDisplay(0); vapeTimerDisplay.classList.remove('warning', 'counting-down'); }
     }
 
+    // --- CORRECTED renderSmokeLog Function ---
     function renderSmokeLog() {
         if (!smokeLogList) return;
         smokeLogList.innerHTML = '';
@@ -321,17 +323,19 @@ document.addEventListener('DOMContentLoaded', () => {
         logsToRender.forEach(log => {
             const listItem = document.createElement('li');
             listItem.className = 'moment-card';
-            listItem.style.cssText = 'opacity:1; animation:none; padding:8px; margin-bottom:8px;'; // Inline for simplicity
+            listItem.style.cssText = 'opacity:1; animation:none; padding:8px; margin-bottom:8px;'; // Keep base styles
 
             const logTime = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const logDate = new Date(log.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' });
+            const logDate = new Date(log.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric'});
 
             let iconClass = '', iconColor = '', text = '', details = '';
-            let reasonIconClass = log.reason ? 'fas fa-comment-dots has-reason' : 'far fa-comment-dots';
+            let reasonIconBaseClass = 'add-reason-icon'; // Base class
+            let reasonIconExtraClass = log.reason ? 'fas fa-comment-dots has-reason' : 'far fa-comment-dots'; // Dynamic part
 
             if (log.type === 'cigarette') { iconClass = 'fas fa-smoking'; iconColor = 'var(--theme-highlight-accent)'; text = 'Cigarette'; }
             else if (log.type === 'vape') { iconClass = 'fas fa-vial'; iconColor = 'var(--theme-primary-accent)'; text = 'Vape Session'; details = log.duration ? `(${formatTime(log.duration)})` : ''; }
 
+            // Set innerHTML *without* the dynamic title or data-timestamp on the icon yet
             listItem.innerHTML = `
                 <div class="log-item-content">
                     <div class="log-item-details">
@@ -340,17 +344,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="log-item-reason-icon-container">
                          <span class="log-item-time">${logDate} @ ${logTime}</span>
-                         <i class="${reasonIconClass} add-reason-icon" data-timestamp="${log.timestamp}" title="${log.reason ? 'Edit Reason' : 'Add Reason'}"></i>
+                         <i class="${reasonIconBaseClass} ${reasonIconExtraClass}"></i> {/* Placeholder icon */}
                     </div>
                 </div>`;
+
+            // Find the icon within the newly created listItem
+            const reasonIconElement = listItem.querySelector('.add-reason-icon');
+
+            if (reasonIconElement) {
+                 // Set the title attribute safely using setAttribute
+                 const reasonTitle = log.reason ? 'Edit Reason' : 'Add Reason';
+                 reasonIconElement.setAttribute('title', reasonTitle);
+
+                 // Set the data-timestamp attribute
+                 reasonIconElement.setAttribute('data-timestamp', log.timestamp);
+            }
+
             smokeLogList.appendChild(listItem);
-        });
-    }
+        }); // End forEach
+    } // End renderSmokeLog
+
 
     // --- Reason Modal Logic ---
     function handleOpenReasonModal(timestamp) { const lE = smokeLog.find(log => log.timestamp === timestamp); if (!lE || !reasonModalOverlay) return; reasonInput.value = lE.reason || ''; reasonLogTimestampInput.value = timestamp; reasonModalOverlay.classList.add('show'); reasonInput.focus(); }
     function handleCloseReasonModal() { if (reasonModalOverlay) reasonModalOverlay.classList.remove('show'); reasonInput.value = ''; reasonLogTimestampInput.value = ''; }
     function handleSaveReason() { const t = parseInt(reasonLogTimestampInput.value); const nR = reasonInput.value.trim(); if (isNaN(t)) return; const lE = smokeLog.find(log => log.timestamp === t); if (lE) { lE.reason = nR; saveState(); renderSmokeLog(); showToast(nR ? "Reason Saved!" : "Reason Cleared."); } handleCloseReasonModal(); }
+
 
     // --- Shop Toolbar Rendering and Interaction ---
     function renderThemeOptionsInToolbar() {
@@ -389,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         e.stopPropagation();
                         applyThemeOnPage(themeId); // Apply and save
                         showToast(`${themeData.name} theme applied!`);
-                        // No need to re-render here, applyThemeOnPage handles it if toolbar is open
+                        // renderThemeOptionsInToolbar() called by applyThemeOnPage if toolbar is open
                     });
                 }
                 shopAccordionContent.appendChild(themeItem);
@@ -427,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } else {
-        console.error("Shop toolbar elements not found!"); // Added error check
+        console.error("Shop toolbar elements not found! Cannot attach listener.");
     }
 
 
@@ -439,8 +458,8 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStatusDisplay(); // Update UI with loaded/calculated values
     renderSmokeLog(); // Render log with loaded data
 
-    console.log("Smoke Tracker Initialized (v4.1 - Debugged).");
-    console.log("Initial Theme:", currentTheme); // Log initial theme
-    console.log("Owned Themes:", ownedThemes); // Log owned themes
+    console.log("Smoke Tracker Initialized (v4.2 - Full Corrected Script).");
+    console.log("Initial Theme:", currentTheme);
+    console.log("Owned Themes:", ownedThemes);
 
 }); // End DOMContentLoaded
