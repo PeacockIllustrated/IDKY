@@ -441,7 +441,7 @@ i.fas, i.far { vertical-align: middle; }
     border: none; padding: 0;
 }
 .accordion-content-container.expanded {
-    max-height: 1000px;
+    max-height: 4000px;
     border: var(--pixel-border-width) solid var(--theme-border-main);
     border-top: none; padding: 10px;
     background-color: var(--theme-light-bg);
