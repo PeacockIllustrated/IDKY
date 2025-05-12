@@ -10,11 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- Base Styles (Ensure these are sufficient or handled by style.css) --- */
-        :root { /* Ensure theme variables are available */ }
-        body { /* Ensure base body styles are set */ }
-
-        /* --- Styles for Smoke Tracker elements (Keep from previous steps) --- */
+        /* --- Styles from previous step (Keep these) --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000; animation: fadeInBg 0.3s ease; }
         .modal-overlay.show { display: flex; }
         .modal-content { background-color: var(--theme-card-bg); padding: 20px; border: var(--pixel-border-width) solid var(--theme-border-main); box-shadow: 4px 4px 0 var(--theme-primary-dark); width: 90%; max-width: 450px; animation: zoomInModal 0.3s ease-out; color: var(--theme-text-main); }
@@ -44,62 +40,25 @@
         .log-item-time { font-size: 14px; color: #666; white-space: nowrap; }
         .log-item-reason-icon-container { text-align: right; }
 
-        /* --- Styles for the Interactive Shop Toolbar (Refined) --- */
+        /* --- Styles for the SIMPLIFIED Shop Toolbar (Link) --- */
         .shop-toolbar-fixed {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark);
             border-top: var(--pixel-border-width) solid var(--theme-border-main);
             box-shadow: 0 -2px 5px rgba(0,0,0,0.2); z-index: 1000;
-            transition: transform 0.3s ease-in-out;
         }
-        .shop-toolbar-header {
+        /* Make the header itself clickable as a link */
+        .shop-toolbar-header-link {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 15px; cursor: pointer; font-size: 18px;
+            padding: 8px 15px; font-size: 18px;
+            color: var(--theme-text-on-dark); /* Ensure link text color */
+            text-decoration: none; /* Remove underline */
+            cursor: pointer;
         }
-        .shop-toolbar-header:hover { background-color: color-mix(in srgb, var(--theme-primary-dark) 85%, white); }
-        .shop-toolbar-header i { margin-right: 5px; }
+        .shop-toolbar-header-link:hover { background-color: color-mix(in srgb, var(--theme-primary-dark) 85%, white); }
+        .shop-toolbar-header-link i { margin-right: 5px; }
         .shop-pts-display { font-size: 16px; margin-left: auto; margin-right: 15px; }
-        .shop-toggle-icon { transition: transform 0.3s ease-in-out; }
-        .shop-toolbar-fixed.expanded .shop-toggle-icon { transform: rotate(180deg); }
-
-        .shop-accordion-content {
-            max-height: 0; overflow-y: auto;
-            background-color: var(--theme-light-bg); color: var(--theme-text-main);
-            border-top: var(--pixel-border-width) dashed var(--theme-border-main);
-            transition: max-height 0.4s ease-in-out; padding: 0 10px;
-        }
-        .shop-toolbar-fixed.expanded .shop-accordion-content {
-            max-height: 200px; /* Adjust if needed */
-            padding: 10px;
-        }
-
-        /* Toolbar Theme Item Styles */
-        .theme-item-toolbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 6px 5px; margin-bottom: 5px;
-            background-color: var(--theme-card-bg);
-            border: var(--pixel-border-width) solid var(--theme-border-main); /* Use main border */
-            box-shadow: 1px 1px 0px var(--theme-primary-dark); /* Use main shadow */
-            color: var(--theme-text-main); /* Use main text color */
-        }
-        .theme-item-toolbar-preview { display: flex; gap: 2px; margin-right: 8px; }
-        .theme-item-toolbar-preview span { width: 15px; height: 15px; display: inline-block; border: 1px solid rgba(0,0,0,0.1); }
-        .theme-item-toolbar-name { flex-grow: 1; font-size: 16px; }
-        .theme-item-toolbar-action button { /* Inherit from .action-button if possible, else define */
-            padding: 4px 8px; font-size: 14px; font-family: 'VT323', monospace; cursor: pointer;
-            border: var(--pixel-border-width) solid var(--theme-primary-dark);
-            background-color: var(--theme-primary-accent); color: var(--theme-card-bg);
-            box-shadow: 1px 1px 0px var(--theme-primary-dark); transition: all 0.1s ease; min-width: 60px;
-            text-align: center; /* Added for consistency */
-            outline: none; /* Added for consistency */
-        }
-         .theme-item-toolbar-action button:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 2px 2px 0px var(--theme-primary-dark); }
-         .theme-item-toolbar-action button:active { transform: translate(1px, 1px); box-shadow: none; }
-        .theme-item-toolbar-action .current-theme-indicator {
-            font-size: 14px; font-weight: bold; color: var(--theme-primary-accent); padding: 4px 8px;
-            display: inline-block; /* Ensure it takes space */
-            text-align: center; min-width: 60px; /* Align with button size */
-        }
+        /* No need for accordion content styles anymore */
 
         /* Necessary animations if not in style.css */
         @keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
@@ -109,9 +68,9 @@
     </style>
 </head>
 <body>
-    <!-- Canvas and App Container are the same -->
     <canvas id="particleCanvas"></canvas>
-    <div class="app-container">
+    <div class="app-container" style="padding-bottom: 60px;"> <!-- Add padding to prevent overlap with fixed toolbar -->
+
         <!-- Header Section (Unchanged) -->
         <div class="header-section">
              <div class="app-title-bar"> <div class="app-title-container"> <i class="fas fa-smoking title-icon"></i> <h1>Smoke Tracker</h1> </div> </div>
@@ -132,19 +91,18 @@
         </div> <!-- End smoke-tracker-content -->
     </div> <!-- End app-container -->
 
-    <!-- Shop Toolbar - Interactive -->
+    <!-- Shop Toolbar - Now a Link Bar -->
      <div class="shop-toolbar-fixed" id="shopToolbar">
-        <div class="shop-toolbar-header" id="shopToolbarHeader">
-            <span><i class="fas fa-palette"></i> THEME SELECT</span>
+        <!-- Make the whole header an anchor tag -->
+        <a href="shop.html" class="shop-toolbar-header-link" id="shopToolbarHeaderLink">
+            <span><i class="fas fa-store"></i> THEME SHOP</span> <!-- Changed icon and text -->
             <span class="shop-pts-display">
                 <i class="fas fa-coins points-icon"></i> <span id="shopUserPoints">0</span> PTS
             </span>
-             <i class="fas fa-chevron-up shop-toggle-icon" id="shopToggleIcon"></i>
-        </div>
-        <div class="shop-accordion-content" id="shopAccordionContent">
-             <!-- Themes rendered here -->
-             <div style="text-align:center; padding: 10px; color: #888;">Loading themes...</div>
-        </div>
+             <!-- Removed chevron, added right arrow for link indication -->
+             <i class="fas fa-arrow-right"></i>
+        </a>
+         <!-- Accordion content removed -->
     </div>
 
     <!-- Reason Modal (Unchanged) -->
@@ -153,6 +111,6 @@
     <!-- Toast Notification (Unchanged) -->
     <div class="toast-notification" id="toastNotification">Toast message</div>
 
-    <script src="smoke-tracker-script.js"></script>
+    <script src="smoke-tracker-script.js"></script> <!-- Ensure this script is updated -->
 </body>
 </html>
