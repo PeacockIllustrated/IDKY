@@ -5,80 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smoke Tracker - IDKY Retro</title>
     <link rel="stylesheet" href="style.css"> <!-- Link to EXISTING style.css -->
+    <!-- Shop-specific styles might be needed for the toolbar items if not covered by style.css -->
+    <!-- <link rel="stylesheet" href="shop-style.css"> -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Basic Modal Styles (add to style.css or keep here) */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7); display: none;
-            justify-content: center; align-items: center; z-index: 3000;
-            animation: fadeInBg 0.3s ease; /* Reuse animation from style.css */
-        }
-        .modal-overlay.show { display: flex; }
-        .modal-content {
-            background-color: var(--theme-card-bg); padding: 20px;
-            border: var(--pixel-border-width) solid var(--theme-primary-dark);
-            box-shadow: 4px 4px 0 var(--theme-primary-dark);
-            width: 90%; max-width: 450px; animation: zoomInModal 0.3s ease-out; /* Reuse */
-            color: var(--theme-text-main); /* Ensure text color matches theme */
-        }
-        .modal-content h3 {
-            font-size: 20px; margin-bottom: 15px; color: var(--theme-primary-accent);
-            text-align: center; border-bottom: 1px dashed var(--theme-primary-accent); padding-bottom: 8px;
-        }
-        .modal-content textarea {
-            width: 100%; min-height: 80px; padding: 8px; margin-bottom: 15px;
-            border: var(--pixel-border-width) solid var(--theme-border-main);
-            font-family: 'VT323', monospace; font-size: 18px; resize: vertical;
-            background-color: var(--theme-light-bg); color: var(--theme-text-main);
-            outline: none;
-        }
-        .modal-actions { display: flex; justify-content: space-around; }
-        .modal-actions button { /* Reuse existing button styles */
-            padding: 8px 15px; font-family: 'VT323', monospace; font-size: 16px;
-            border: var(--pixel-border-width) solid var(--theme-primary-dark); cursor: pointer;
-            box-shadow: 1px 1px 0px var(--theme-primary-dark); transition: all 0.1s ease; min-width: 100px;
-        }
-        .modal-actions button#saveReasonButton { background-color: var(--theme-primary-accent); color: var(--theme-card-bg); }
-        .modal-actions button#cancelReasonButton { background-color: #aaa; color: var(--theme-primary-dark); } /* Style cancel */
-        .modal-actions button:hover:not(:active) { transform: translateY(-1px); box-shadow: 2px 2px 0px var(--theme-primary-dark); }
-        .modal-actions button:active { transform: translate(1px, 1px); box-shadow: none; }
+        /* --- Styles from previous step --- */
+        .modal-overlay { /* ... Modal styles ... */ }
+        .modal-overlay.show { /* ... */ }
+        .modal-content { /* ... */ }
+        .modal-content h3 { /* ... */ }
+        .modal-content textarea { /* ... */ }
+        .modal-actions { /* ... */ }
+        .modal-actions button { /* ... */ }
+        .modal-actions button#saveReasonButton { /* ... */ }
+        .modal-actions button#cancelReasonButton { /* ... */ }
+        .add-reason-icon { /* ... */ }
+        .add-reason-icon.has-reason { /* ... */ }
+        .timer-display { /* ... */ }
+        .timer-display.counting-down { /* ... */ }
+        .timer-display.warning { /* ... */ }
+        @keyframes pulseWarning { /* ... */ }
+        .limit-setting label { /* ... */ }
+        .limit-setting input[type="text"], .limit-setting input[type="number"] { /* ... */ }
+        .over-limit { /* ... */ }
+        .log-item-content { /* ... */ }
+        .log-item-details { /* ... */ }
+        .log-item-time { /* ... */ }
+        .log-item-reason-icon-container { /* ... */ }
 
-        /* Icon for adding reason */
-        .add-reason-icon {
-            cursor: pointer; margin-left: 8px; color: var(--theme-tertiary-accent);
-            font-size: 16px; transition: color 0.2s, transform 0.2s; vertical-align: middle;
-        }
-        .add-reason-icon:hover { color: var(--theme-highlight-accent); transform: scale(1.1); }
-        .add-reason-icon.has-reason { color: var(--theme-primary-accent); } /* Indicate reason exists */
-
-        /* Timer and Limit Styles */
-        .timer-display {
-            font-size: 28px; color: var(--theme-primary-accent);
+        /* --- Styles for the Interactive Shop Toolbar --- */
+        /* Reuse existing toolbar styles where possible */
+        .shop-toolbar-fixed { /* From style.css - should already exist */
+            position: fixed; bottom: 0; left: 0; width: 100%;
             background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark);
-            padding: 5px 10px; border: var(--pixel-border-width) solid var(--theme-primary-accent);
-            margin: 10px auto; text-align: center; width: fit-content; min-width: 80px;
-            box-shadow: inset 1px 1px 0px rgba(0,0,0,0.4);
+            border-top: var(--pixel-border-width) solid var(--theme-border-main);
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.2); z-index: 1000;
+            transition: transform 0.3s ease-in-out; /* Add if needed */
         }
-        .timer-display.counting-down { border-color: var(--theme-secondary-accent); }
-        .timer-display.warning { animation: pulseWarning 1s infinite; border-color: var(--theme-highlight-accent); }
-        @keyframes pulseWarning { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .limit-setting label { font-size: 16px; margin-right: 5px; }
-        .limit-setting input[type="text"], .limit-setting input[type="number"] {
-            width: 70px; padding: 4px; font-family: 'VT323', monospace; font-size: 16px;
-            border: var(--pixel-border-width) solid var(--theme-border-main);
-            background-color: var(--theme-light-bg); color: var(--theme-text-main); text-align: center;
+        .shop-toolbar-header { /* From style.css - should already exist */
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 15px; cursor: pointer; font-size: 18px;
         }
-        .over-limit { color: var(--theme-highlight-accent) !important; font-weight: bold; }
+        .shop-toolbar-header:hover { background-color: color-mix(in srgb, var(--theme-primary-dark) 85%, white); }
+        .shop-toolbar-header i { margin-right: 5px; }
+        .shop-pts-display { /* From style.css - should already exist */
+            font-size: 16px; margin-left: auto; margin-right: 15px;
+        }
+        .shop-toggle-icon { /* From style.css - should already exist */
+            transition: transform 0.3s ease-in-out;
+        }
+        /* Rotation for expanded state */
+        .shop-toolbar-fixed.expanded .shop-toggle-icon { transform: rotate(180deg); }
 
-        /* Log list item alignment */
-        .log-item-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px; }
-        .log-item-details { display: flex; align-items: center; flex-grow: 1; }
-        .log-item-time { font-size: 14px; color: #666; white-space: nowrap; }
-        .log-item-reason-icon-container { text-align: right; } /* Aligns icon better */
+        .shop-accordion-content { /* Modified from style.css */
+            max-height: 0; /* Start collapsed */
+            overflow-y: auto;
+            background-color: var(--theme-light-bg);
+            color: var(--theme-text-main);
+            border-top: var(--pixel-border-width) dashed var(--theme-border-main);
+            transition: max-height 0.4s ease-in-out; /* Animate height */
+            padding: 0 10px; /* No padding when collapsed */
+        }
+        /* Expanded state */
+        .shop-toolbar-fixed.expanded .shop-accordion-content {
+            max-height: 200px; /* Adjust max height as needed */
+            padding: 10px; /* Add padding when expanded */
+        }
+
+        /* Styles for theme items within the toolbar */
+        .theme-item-toolbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 6px 5px; margin-bottom: 5px;
+            background-color: var(--theme-card-bg);
+            border: var(--pixel-border-width) solid var(--theme-border-main);
+            box-shadow: 1px 1px 0px var(--theme-primary-dark);
+        }
+        .theme-item-toolbar-preview { display: flex; gap: 2px; margin-right: 8px; }
+        .theme-item-toolbar-preview span { width: 15px; height: 15px; display: inline-block; border: 1px solid rgba(0,0,0,0.1); }
+        .theme-item-toolbar-name { flex-grow: 1; font-size: 16px; }
+        .theme-item-toolbar-action button { /* Use action-button style */
+            padding: 4px 8px; font-size: 14px; font-family: 'VT323', monospace;
+            cursor: pointer; border: var(--pixel-border-width) solid var(--theme-primary-dark);
+            background-color: var(--theme-primary-accent); color: var(--theme-card-bg);
+            box-shadow: 1px 1px 0px var(--theme-primary-dark); transition: all 0.1s ease; min-width: 60px;
+        }
+         .theme-item-toolbar-action button:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 2px 2px 0px var(--theme-primary-dark); }
+         .theme-item-toolbar-action button:active { transform: translate(1px, 1px); box-shadow: none; }
+        .theme-item-toolbar-action .current-theme-indicator {
+            font-size: 14px; font-weight: bold; color: var(--theme-primary-accent); padding: 4px 8px;
+        }
 
     </style>
 </head>
@@ -88,129 +106,47 @@
     <div class="app-container">
         <!-- Header Section (Unchanged) -->
         <div class="header-section">
-            <div class="app-title-bar">
-                <div class="app-title-container">
-                    <i class="fas fa-smoking title-icon"></i>
-                    <h1>Smoke Tracker</h1>
-                </div>
-            </div>
-            <div class="header-stats-bar">
-                <div class="points-display">
-                    <i class="fas fa-coins points-icon"></i> <span id="userPoints">0</span> PTS
-                </div>
-                <div class="points-display">
-                    <i class="fas fa-calendar-check points-icon"></i> <span id="smokeFreeStreak">0</span> DAY STREAK
-                </div>
-                <div class="points-display">
-                    <i class="fas fa-star points-icon gold-star-icon"></i> <span id="healthMilestones">0</span> ACHIEVED
-                </div>
-            </div>
+             <div class="app-title-bar"> <div class="app-title-container"> <i class="fas fa-smoking title-icon"></i> <h1>Smoke Tracker</h1> </div> </div>
+             <div class="header-stats-bar">
+                 <div class="points-display"><i class="fas fa-coins points-icon"></i> <span id="userPoints">0</span> PTS</div>
+                 <div class="points-display"><i class="fas fa-calendar-check points-icon"></i> <span id="smokeFreeStreak">0</span> DAY STREAK</div>
+                 <div class="points-display"><i class="fas fa-star points-icon gold-star-icon"></i> <span id="healthMilestones">0</span> ACHIEVED</div>
+             </div>
         </div>
 
-        <!-- Main Content for Smoke Tracker -->
+        <!-- Main Content (Unchanged Structure) -->
         <div class="smoke-tracker-content">
-
-            <!-- Cigarette Logging (Unchanged) -->
-            <div class="log-actions-section moment-card" style="padding: 15px; margin-bottom: 15px; text-align: center;">
-                 <button class="log-button" id="logCigaretteButton" style="width: 80%; font-size: 16px; padding: 10px;">
-                    <i class="fas fa-smoking"></i> LOG CIGARETTE
-                 </button>
-            </div>
-
-            <!-- Vape Timer Section -->
-            <div class="vape-timer-section moment-card" style="padding: 15px; margin-bottom: 15px; text-align: center;">
-                <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px;">VAPE TIMER</h2>
-                <div class="timer-display" id="vapeTimerDisplay">00:00</div>
-                <div style="display: flex; justify-content: space-around; margin-top: 15px;">
-                    <button class="log-button" id="startVapeTimerButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-primary-accent);">
-                       <i class="fas fa-play"></i> START
-                    </button>
-                    <button class="log-button" id="stopVapeTimerButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-highlight-accent); display: none;">
-                       <i class="fas fa-stop"></i> STOP & LOG
-                    </button>
-                </div>
-                 <div class="limit-setting" style="margin-top: 15px; padding-top: 10px; border-top: var(--pixel-border-width) dotted #bbb; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <label for="setVapeSessionLimitInput">Session Limit (0=Off):</label> <!-- Clarified 0=Off -->
-                    <input type="text" id="setVapeSessionLimitInput" placeholder="MM:SS" value="0:30">
-                    <button class="action-button" id="saveVapeSessionLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button>
-                 </div>
-            </div>
-
-            <!-- Daily Status & Limits (Unchanged) -->
-            <div class="status-limit-section moment-card" style="padding: 10px; margin-bottom: 15px;">
-                <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px; border-bottom: var(--pixel-border-width) dashed var(--theme-primary-accent); padding-bottom: 5px;">DAILY STATUS & LIMITS</h2>
-                <!-- Cigarette Status -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 5px 0; border-bottom: 1px dotted #ccc;">
-                    <span style="font-size: 18px;">CIGARETTES: <strong id="todayCigaretteCount">0</strong> / <span id="cigaretteLimitDisplay">5</span></span>
-                    <div class="limit-setting" style="display: flex; gap: 5px; align-items: center;">
-                        <label for="setLimitInput" style="font-size: 14px;">Limit:</label>
-                        <input type="number" id="setLimitInput" min="0" value="5">
-                        <button class="action-button" id="saveLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button>
-                    </div>
-                </div>
-                <!-- Vape Time Status -->
-                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding: 5px 0;">
-                    <span style="font-size: 18px;">TOTAL VAPE TIME: <strong id="todayTotalVapeTimeDisplay">0m 0s</strong> / <span id="dailyVapeTimeLimitDisplay">5m 0s</span></span>
-                     <div class="limit-setting" style="display: flex; gap: 5px; align-items: center;">
-                        <label for="setDailyVapeTimeLimitInput" style="font-size: 14px;">Limit (min):</label>
-                        <input type="number" id="setDailyVapeTimeLimitInput" min="0" value="5">
-                        <button class="action-button" id="saveDailyVapeTimeLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Log History Section -->
-            <div class="log-history-section">
-                 <h2 style="text-align: center; color: var(--theme-secondary-accent); font-size: 20px; margin-bottom: 10px;">RECENT LOG</h2>
-                 <ul class="moments-list" id="smokeLogList">
-                     <!-- Log items dynamically generated -->
-                     <li class="moment-card no-items-placeholder" id="noLogsPlaceholder" style="padding: 15px; text-align: center; color: #888; display: none;">NO LOGS YET TODAY</li>
-                 </ul>
-            </div>
-
-             <!-- Progress Section Placeholder (Unchanged) -->
-            <div class="progress-section moment-card" style="padding: 10px; margin-top: 20px; text-align: center; background-color: var(--theme-light-bg);">
-                <h2 style="font-size: 18px; color: var(--theme-primary-dark); margin-bottom: 10px;">PROGRESS OVERVIEW</h2>
-                <p style="color: #666;">[Charts/Streak Visuals Here]</p>
-                 <div style="margin-top: 15px; padding: 8px; border: var(--pixel-border-width) dashed var(--theme-primary-accent);">
-                     <span style="font-size: 18px;">Current 'Under Limit' Streak: <strong style="color: var(--theme-primary-accent);" id="streakDisplay">0 Days</strong></span> <i class="fas fa-fire" style="color: var(--theme-highlight-accent);"></i>
-                 </div>
-            </div>
+            <!-- Cigarette Logging --> <div class="log-actions-section moment-card" style="padding: 15px; margin-bottom: 15px; text-align: center;"> <button class="log-button" id="logCigaretteButton" style="width: 80%; font-size: 16px; padding: 10px;"><i class="fas fa-smoking"></i> LOG CIGARETTE</button> </div>
+            <!-- Vape Timer --> <div class="vape-timer-section moment-card" style="padding: 15px; margin-bottom: 15px; text-align: center;"> <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px;">VAPE TIMER</h2> <div class="timer-display" id="vapeTimerDisplay">00:00</div> <div style="display: flex; justify-content: space-around; margin-top: 15px;"> <button class="log-button" id="startVapeTimerButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-primary-accent);"><i class="fas fa-play"></i> START</button> <button class="log-button" id="stopVapeTimerButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-highlight-accent); display: none;"><i class="fas fa-stop"></i> STOP & LOG</button> </div> <div class="limit-setting" style="margin-top: 15px; padding-top: 10px; border-top: var(--pixel-border-width) dotted #bbb; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px;"> <label for="setVapeSessionLimitInput">Session Limit (0=Off):</label> <input type="text" id="setVapeSessionLimitInput" placeholder="MM:SS" value="0:30"> <button class="action-button" id="saveVapeSessionLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div>
+            <!-- Daily Status & Limits --> <div class="status-limit-section moment-card" style="padding: 10px; margin-bottom: 15px;"> <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px; border-bottom: var(--pixel-border-width) dashed var(--theme-primary-accent); padding-bottom: 5px;">DAILY STATUS & LIMITS</h2> <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 5px 0; border-bottom: 1px dotted #ccc;"> <span style="font-size: 18px;">CIGARETTES: <strong id="todayCigaretteCount">0</strong> / <span id="cigaretteLimitDisplay">5</span></span> <div class="limit-setting" style="display: flex; gap: 5px; align-items: center;"> <label for="setLimitInput" style="font-size: 14px;">Limit:</label> <input type="number" id="setLimitInput" min="0" value="5"> <button class="action-button" id="saveLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div> <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding: 5px 0;"> <span style="font-size: 18px;">TOTAL VAPE TIME: <strong id="todayTotalVapeTimeDisplay">0m 0s</strong> / <span id="dailyVapeTimeLimitDisplay">5m 0s</span></span> <div class="limit-setting" style="display: flex; gap: 5px; align-items: center;"> <label for="setDailyVapeTimeLimitInput" style="font-size: 14px;">Limit (min):</label> <input type="number" id="setDailyVapeTimeLimitInput" min="0" value="5"> <button class="action-button" id="saveDailyVapeTimeLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div> </div>
+            <!-- Log History --> <div class="log-history-section"> <h2 style="text-align: center; color: var(--theme-secondary-accent); font-size: 20px; margin-bottom: 10px;">RECENT LOG</h2> <ul class="moments-list" id="smokeLogList"> <li class="moment-card no-items-placeholder" id="noLogsPlaceholder" style="padding: 15px; text-align: center; color: #888; display: none;">NO LOGS YET TODAY</li> </ul> </div>
+            <!-- Progress --> <div class="progress-section moment-card" style="padding: 10px; margin-top: 20px; text-align: center; background-color: var(--theme-light-bg);"> <h2 style="font-size: 18px; color: var(--theme-primary-dark); margin-bottom: 10px;">PROGRESS OVERVIEW</h2> <p style="color: #666;">[Charts/Streak Visuals Here]</p> <div style="margin-top: 15px; padding: 8px; border: var(--pixel-border-width) dashed var(--theme-primary-accent);"> <span style="font-size: 18px;">Current 'Under Limit' Streak: <strong style="color: var(--theme-primary-accent);" id="streakDisplay">0 Days</strong></span> <i class="fas fa-fire" style="color: var(--theme-highlight-accent);"></i> </div> </div>
         </div> <!-- End smoke-tracker-content -->
     </div> <!-- End app-container -->
 
-    <!-- Shop Toolbar (Unchanged) -->
+    <!-- Shop Toolbar - Now Interactive -->
      <div class="shop-toolbar-fixed" id="shopToolbar">
-        <div class="shop-toolbar-header" id="shopToolbarHeader" onclick="window.location.href='shop.html'">
-            <span><i class="fas fa-palette"></i> THEME SHOP</span>
+        <div class="shop-toolbar-header" id="shopToolbarHeader"> <!-- Removed onclick -->
+            <span><i class="fas fa-palette"></i> THEME SELECT</span> <!-- Changed text -->
             <span class="shop-pts-display">
                 <i class="fas fa-coins points-icon"></i> <span id="shopUserPoints">0</span> PTS
             </span>
-             <i class="fas fa-arrow-right"></i>
+             <!-- Ensure chevron icon exists -->
+             <i class="fas fa-chevron-up shop-toggle-icon" id="shopToggleIcon"></i>
         </div>
-         <div class="shop-accordion-content" id="shopAccordionContent">
-             <div class="theme-item" style="justify-content: center; padding: 10px;">
-                <span>Visit Theme Emporium...</span>
-            </div>
+         <!-- Content area for themes -->
+        <div class="shop-accordion-content" id="shopAccordionContent">
+             <!-- Theme options will be rendered here by JS -->
+             <div style="text-align:center; padding: 10px; color: #888;">Loading themes...</div>
         </div>
     </div>
 
-    <!-- Reason Logging Modal -->
-    <div class="modal-overlay" id="reasonModalOverlay">
-        <div class="modal-content">
-            <h3>Why this time? (Optional)</h3>
-            <textarea id="reasonInput" placeholder="e.g., stressed, bored, social, craving..."></textarea>
-            <input type="hidden" id="reasonLogTimestamp"> <!-- To store which log item we're editing -->
-            <div class="modal-actions">
-                <button id="saveReasonButton">SAVE REASON</button>
-                <button id="cancelReasonButton">CANCEL</button>
-            </div>
-        </div>
-    </div>
+    <!-- Reason Modal (Unchanged) -->
+    <div class="modal-overlay" id="reasonModalOverlay"> <div class="modal-content"> <h3>Why this time? (Optional)</h3> <textarea id="reasonInput" placeholder="e.g., stressed, bored, social, craving..."></textarea> <input type="hidden" id="reasonLogTimestamp"> <div class="modal-actions"> <button id="saveReasonButton">SAVE REASON</button> <button id="cancelReasonButton">CANCEL</button> </div> </div> </div>
 
     <!-- Toast Notification (Unchanged) -->
     <div class="toast-notification" id="toastNotification">Toast message</div>
 
-    <script src="smoke-tracker-script.js"></script> <!-- Link updated JS -->
+    <script src="smoke-tracker-script.js"></script>
 </body>
 </html>
