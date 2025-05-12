@@ -4,13 +4,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Constants and State Variables ---
     const localStorageKeySuffix = '_v27_theme_shop';
 
-    // --- Element Selectors (Checked against HTML) ---
+    // --- Element Selectors ---
+    // Header & General UI
     const userPointsDisplay = document.getElementById('userPoints');
     const smokeFreeStreakDisplay = document.getElementById('smokeFreeStreak');
     const streakDisplay = document.getElementById('streakDisplay');
     const healthMilestonesDisplay = document.getElementById('healthMilestones');
-    const shopUserPointsDisplay = document.getElementById('shopUserPoints');
+    const shopUserPointsDisplay = document.getElementById('shopUserPoints'); // In toolbar
     const toastNotification = document.getElementById('toastNotification');
+
+    // Smoking/Vaping Elements
     const logCigaretteButton = document.getElementById('logCigaretteButton');
     const todayCigaretteCountDisplay = document.getElementById('todayCigaretteCount');
     const cigaretteLimitDisplay = document.getElementById('cigaretteLimitDisplay');
@@ -27,15 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveDailyVapeTimeLimitButton = document.getElementById('saveDailyVapeTimeLimitButton');
     const smokeLogList = document.getElementById('smokeLogList');
     const noLogsPlaceholder = document.getElementById('noLogsPlaceholder');
+
+    // Reason Modal Elements
     const reasonModalOverlay = document.getElementById('reasonModalOverlay');
     const reasonInput = document.getElementById('reasonInput');
     const reasonLogTimestampInput = document.getElementById('reasonLogTimestamp');
     const saveReasonButton = document.getElementById('saveReasonButton');
     const cancelReasonButton = document.getElementById('cancelReasonButton');
-    const shopToolbar = document.getElementById('shopToolbar');
-    const shopToolbarHeader = document.getElementById('shopToolbarHeader');
-    const shopAccordionContent = document.getElementById('shopAccordionContent');
-    const shopToggleIcon = document.getElementById('shopToggleIcon');
 
     // --- State Variables ---
     let userPoints = 0;
@@ -54,10 +55,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let vapeTimerIntervalId = null;
     let vapeTimerTargetEndTime = null;
     let vapeTimerMode = 'up';
-    let ownedThemes = ['default'];
+    // --- Theme State (Still needed for applying) ---
+    let ownedThemes = ['default']; // Load this, but don't display options here
     let currentTheme = 'default';
 
-    // --- Theme Data Object (Ensure this is COMPLETE and correct) ---
+    // --- Theme Data Object (Keep this definition) ---
     const themes = {
         default: { name: "Default Retro", cost: 0, owned: true, description: "The classic look and feel.", cssVariables: { '--theme-primary-dark': '#264653', '--theme-primary-accent': '#2A9D8F', '--theme-secondary-accent': '#E9C46A', '--theme-tertiary-accent': '#F4A261', '--theme-highlight-accent': '#E76F51', '--theme-light-bg': '#EAEAEA', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#EAEAEA', '--theme-page-bg': 'rgb(174, 217, 211)' } },
         oceanDepths: { name: "Ocean Depths", cost: 1, description: "Dive into cool blue tranquility.", cssVariables: { '--theme-primary-dark': '#03045E', '--theme-primary-accent': '#0077B6', '--theme-secondary-accent': '#00B4D8', '--theme-tertiary-accent': '#90E0EF', '--theme-highlight-accent': '#CAF0F8', '--theme-light-bg': '#E0FBFC', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#CAF0F8', '--theme-page-bg': '#ADE8F4' } },
@@ -154,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('smoketrack_today_cig' + localStorageKeySuffix, todayCigaretteCount.toString());
         localStorage.setItem('smoketrack_today_vape_time' + localStorageKeySuffix, todayTotalVapeTime.toString());
         localStorage.setItem('smoketrack_last_streak_date' + localStorageKeySuffix, lastDayStreakIncremented);
+        // Theme state is saved by applyThemeOnPage (which calls this) or by shop page
         localStorage.setItem('idk_owned_themes' + localStorageKeySuffix, JSON.stringify(ownedThemes));
         localStorage.setItem('idk_current_theme' + localStorageKeySuffix, currentTheme);
     }
@@ -175,15 +178,15 @@ document.addEventListener('DOMContentLoaded', () => {
             applyThemeOnPage('default'); // Apply default explicitly
             return; // Exit after applying default
         }
-        saveState(); // Save the new theme choice
-         // Re-render toolbar if it's open to update the 'CURRENT' indicator
-        if (shopToolbar && shopToolbar.classList.contains('expanded')) {
-             renderThemeOptionsInToolbar();
-        }
+        // Save state in this script ONLY IF this function is called by something other than shop.
+        // For now, let shop.html handle primary saving when themes are bought/applied there.
+        // This script just applies the theme loaded from localStorage on page load.
+        // If you want to allow saving from here too (e.g., if you add a theme switcher here), uncomment:
+        // saveState();
     }
 
 
-    // --- Core Logic Functions (Expanded) ---
+    // --- Core Logic Functions ---
     function checkDateAndResetCounts() {
         const currentDate = getCurrentDateString();
         if (currentDate !== lastLogDate && lastLogDate !== '') {
@@ -346,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
         logsToRender.forEach(log => {
             const listItem = document.createElement('li');
             listItem.className = 'moment-card';
-            listItem.style.cssText = 'opacity:1; animation:none; padding:8px; margin-bottom:8px;'; // Keep base styles
+            listItem.style.cssText = 'opacity:1; animation:none; padding:8px; margin-bottom:8px;';
 
             const logTime = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const logDate = new Date(log.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric'});
@@ -366,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="log-item-reason-icon-container">
                          <span class="log-item-time">${logDate} @ ${logTime}</span>
-                         <i class="${reasonIconBaseClass} ${reasonIconExtraClass}"></i> {/* Placeholder */}
+                         <i class="${reasonIconBaseClass} ${reasonIconExtraClass}"></i>
                     </div>
                 </div>`;
 
@@ -381,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- Reason Modal Logic (Expanded) ---
+    // --- Reason Modal Logic ---
     function handleOpenReasonModal(timestamp) {
         const logEntry = smokeLog.find(log => log.timestamp === timestamp);
         if (!logEntry || !reasonModalOverlay) { return; }
@@ -409,63 +412,6 @@ document.addEventListener('DOMContentLoaded', () => {
         handleCloseReasonModal();
     }
 
-
-    // --- Shop Toolbar Rendering and Interaction (Expanded) ---
-    function renderThemeOptionsInToolbar() {
-        if (!shopAccordionContent) { console.error("Shop accordion content not found!"); return; }
-        shopAccordionContent.innerHTML = ''; // Clear previous
-
-        Object.entries(themes).forEach(([themeId, themeData]) => {
-            if (ownedThemes.includes(themeId)) {
-                const themeItem = document.createElement('div');
-                themeItem.className = 'theme-item-toolbar';
-
-                const previewDiv = document.createElement('div');
-                previewDiv.className = 'theme-item-toolbar-preview';
-                const colorKeys = ['--theme-primary-dark', '--theme-primary-accent', '--theme-secondary-accent'];
-                for (let i = 0; i < 3; i++) {
-                    const colorSpan = document.createElement('span');
-                    // Ensure cssVariables exists before accessing
-                    if (themeData.cssVariables) {
-                         colorSpan.style.backgroundColor = themeData.cssVariables[colorKeys[i % colorKeys.length]];
-                    }
-                    previewDiv.appendChild(colorSpan);
-                }
-                themeItem.appendChild(previewDiv);
-
-                const nameSpan = document.createElement('span');
-                nameSpan.className = 'theme-item-toolbar-name';
-                nameSpan.textContent = themeData.name;
-                themeItem.appendChild(nameSpan);
-
-                const actionSpan = document.createElement('span');
-                actionSpan.className = 'theme-item-toolbar-action';
-
-                if (currentTheme === themeId) {
-                    const indicatorSpan = document.createElement('span');
-                    indicatorSpan.className = 'current-theme-indicator';
-                    indicatorSpan.textContent = 'CURRENT';
-                    actionSpan.appendChild(indicatorSpan);
-                } else {
-                    const applyButton = document.createElement('button');
-                    applyButton.dataset.themeId = themeId;
-                    applyButton.textContent = 'APPLY';
-                    applyButton.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        applyThemeOnPage(themeId);
-                        showToast(`${themeData.name} theme applied!`);
-                    });
-                    actionSpan.appendChild(applyButton);
-                }
-                themeItem.appendChild(actionSpan);
-                shopAccordionContent.appendChild(themeItem);
-            }
-        });
-
-        if (shopAccordionContent.children.length === 0) {
-             shopAccordionContent.innerHTML = '<div style="text-align:center; padding: 10px; color: #888;">Visit Shop for more themes!</div>';
-         }
-    }
 
     // --- Event Listeners ---
     if (logCigaretteButton) { logCigaretteButton.addEventListener('click', logCigaretteEvent); }
@@ -515,29 +461,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (shopToolbarHeader && shopToolbar && shopToggleIcon) {
-        shopToolbarHeader.addEventListener('click', () => {
-            const isExpanded = shopToolbar.classList.toggle('expanded');
-            shopToggleIcon.classList.toggle('expanded', isExpanded);
-            if (isExpanded) {
-                renderThemeOptionsInToolbar(); // Render themes when opened
-            }
-        });
-    } else {
-        console.error("Shop toolbar elements not found! Cannot attach listener.");
-    }
-
+    // No toolbar interaction listeners in this script anymore.
 
     // --- Initial Setup ---
     loadState();
-    applyThemeOnPage(currentTheme);
+    applyThemeOnPage(currentTheme); // Apply the loaded theme
     checkDateAndResetCounts();
-    updateHeaderDisplays();
+    updateHeaderDisplays(); // Update UI (including points in toolbar)
     updateStatusDisplay();
     renderSmokeLog();
 
-    console.log("Smoke Tracker Initialized (v4.4 - Expanded Functions).");
+    console.log("Smoke Tracker Initialized (v5 - Toolbar as Link).");
     console.log("Initial Theme:", currentTheme);
-    console.log("Owned Themes:", ownedThemes);
 
 }); // End DOMContentLoaded
