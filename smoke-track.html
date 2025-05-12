@@ -4,105 +4,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smoke Tracker - IDKY Retro</title>
-    <link rel="stylesheet" href="style.css"> <!-- Link to EXISTING style.css -->
-    <!-- Shop-specific styles might be needed for the toolbar items if not covered by style.css -->
-    <!-- <link rel="stylesheet" href="shop-style.css"> -->
+    <link rel="stylesheet" href="style.css"> <!-- Main styles -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- Styles from previous step --- */
-        .modal-overlay { /* ... Modal styles ... */ }
-        .modal-overlay.show { /* ... */ }
-        .modal-content { /* ... */ }
-        .modal-content h3 { /* ... */ }
-        .modal-content textarea { /* ... */ }
-        .modal-actions { /* ... */ }
-        .modal-actions button { /* ... */ }
-        .modal-actions button#saveReasonButton { /* ... */ }
-        .modal-actions button#cancelReasonButton { /* ... */ }
-        .add-reason-icon { /* ... */ }
-        .add-reason-icon.has-reason { /* ... */ }
-        .timer-display { /* ... */ }
-        .timer-display.counting-down { /* ... */ }
-        .timer-display.warning { /* ... */ }
-        @keyframes pulseWarning { /* ... */ }
-        .limit-setting label { /* ... */ }
-        .limit-setting input[type="text"], .limit-setting input[type="number"] { /* ... */ }
-        .over-limit { /* ... */ }
-        .log-item-content { /* ... */ }
-        .log-item-details { /* ... */ }
-        .log-item-time { /* ... */ }
-        .log-item-reason-icon-container { /* ... */ }
+        /* --- Base Styles (Ensure these are sufficient or handled by style.css) --- */
+        :root { /* Ensure theme variables are available */ }
+        body { /* Ensure base body styles are set */ }
 
-        /* --- Styles for the Interactive Shop Toolbar --- */
-        /* Reuse existing toolbar styles where possible */
-        .shop-toolbar-fixed { /* From style.css - should already exist */
+        /* --- Styles for Smoke Tracker elements (Keep from previous steps) --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000; animation: fadeInBg 0.3s ease; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background-color: var(--theme-card-bg); padding: 20px; border: var(--pixel-border-width) solid var(--theme-border-main); box-shadow: 4px 4px 0 var(--theme-primary-dark); width: 90%; max-width: 450px; animation: zoomInModal 0.3s ease-out; color: var(--theme-text-main); }
+        .modal-content h3 { font-size: 20px; margin-bottom: 15px; color: var(--theme-primary-accent); text-align: center; border-bottom: 1px dashed var(--theme-primary-accent); padding-bottom: 8px; }
+        .modal-content textarea { width: 100%; min-height: 80px; padding: 8px; margin-bottom: 15px; border: var(--pixel-border-width) solid var(--theme-border-main); font-family: 'VT323', monospace; font-size: 18px; resize: vertical; background-color: var(--theme-light-bg); color: var(--theme-text-main); outline: none; }
+        .modal-actions { display: flex; justify-content: space-around; }
+        .modal-actions button { padding: 8px 15px; font-family: 'VT323', monospace; font-size: 16px; border: var(--pixel-border-width) solid var(--theme-primary-dark); cursor: pointer; box-shadow: 1px 1px 0px var(--theme-primary-dark); transition: all 0.1s ease; min-width: 100px; }
+        .modal-actions button#saveReasonButton { background-color: var(--theme-primary-accent); color: var(--theme-card-bg); }
+        .modal-actions button#cancelReasonButton { background-color: #aaa; color: var(--theme-primary-dark); }
+        .modal-actions button:hover:not(:active) { transform: translateY(-1px); box-shadow: 2px 2px 0px var(--theme-primary-dark); }
+        .modal-actions button:active { transform: translate(1px, 1px); box-shadow: none; }
+
+        .add-reason-icon { cursor: pointer; margin-left: 8px; color: var(--theme-tertiary-accent); font-size: 16px; transition: color 0.2s, transform 0.2s; vertical-align: middle; }
+        .add-reason-icon:hover { color: var(--theme-highlight-accent); transform: scale(1.1); }
+        .add-reason-icon.has-reason { color: var(--theme-primary-accent); }
+
+        .timer-display { font-size: 28px; background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark); padding: 5px 10px; border: var(--pixel-border-width) solid var(--theme-primary-accent); margin: 10px auto; text-align: center; width: fit-content; min-width: 80px; box-shadow: inset 1px 1px 0px rgba(0,0,0,0.4); }
+        .timer-display.counting-down { border-color: var(--theme-secondary-accent); }
+        .timer-display.warning { animation: pulseWarning 1s infinite; border-color: var(--theme-highlight-accent); }
+        @keyframes pulseWarning { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .limit-setting label { font-size: 16px; margin-right: 5px; }
+        .limit-setting input[type="text"], .limit-setting input[type="number"] { width: 70px; padding: 4px; font-family: 'VT323', monospace; font-size: 16px; border: var(--pixel-border-width) solid var(--theme-border-main); background-color: var(--theme-light-bg); color: var(--theme-text-main); text-align: center; }
+        .over-limit { color: var(--theme-highlight-accent) !important; font-weight: bold; }
+
+        .log-item-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px; }
+        .log-item-details { display: flex; align-items: center; flex-grow: 1; }
+        .log-item-time { font-size: 14px; color: #666; white-space: nowrap; }
+        .log-item-reason-icon-container { text-align: right; }
+
+        /* --- Styles for the Interactive Shop Toolbar (Refined) --- */
+        .shop-toolbar-fixed {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark);
             border-top: var(--pixel-border-width) solid var(--theme-border-main);
             box-shadow: 0 -2px 5px rgba(0,0,0,0.2); z-index: 1000;
-            transition: transform 0.3s ease-in-out; /* Add if needed */
+            transition: transform 0.3s ease-in-out;
         }
-        .shop-toolbar-header { /* From style.css - should already exist */
+        .shop-toolbar-header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 8px 15px; cursor: pointer; font-size: 18px;
         }
         .shop-toolbar-header:hover { background-color: color-mix(in srgb, var(--theme-primary-dark) 85%, white); }
         .shop-toolbar-header i { margin-right: 5px; }
-        .shop-pts-display { /* From style.css - should already exist */
-            font-size: 16px; margin-left: auto; margin-right: 15px;
-        }
-        .shop-toggle-icon { /* From style.css - should already exist */
-            transition: transform 0.3s ease-in-out;
-        }
-        /* Rotation for expanded state */
+        .shop-pts-display { font-size: 16px; margin-left: auto; margin-right: 15px; }
+        .shop-toggle-icon { transition: transform 0.3s ease-in-out; }
         .shop-toolbar-fixed.expanded .shop-toggle-icon { transform: rotate(180deg); }
 
-        .shop-accordion-content { /* Modified from style.css */
-            max-height: 0; /* Start collapsed */
-            overflow-y: auto;
-            background-color: var(--theme-light-bg);
-            color: var(--theme-text-main);
+        .shop-accordion-content {
+            max-height: 0; overflow-y: auto;
+            background-color: var(--theme-light-bg); color: var(--theme-text-main);
             border-top: var(--pixel-border-width) dashed var(--theme-border-main);
-            transition: max-height 0.4s ease-in-out; /* Animate height */
-            padding: 0 10px; /* No padding when collapsed */
+            transition: max-height 0.4s ease-in-out; padding: 0 10px;
         }
-        /* Expanded state */
         .shop-toolbar-fixed.expanded .shop-accordion-content {
-            max-height: 200px; /* Adjust max height as needed */
-            padding: 10px; /* Add padding when expanded */
+            max-height: 200px; /* Adjust if needed */
+            padding: 10px;
         }
 
-        /* Styles for theme items within the toolbar */
+        /* Toolbar Theme Item Styles */
         .theme-item-toolbar {
             display: flex; align-items: center; justify-content: space-between;
             padding: 6px 5px; margin-bottom: 5px;
             background-color: var(--theme-card-bg);
-            border: var(--pixel-border-width) solid var(--theme-border-main);
-            box-shadow: 1px 1px 0px var(--theme-primary-dark);
+            border: var(--pixel-border-width) solid var(--theme-border-main); /* Use main border */
+            box-shadow: 1px 1px 0px var(--theme-primary-dark); /* Use main shadow */
+            color: var(--theme-text-main); /* Use main text color */
         }
         .theme-item-toolbar-preview { display: flex; gap: 2px; margin-right: 8px; }
         .theme-item-toolbar-preview span { width: 15px; height: 15px; display: inline-block; border: 1px solid rgba(0,0,0,0.1); }
         .theme-item-toolbar-name { flex-grow: 1; font-size: 16px; }
-        .theme-item-toolbar-action button { /* Use action-button style */
-            padding: 4px 8px; font-size: 14px; font-family: 'VT323', monospace;
-            cursor: pointer; border: var(--pixel-border-width) solid var(--theme-primary-dark);
+        .theme-item-toolbar-action button { /* Inherit from .action-button if possible, else define */
+            padding: 4px 8px; font-size: 14px; font-family: 'VT323', monospace; cursor: pointer;
+            border: var(--pixel-border-width) solid var(--theme-primary-dark);
             background-color: var(--theme-primary-accent); color: var(--theme-card-bg);
             box-shadow: 1px 1px 0px var(--theme-primary-dark); transition: all 0.1s ease; min-width: 60px;
+            text-align: center; /* Added for consistency */
+            outline: none; /* Added for consistency */
         }
          .theme-item-toolbar-action button:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 2px 2px 0px var(--theme-primary-dark); }
          .theme-item-toolbar-action button:active { transform: translate(1px, 1px); box-shadow: none; }
         .theme-item-toolbar-action .current-theme-indicator {
             font-size: 14px; font-weight: bold; color: var(--theme-primary-accent); padding: 4px 8px;
+            display: inline-block; /* Ensure it takes space */
+            text-align: center; min-width: 60px; /* Align with button size */
         }
+
+        /* Necessary animations if not in style.css */
+        @keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomInModal { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pointsFlash { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); color: var(--theme-secondary-accent); } }
 
     </style>
 </head>
 <body>
+    <!-- Canvas and App Container are the same -->
     <canvas id="particleCanvas"></canvas>
-
     <div class="app-container">
         <!-- Header Section (Unchanged) -->
         <div class="header-section">
@@ -124,19 +132,17 @@
         </div> <!-- End smoke-tracker-content -->
     </div> <!-- End app-container -->
 
-    <!-- Shop Toolbar - Now Interactive -->
+    <!-- Shop Toolbar - Interactive -->
      <div class="shop-toolbar-fixed" id="shopToolbar">
-        <div class="shop-toolbar-header" id="shopToolbarHeader"> <!-- Removed onclick -->
-            <span><i class="fas fa-palette"></i> THEME SELECT</span> <!-- Changed text -->
+        <div class="shop-toolbar-header" id="shopToolbarHeader">
+            <span><i class="fas fa-palette"></i> THEME SELECT</span>
             <span class="shop-pts-display">
                 <i class="fas fa-coins points-icon"></i> <span id="shopUserPoints">0</span> PTS
             </span>
-             <!-- Ensure chevron icon exists -->
              <i class="fas fa-chevron-up shop-toggle-icon" id="shopToggleIcon"></i>
         </div>
-         <!-- Content area for themes -->
         <div class="shop-accordion-content" id="shopAccordionContent">
-             <!-- Theme options will be rendered here by JS -->
+             <!-- Themes rendered here -->
              <div style="text-align:center; padding: 10px; color: #888;">Loading themes...</div>
         </div>
     </div>
