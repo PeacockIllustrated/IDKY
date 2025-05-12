@@ -7,20 +7,14 @@
     <title>Smoke Tracker - IDKY Retro</title>
 
     <!-- ========================== STYLESHEETS & FONTS ========================== -->
-    <!-- Main shared stylesheet -->
     <link rel="stylesheet" href="style.css">
-
-    <!-- Google Fonts: VT323 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Inline styles for this specific page -->
     <style>
-        /* --- Modal Styles --- */
+        /* --- Modal Styles (Copied from existing setup) --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000; animation: fadeInBg 0.3s ease; }
         .modal-overlay.show { display: flex; }
         .modal-content { background-color: var(--theme-card-bg); padding: 20px; border: var(--pixel-border-width) solid var(--theme-border-main); box-shadow: 4px 4px 0 var(--theme-primary-dark); width: 90%; max-width: 450px; animation: zoomInModal 0.3s ease-out; color: var(--theme-text-main); }
@@ -33,12 +27,12 @@
         .modal-actions button:hover:not(:active) { transform: translateY(-1px); box-shadow: 2px 2px 0px var(--theme-primary-dark); }
         .modal-actions button:active { transform: translate(1px, 1px); box-shadow: none; }
 
-        /* --- Reason Icon Styles --- */
+        /* --- Reason Icon Styles (Copied from existing setup) --- */
         .add-reason-icon { cursor: pointer; margin-left: 8px; color: var(--theme-tertiary-accent); font-size: 16px; transition: color 0.2s, transform 0.2s; vertical-align: middle; }
         .add-reason-icon:hover { color: var(--theme-highlight-accent); transform: scale(1.1); }
         .add-reason-icon.has-reason { color: var(--theme-primary-accent); }
 
-        /* --- Timer & Limit Styles --- */
+        /* --- Timer & Limit Styles (Copied from existing setup) --- */
         .timer-display { font-size: 28px; background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark); padding: 5px 10px; border: var(--pixel-border-width) solid var(--theme-primary-accent); margin: 10px auto; text-align: center; width: fit-content; min-width: 80px; box-shadow: inset 1px 1px 0px rgba(0,0,0,0.4); }
         .timer-display.counting-down { border-color: var(--theme-secondary-accent); }
         .timer-display.warning { animation: pulseWarning 1s infinite; border-color: var(--theme-highlight-accent); }
@@ -47,44 +41,34 @@
         .limit-setting input[type="text"], .limit-setting input[type="number"] { width: 70px; padding: 4px; font-family: 'VT323', monospace; font-size: 16px; border: var(--pixel-border-width) solid var(--theme-border-main); background-color: var(--theme-light-bg); color: var(--theme-text-main); text-align: center; }
         .over-limit { color: var(--theme-highlight-accent) !important; font-weight: bold; }
 
-        /* --- Log Item Styles --- */
+        /* --- Log Item Styles (Copied from existing setup) --- */
         .log-item-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px; }
         .log-item-details { display: flex; align-items: center; flex-grow: 1; }
         .log-item-time { font-size: 14px; color: #666; white-space: nowrap; }
         .log-item-reason-icon-container { text-align: right; }
 
-        /* --- Shop Toolbar Link Styles --- */
+        /* --- Shop Toolbar Link Styles (Copied from existing setup) --- */
         .shop-toolbar-fixed { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark); border-top: var(--pixel-border-width) solid var(--theme-border-main); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); z-index: 1000; }
         .shop-toolbar-header-link { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; font-size: 18px; color: var(--theme-text-on-dark); text-decoration: none; cursor: pointer; }
         .shop-toolbar-header-link:hover { background-color: color-mix(in srgb, var(--theme-primary-dark) 85%, white); }
         .shop-toolbar-header-link i { margin-right: 5px; }
         .shop-pts-display { font-size: 16px; margin-left: auto; margin-right: 15px; }
 
-        /* --- Required Animations (if not in main style.css) --- */
+        /* --- Required Animations (Copied from existing setup / style.css) --- */
         @keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
         @keyframes zoomInModal { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes pointsFlash { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); color: var(--theme-secondary-accent); } }
+        /* pointsFlash might be in style.css */
 
-        /* --- Particle Canvas Style --- */
-        #particleCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none; /* Allows clicks through to elements behind it */
-            z-index: -1; /* Places it in the background */
-        }
+        /* --- Particle Canvas Style (Copied from existing setup) --- */
+        #particleCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; }
     </style>
 </head>
 <body>
-    <!-- ========================== PARTICLE CANVAS ========================== -->
     <canvas id="particleCanvas"></canvas>
 
-    <!-- ========================== MAIN APP CONTAINER ========================== -->
-    <div class="app-container" style="padding-bottom: 70px;"> <!-- Padding for fixed toolbar -->
+    <div class="app-container" style="padding-bottom: 100px;"> <!-- Increased padding for fixed toolbar AND testing tools -->
 
-        <!-- SECTION: HEADER (Title & Stats) -->
+        <!-- SECTION: HEADER -->
         <div class="header-section">
              <div class="app-title-bar">
                  <div class="app-title-container">
@@ -98,7 +82,6 @@
                  <div class="points-display"><i class="fas fa-star points-icon gold-star-icon"></i> <span id="healthMilestones">0</span> ACHIEVED</div>
              </div>
         </div>
-        <!-- END SECTION: HEADER -->
 
         <!-- SECTION: MAIN TRACKER CONTENT -->
         <div class="smoke-tracker-content">
@@ -109,7 +92,6 @@
                     <i class="fas fa-smoking"></i> LOG CIGARETTE
                 </button>
             </div>
-            <!-- END SUB-SECTION: Cigarette Logging -->
 
             <!-- SUB-SECTION: Vape Timer -->
             <div class="vape-timer-section moment-card" style="padding: 15px; margin-bottom: 15px; text-align: center;">
@@ -129,7 +111,6 @@
                     <button class="action-button" id="saveVapeSessionLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button>
                 </div>
             </div>
-            <!-- END SUB-SECTION: Vape Timer -->
 
             <!-- SUB-SECTION: Daily Status & Limits -->
             <div class="status-limit-section moment-card" style="padding: 10px; margin-bottom: 15px;">
@@ -151,7 +132,6 @@
                     </div>
                 </div>
             </div>
-            <!-- END SUB-SECTION: Daily Status & Limits -->
 
             <!-- SUB-SECTION: Log History -->
             <div class="log-history-section">
@@ -160,26 +140,32 @@
                     <li class="moment-card no-items-placeholder" id="noLogsPlaceholder" style="padding: 15px; text-align: center; color: #888; display: none;">NO LOGS YET TODAY</li>
                 </ul>
             </div>
-            <!-- END SUB-SECTION: Log History -->
 
-            <!-- SUB-SECTION: Progress Overview (Placeholder) -->
+            <!-- SUB-SECTION: Progress Overview -->
             <div class="progress-section moment-card" style="padding: 10px; margin-top: 20px; text-align: center; background-color: var(--theme-light-bg);">
-                <h2 style="font-size: 18px; color: var(--theme-primary-dark); margin-bottom: 10px;">PROGRESS OVERVIEW</h2>
-                <p style="color: #666;">[Charts/Streak Visuals Here]</p>
+                <h2 style="font-size: 18px; color: var(--theme-primary-dark); margin-bottom: 10px;">WEEKLY CIGARETTE COUNT</h2>
+                <!-- New Chart Container -->
+                <div id="dailyProgressChartContainer" class="daily-progress-chart-container" style="margin-bottom: 15px;">
+                    <!-- Chart bars will be injected here by JS -->
+                </div>
                 <div style="margin-top: 15px; padding: 8px; border: var(--pixel-border-width) dashed var(--theme-primary-accent);">
                     <span style="font-size: 18px;">Current 'Under Limit' Streak: <strong style="color: var(--theme-primary-accent);" id="streakDisplay">0 Days</strong></span>
                     <i class="fas fa-fire" style="color: var(--theme-highlight-accent);"></i>
                 </div>
             </div>
-            <!-- END SUB-SECTION: Progress Overview -->
 
-        </div>
-        <!-- END SECTION: MAIN TRACKER CONTENT -->
+            <!-- SUB-SECTION: Testing Tools -->
+            <div class="testing-tools-section moment-card" style="padding: 10px; margin-top: 15px; margin-bottom: 20px; text-align: center;">
+                <h2 style="font-size: 18px; color: var(--theme-tertiary-accent); margin-bottom: 10px;">TESTING TOOLS</h2>
+                <button class="action-button" id="endOfDayTestButton" style="padding: 8px 12px; background-color: var(--theme-secondary-accent); color: var(--theme-primary-dark);">
+                    <i class="fas fa-calendar-times"></i> SIMULATE END OF DAY
+                </button>
+            </div>
 
-    </div>
-    <!-- END ========================== MAIN APP CONTAINER ========================== -->
+        </div> <!-- END smoke-tracker-content -->
+    </div> <!-- END app-container -->
 
-    <!-- ========================== SHOP TOOLBAR LINK (Fixed Bottom) ========================== -->
+    <!-- SHOP TOOLBAR LINK (Fixed Bottom) -->
      <div class="shop-toolbar-fixed" id="shopToolbar">
         <a href="shop.html" class="shop-toolbar-header-link" id="shopToolbarHeaderLink">
             <span><i class="fas fa-store"></i> THEME SHOP</span>
@@ -189,9 +175,8 @@
              <i class="fas fa-arrow-right"></i>
         </a>
     </div>
-    <!-- END ========================== SHOP TOOLBAR LINK ========================== -->
 
-    <!-- ========================== REASON INPUT MODAL ========================== -->
+    <!-- REASON INPUT MODAL -->
     <div class="modal-overlay" id="reasonModalOverlay">
         <div class="modal-content">
             <h3>Why this time? (Optional)</h3>
@@ -203,13 +188,10 @@
             </div>
         </div>
     </div>
-    <!-- END ========================== REASON INPUT MODAL ========================== -->
 
-    <!-- ========================== TOAST NOTIFICATION ========================== -->
+    <!-- TOAST NOTIFICATION -->
     <div class="toast-notification" id="toastNotification">Toast message</div>
-    <!-- END ========================== TOAST NOTIFICATION ========================== -->
 
-    <!-- ========================== SCRIPT FILE ========================== -->
     <script src="smoke-tracker-script.js"></script>
 </body>
 </html>
