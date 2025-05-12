@@ -319,7 +319,7 @@ i.fas, i.far { vertical-align: middle; }
 .action-button:disabled { border-color: #aaa; color: #aaa; background-color: #ddd; cursor: not-allowed; transform: none; } /* Consider theming */
 
 .moment-answer-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-.moment-answer-wrapper.expanded { max-height: 800px; }
+.moment-answer-wrapper.expanded { max-height: 3000px; }
 .moment-answer-content {
     background-color: var(--theme-light-bg); padding: 5px 5px 5px 3px; margin: 8px;
     font-size: 16px; color: var(--theme-text-main);
