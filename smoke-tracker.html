@@ -1,25 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- ========================== METADATA & BROWSER CONFIG ========================== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smoke Tracker - MINIMAL TEST</title>
-    <!-- We still need the main style for basic theme variables to be defined -->
+    <title>Smoke Tracker - IDKY Retro</title>
+
+    <!-- ========================== STYLESHEETS & FONTS ========================== -->
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Inline styles for this specific page -->
     <style>
-        body { font-family: 'VT323', monospace; padding: 20px; color: var(--theme-text-main); background-color: var(--theme-page-bg); }
-        button { padding: 10px; font-size: 18px; font-family: 'VT323', monospace; margin: 10px; cursor: pointer; }
-        #output { margin-top: 20px; border: 1px solid #ccc; padding: 10px; min-height: 50px; }
+        /* --- Modal Styles --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000; animation: fadeInBg 0.3s ease; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background-color: var(--theme-card-bg); padding: 20px; border: var(--pixel-border-width) solid var(--theme-border-main); box-shadow: 4px 4px 0 var(--theme-primary-dark); width: 90%; max-width: 450px; animation: zoomInModal 0.3s ease-out; color: var(--theme-text-main); }
+        .modal-content h3 { font-size: 20px; margin-bottom: 15px; color: var(--theme-primary-accent); text-align: center; border-bottom: 1px dashed var(--theme-primary-accent); padding-bottom: 8px; }
+        .modal-content textarea { width: 100%; min-height: 80px; padding: 8px; margin-bottom: 15px; border: var(--pixel-border-width) solid var(--theme-border-main); font-family: 'VT323', monospace; font-size: 18px; resize: vertical; background-color: var(--theme-light-bg); color: var(--theme-text-main); outline: none; }
+        .modal-actions { display: flex; justify-content: space-around; }
+        .modal-actions button { padding: 8px 15px; font-family: 'VT323', monospace; font-size: 16px; border: var(--pixel-border-width) solid var(--theme-primary-dark); cursor: pointer; box-shadow: 1px 1px 0px var(--theme-primary-dark); transition: all 0.1s ease; min-width: 100px; }
+        .modal-actions button#saveReasonButton { background-color: var(--theme-primary-accent); color: var(--theme-card-bg); }
+        .modal-actions button#cancelReasonButton { background-color: #aaa; color: var(--theme-primary-dark); }
+        .add-reason-icon { cursor: pointer; margin-left: 8px; color: var(--theme-tertiary-accent); font-size: 16px; transition: color 0.2s, transform 0.2s; vertical-align: middle; }
+        .add-reason-icon.has-reason { color: var(--theme-primary-accent); }
+        .timer-display { font-size: 28px; background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark); padding: 5px 10px; border: var(--pixel-border-width) solid var(--theme-primary-accent); margin: 10px auto; text-align: center; width: fit-content; min-width: 80px; box-shadow: inset 1px 1px 0px rgba(0,0,0,0.4); }
+        .timer-display.counting-down { border-color: var(--theme-secondary-accent); }
+        .timer-display.warning { animation: pulseWarning 1s infinite; border-color: var(--theme-highlight-accent); }
+        @keyframes pulseWarning { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .limit-setting label { font-size: 16px; margin-right: 5px; }
+        .limit-setting input[type="text"], .limit-setting input[type="number"] { width: 70px; padding: 4px; font-family: 'VT323', monospace; font-size: 16px; border: var(--pixel-border-width) solid var(--theme-border-main); background-color: var(--theme-light-bg); color: var(--theme-text-main); text-align: center; }
+        .over-limit { color: var(--theme-highlight-accent) !important; font-weight: bold; }
+        .log-item-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px; }
+        .log-item-details { display: flex; align-items: center; flex-grow: 1; }
+        .log-item-time { font-size: 14px; color: #666; white-space: nowrap; }
+        .log-item-reason-icon-container { text-align: right; }
+        .shop-toolbar-fixed { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark); border-top: var(--pixel-border-width) solid var(--theme-border-main); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); z-index: 1000; }
+        .shop-toolbar-header-link { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; font-size: 18px; color: var(--theme-text-on-dark); text-decoration: none; cursor: pointer; }
+        .shop-toolbar-header-link:hover { background-color: color-mix(in srgb, var(--theme-primary-dark) 85%, white); }
+        .shop-toolbar-header-link i { margin-right: 5px; }
+        .shop-pts-display { font-size: 16px; margin-left: auto; margin-right: 15px; }
+        @keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomInModal { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pointsFlash { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); color: var(--theme-secondary-accent); } }
+        #particleCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; }
+
+        /* --- Journal Modal Styles --- */
+        #journalModalOverlay { z-index: 3500; /* Higher than reason modal */ }
+        #journalModalContent { max-width: 90vw; width: 650px; max-height: 85vh; display: flex; flex-direction: column; }
+        .journal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: var(--pixel-border-width) dashed var(--theme-primary-accent); }
+        .journal-header h2 { font-size: 22px; color: var(--theme-primary-accent); margin: 0; }
+        .journal-nav button { background: var(--theme-secondary-accent); color: var(--theme-primary-dark); border: var(--pixel-border-width) solid var(--theme-primary-dark); padding: 5px 10px; font-family: 'VT323', monospace; font-size: 16px; cursor: pointer; margin-left: 8px; box-shadow: 1px 1px 0 var(--theme-primary-dark); }
+        .journal-nav button:hover { filter: brightness(1.1); }
+        .journal-calendar-area { margin-bottom: 15px; }
+        .calendar-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .calendar-table th, .calendar-table td { border: var(--pixel-border-width) solid var(--theme-border-main); padding: 5px; text-align: center; vertical-align: top; height: 60px; font-size: 14px; }
+        .calendar-table th { background-color: var(--theme-light-bg); color: var(--theme-text-main); font-size: 16px; }
+        .calendar-day-cell { cursor: default; position: relative; }
+        .calendar-day-cell.has-logs { cursor: pointer; background-color: var(--theme-card-bg); }
+        .calendar-day-cell.has-logs:hover { background-color: color-mix(in srgb, var(--theme-card-bg) 90%, var(--theme-primary-accent) 20%); }
+        .calendar-day-cell.other-month { color: #aaa; background-color: var(--theme-light-bg) !important; cursor: default !important; }
+        .day-number { display: block; font-size: 16px; margin-bottom: 3px; }
+        .day-log-icon { font-size: 20px; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); }
+        .day-log-icon.exceeded { color: var(--theme-highlight-accent); }
+        .day-log-icon.under-limit { color: var(--theme-primary-accent); }
+        .day-log-icon.met-limit { color: var(--theme-secondary-accent); }
+        .journal-daily-logs-area { border-top: var(--pixel-border-width) dashed var(--theme-tertiary-accent); padding-top: 15px; flex-grow: 1; overflow-y: auto; max-height: 250px; }
+        .journal-daily-logs-area h4 { font-size: 18px; color: var(--theme-primary-dark); margin-bottom: 10px; }
+        .journal-daily-logs-area .moments-list { padding-left: 0; }
+        .journal-daily-logs-area .no-logs-for-day { text-align: center; color: #888; padding: 10px; }
+        .journal-close-button { margin-top: 15px; padding: 8px 15px; font-size: 16px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); border: var(--pixel-border-width) solid var(--theme-primary-dark); box-shadow: 1px 1px 0 var(--theme-primary-dark); cursor: pointer; display: block; width: fit-content; margin-left: auto; margin-right: auto; }
+        .view-all-logs-button { display: none; margin: 15px auto 0 auto; padding: 8px 15px; font-size: 16px; background-color: var(--theme-secondary-accent); color: var(--theme-primary-dark); border: var(--pixel-border-width) solid var(--theme-primary-dark); box-shadow: 1px 1px 0 var(--theme-primary-dark); cursor: pointer; text-align: center; }
+        .view-all-logs-button:hover { filter: brightness(1.1); }
     </style>
 </head>
 <body>
+    <canvas id="particleCanvas"></canvas> <!-- For particle effects -->
 
-    <h1>Smoke Tracker - Minimal Test</h1>
+    <div class="app-container" style="padding-bottom: 70px;">
+        <!-- Header Section -->
+        <div class="header-section">
+             <div class="app-title-bar"> <div class="app-title-container"> <i class="fas fa-smoking title-icon"></i> <h1>Smoke Tracker</h1> </div> </div>
+             <div class="header-stats-bar">
+                 <div class="points-display"><i class="fas fa-coins points-icon"></i> <span id="userPoints">0</span> PTS</div>
+                 <div class="points-display"><i class="fas fa-calendar-check points-icon"></i> <span id="smokeFreeStreak">0</span> DAY STREAK</div>
+                 <div class="points-display"><i class="fas fa-star points-icon gold-star-icon"></i> <span id="healthMilestones">0</span> ACHIEVED</div>
+             </div>
+        </div>
 
-    <button id="testLogCigaretteButton">Test Log Cigarette</button>
-    <button id="testStartVapeButton">Test Start Vape</button>
+        <!-- Main Content -->
+        <div class="smoke-tracker-content">
+            <div class="log-actions-section moment-card" style="padding: 15px; margin-bottom: 15px; text-align: center;"> <button class="log-button" id="logCigaretteButton" style="width: 80%; font-size: 16px; padding: 10px;"><i class="fas fa-smoking"></i> LOG CIGARETTE</button> </div>
+            <div class="vape-timer-section moment-card" style="padding: 15px; margin-bottom: 15px; text-align: center;"> <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px;">VAPE TIMER</h2> <div class="timer-display" id="vapeTimerDisplay">00:00</div> <div style="display: flex; justify-content: space-around; margin-top: 15px;"> <button class="log-button" id="startVapeTimerButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-primary-accent);"><i class="fas fa-play"></i> START</button> <button class="log-button" id="stopVapeTimerButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-highlight-accent); display: none;"><i class="fas fa-stop"></i> STOP & LOG</button> </div> <div class="limit-setting" style="margin-top: 15px; padding-top: 10px; border-top: var(--pixel-border-width) dotted #bbb; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px;"> <label for="setVapeSessionLimitInput">Session Limit (0=Off):</label> <input type="text" id="setVapeSessionLimitInput" placeholder="MM:SS" value="0:30"> <button class="action-button" id="saveVapeSessionLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div>
+            <div class="status-limit-section moment-card" style="padding: 10px; margin-bottom: 15px;"> <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px; border-bottom: var(--pixel-border-width) dashed var(--theme-primary-accent); padding-bottom: 5px;">DAILY STATUS & LIMITS</h2> <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 5px 0; border-bottom: 1px dotted #ccc;"> <span style="font-size: 18px;">CIGARETTES: <strong id="todayCigaretteCount">0</strong> / <span id="cigaretteLimitDisplay">5</span></span> <div class="limit-setting" style="display: flex; gap: 5px; align-items: center;"> <label for="setLimitInput" style="font-size: 14px;">Limit:</label> <input type="number" id="setLimitInput" min="0" value="5"> <button class="action-button" id="saveLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div> <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding: 5px 0;"> <span style="font-size: 18px;">TOTAL VAPE TIME: <strong id="todayTotalVapeTimeDisplay">0m 0s</strong> / <span id="dailyVapeTimeLimitDisplay">5m 0s</span></span> <div class="limit-setting" style="display: flex; gap: 5px; align-items: center;"> <label for="setDailyVapeTimeLimitInput" style="font-size: 14px;">Limit (min):</label> <input type="number" id="setDailyVapeTimeLimitInput" min="0" value="5"> <button class="action-button" id="saveDailyVapeTimeLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div> </div>
+            <div class="log-history-section"> <h2 style="text-align: center; color: var(--theme-secondary-accent); font-size: 20px; margin-bottom: 10px;">RECENT LOG</h2> <ul class="moments-list" id="smokeLogList"> <li class="moment-card no-items-placeholder" id="noLogsPlaceholder" style="padding: 15px; text-align: center; color: #888; display: none;">NO LOGS YET TODAY</li> </ul> <button class="view-all-logs-button" id="viewAllLogsButton"><i class="fas fa-book-open"></i> VIEW ALL LOGS</button> </div>
+            <div class="progress-section moment-card" style="padding: 10px; margin-top: 20px; text-align: center; background-color: var(--theme-light-bg);"> <h2 style="font-size: 18px; color: var(--theme-primary-dark); margin-bottom: 10px;">PROGRESS OVERVIEW</h2> <p style="color: #666;">[Charts/Streak Visuals Here]</p> <div style="margin-top: 15px; padding: 8px; border: var(--pixel-border-width) dashed var(--theme-primary-accent);"> <span style="font-size: 18px;">Current 'Under Limit' Streak: <strong style="color: var(--theme-primary-accent);" id="streakDisplay">0 Days</strong></span> <i class="fas fa-fire" style="color: var(--theme-highlight-accent);"></i> </div> </div>
+        </div>
+    </div>
 
-    <div id="output">Test output will appear here...</div>
+    <!-- Shop Toolbar Link -->
+     <div class="shop-toolbar-fixed" id="shopToolbar"> <a href="shop.html" class="shop-toolbar-header-link" id="shopToolbarHeaderLink"> <span><i class="fas fa-store"></i> THEME SHOP</span> <span class="shop-pts-display"> <i class="fas fa-coins points-icon"></i> <span id="shopUserPoints">0</span> PTS </span> <i class="fas fa-arrow-right"></i> </a> </div>
+    <!-- Reason Modal -->
+    <div class="modal-overlay" id="reasonModalOverlay"> <div class="modal-content"> <h3>Why this time? (Optional)</h3> <textarea id="reasonInput" placeholder="e.g., stressed, bored, social, craving..."></textarea> <input type="hidden" id="reasonLogTimestamp"> <div class="modal-actions"> <button id="saveReasonButton">SAVE REASON</button> <button id="cancelReasonButton">CANCEL</button> </div> </div> </div>
+    <!-- Journal Modal -->
+    <div class="modal-overlay" id="journalModalOverlay"> <div class="modal-content" id="journalModalContent"> <div class="journal-header"> <h2 id="journalMonthYear">Log Journal</h2> <div class="journal-nav"> <button id="journalPrevMonth"><i class="fas fa-chevron-left"></i> PREV</button> <button id="journalNextMonth">NEXT <i class="fas fa-chevron-right"></i></button> </div> </div> <div class="journal-calendar-area"> <table class="calendar-table"> <thead> <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr> </thead> <tbody id="journalCalendarBody"></tbody> </table> </div> <div class="journal-daily-logs-area"> <h4 id="journalSelectedDayHeader">Select a day to view logs.</h4> <ul class="moments-list" id="journalDailyLogList"></ul> <div class="no-logs-for-day" id="journalNoLogsForDay" style="display: none;">No logs recorded for this day.</div> </div> <button class="journal-close-button" id="journalCloseButton">CLOSE JOURNAL</button> </div> </div>
+    <!-- Toast Notification -->
+    <div class="toast-notification" id="toastNotification">Toast message</div>
 
     <script src="smoke-tracker-script.js"></script>
 </body>
