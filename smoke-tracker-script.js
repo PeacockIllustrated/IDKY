@@ -5,13 +5,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const localStorageKeySuffix = '_v27_theme_shop'; // Keep consistent
 
     // --- Element Selectors ---
+    // Header & General UI
     const userPointsDisplay = document.getElementById('userPoints');
-    const smokeFreeStreakDisplay = document.getElementById('smokeFreeStreak'); // In header
-    const streakDisplay = document.getElementById('streakDisplay'); // In progress section
+    const smokeFreeStreakDisplay = document.getElementById('smokeFreeStreak');
+    const streakDisplay = document.getElementById('streakDisplay');
     const healthMilestonesDisplay = document.getElementById('healthMilestones');
     const shopUserPointsDisplay = document.getElementById('shopUserPoints');
+    const toastNotification = document.getElementById('toastNotification');
 
+    // Cigarette Elements
     const logCigaretteButton = document.getElementById('logCigaretteButton');
+    const todayCigaretteCountDisplay = document.getElementById('todayCigaretteCount');
+    const cigaretteLimitDisplay = document.getElementById('cigaretteLimitDisplay');
+    const setLimitInput = document.getElementById('setLimitInput');
+    const saveLimitButton = document.getElementById('saveLimitButton');
 
     // Vape Timer Elements
     const startVapeTimerButton = document.getElementById('startVapeTimerButton');
@@ -20,104 +27,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const setVapeSessionLimitInput = document.getElementById('setVapeSessionLimitInput');
     const saveVapeSessionLimitButton = document.getElementById('saveVapeSessionLimitButton');
 
-    // Cigarette Limit Elements
-    const todayCigaretteCountDisplay = document.getElementById('todayCigaretteCount');
-    const cigaretteLimitDisplay = document.getElementById('cigaretteLimitDisplay');
-    const setLimitInput = document.getElementById('setLimitInput');
-    const saveLimitButton = document.getElementById('saveLimitButton');
-
     // Daily Vape Time Limit Elements
     const todayTotalVapeTimeDisplay = document.getElementById('todayTotalVapeTimeDisplay');
     const dailyVapeTimeLimitDisplay = document.getElementById('dailyVapeTimeLimitDisplay');
     const setDailyVapeTimeLimitInput = document.getElementById('setDailyVapeTimeLimitInput');
     const saveDailyVapeTimeLimitButton = document.getElementById('saveDailyVapeTimeLimitButton');
 
+    // Log List Elements
     const smokeLogList = document.getElementById('smokeLogList');
     const noLogsPlaceholder = document.getElementById('noLogsPlaceholder');
-    const toastNotification = document.getElementById('toastNotification');
+
+    // Reason Modal Elements
+    const reasonModalOverlay = document.getElementById('reasonModalOverlay');
+    const reasonInput = document.getElementById('reasonInput');
+    const reasonLogTimestampInput = document.getElementById('reasonLogTimestamp');
+    const saveReasonButton = document.getElementById('saveReasonButton');
+    const cancelReasonButton = document.getElementById('cancelReasonButton');
+
 
     // --- State ---
     let userPoints = 0;
-    let smokeFreeStreak = 0; // Consecutive days under *both* limits
+    let smokeFreeStreak = 0;
     let healthMilestones = 0;
     let dailyCigaretteLimit = 5;
-    let vapeSessionDurationLimit = 30; // Default session limit in seconds (e.g., 0:30)
-    let dailyTotalVapeTimeLimit = 300; // Default daily total limit in seconds (e.g., 5 minutes)
-    let smokeLog = []; // Array of { type: 'cigarette'/'vape', timestamp: Date.now(), duration?: seconds }
+    let vapeSessionDurationLimit = 30; // Seconds, 0 means count up only
+    let dailyTotalVapeTimeLimit = 300; // Seconds
+    let smokeLog = []; // Array of { type: 'cigarette'/'vape', timestamp: Date.now(), duration?: seconds, reason?: string }
     let lastLogDate = ''; // YYYY-MM-DD
     let todayCigaretteCount = 0;
-    let todayTotalVapeTime = 0; // In seconds
+    let todayTotalVapeTime = 0; // Seconds
     let lastDayStreakIncremented = ''; // YYYY-MM-DD
 
-    // Timer Runtime State (Not saved)
+    // Timer Runtime State
     let isVapeTimerRunning = false;
     let vapeTimerStartTime = null;
     let vapeTimerIntervalId = null;
+    let vapeTimerTargetEndTime = null; // For countdown
+    let vapeTimerMode = 'up'; // 'up' or 'down'
 
-    // --- Helper Functions ---
-    function formatTime(totalSeconds) {
-        if (isNaN(totalSeconds) || totalSeconds < 0) {
-            return "0m 0s";
-        }
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = Math.floor(totalSeconds % 60);
-        return `${minutes}m ${seconds}s`;
-    }
-
-    function formatTimerDisplay(totalSeconds) {
-        if (isNaN(totalSeconds) || totalSeconds < 0) {
-            return "00:00";
-        }
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = Math.floor(totalSeconds % 60);
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
-
-    function parseMMSS(timeString) {
-        if (!timeString || typeof timeString !== 'string') return null;
-        const parts = timeString.split(':');
-        if (parts.length !== 2) return null;
-        const minutes = parseInt(parts[0], 10);
-        const seconds = parseInt(parts[1], 10);
-        if (isNaN(minutes) || isNaN(seconds) || minutes < 0 || seconds < 0 || seconds >= 60) {
-            return null;
-        }
-        return (minutes * 60) + seconds;
-    }
-
-    function showToast(message, duration = 2500) {
-        if (toastNotification) {
-            toastNotification.textContent = message;
-            toastNotification.classList.add('show');
-            setTimeout(() => {
-                toastNotification.classList.remove('show');
-            }, duration);
-        } else { console.log("Toast:", message); }
-    }
-
-     function triggerPointsFlash() {
-        const mainPointsDisplay = document.querySelector('.header-stats-bar .points-display:first-child');
-        if(mainPointsDisplay) mainPointsDisplay.classList.add('points-earned-flash');
-        setTimeout(() => { if(mainPointsDisplay) mainPointsDisplay.classList.remove('points-earned-flash'); }, 500);
-    }
-
-    function addPoints(amount, reason = "") {
-        if (amount > 0) {
-            userPoints += amount;
-            showToast(`+${amount} PTS! ${reason}`.trim(), amount > 5 ? 3000 : 2500); // Longer toast for bigger gains
-            triggerPointsFlash();
-            updateHeaderDisplays();
-            saveState(); // Save points immediately
-        }
-    }
-
-    function getCurrentDateString() {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
+    // --- Helper Functions (formatTime, formatTimerDisplay, parseMMSS, showToast, triggerPointsFlash, addPoints, getCurrentDateString - Unchanged from previous) ---
+    function formatTime(totalSeconds) { if (isNaN(totalSeconds) || totalSeconds < 0) return "0m 0s"; const m = Math.floor(totalSeconds / 60); const s = Math.floor(totalSeconds % 60); return `${m}m ${s}s`; }
+    function formatTimerDisplay(totalSeconds) { if (isNaN(totalSeconds) || totalSeconds < 0) return "00:00"; const m = Math.floor(totalSeconds / 60); const s = Math.floor(totalSeconds % 60); return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`; }
+    function parseMMSS(timeString) { if (!timeString || typeof timeString !== 'string') return null; const p = timeString.split(':'); if (p.length !== 2) return null; const m = parseInt(p[0], 10); const s = parseInt(p[1], 10); if (isNaN(m) || isNaN(s) || m < 0 || s < 0 || s >= 60) return null; return (m * 60) + s; }
+    function showToast(message, duration = 2500) { if (toastNotification) { toastNotification.textContent = message; toastNotification.classList.add('show'); setTimeout(() => { toastNotification.classList.remove('show'); }, duration); } else { console.log("Toast:", message); } }
+    function triggerPointsFlash() { const d = document.querySelector('.header-stats-bar .points-display:first-child'); if(d) d.classList.add('points-earned-flash'); setTimeout(() => { if(d) d.classList.remove('points-earned-flash'); }, 500); }
+    function addPoints(amount, reason = "") { if (amount > 0) { userPoints += amount; showToast(`+${amount} PTS! ${reason}`.trim(), amount > 5 ? 3000 : 2500); triggerPointsFlash(); updateHeaderDisplays(); saveState(); } }
+    function getCurrentDateString() { const t = new Date(); const y = t.getFullYear(); const m = String(t.getMonth() + 1).padStart(2, '0'); const d = String(t.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; }
 
     // --- Load & Save State ---
     function loadState() {
@@ -127,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dailyCigaretteLimit = parseInt(localStorage.getItem('smoketrack_cig_limit' + localStorageKeySuffix)) || 5;
         vapeSessionDurationLimit = parseInt(localStorage.getItem('smoketrack_vape_session_limit' + localStorageKeySuffix)) || 30;
         dailyTotalVapeTimeLimit = parseInt(localStorage.getItem('smoketrack_vape_daily_limit' + localStorageKeySuffix)) || 300;
-        smokeLog = JSON.parse(localStorage.getItem('smoketrack_log_v2' + localStorageKeySuffix)) || []; // Changed key for new format
+        smokeLog = JSON.parse(localStorage.getItem('smoketrack_log_v2' + localStorageKeySuffix)) || []; // Keep v2 key, reason is additive
         lastLogDate = localStorage.getItem('smoketrack_last_log_date' + localStorageKeySuffix) || '';
         todayCigaretteCount = parseInt(localStorage.getItem('smoketrack_today_cig' + localStorageKeySuffix)) || 0;
         todayTotalVapeTime = parseInt(localStorage.getItem('smoketrack_today_vape_time' + localStorageKeySuffix)) || 0;
@@ -135,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Set input values from loaded limits
         if (setLimitInput) setLimitInput.value = dailyCigaretteLimit;
-        if (setDailyVapeTimeLimitInput) setDailyVapeTimeLimitInput.value = Math.floor(dailyTotalVapeTimeLimit / 60); // Input is in minutes
-        if (setVapeSessionLimitInput) setVapeSessionLimitInput.value = formatTimerDisplay(vapeSessionDurationLimit); // Input is MM:SS
+        if (setDailyVapeTimeLimitInput) setDailyVapeTimeLimitInput.value = Math.floor(dailyTotalVapeTimeLimit / 60);
+        if (setVapeSessionLimitInput) setVapeSessionLimitInput.value = formatTimerDisplay(vapeSessionDurationLimit);
     }
 
     function saveState() {
@@ -146,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('smoketrack_cig_limit' + localStorageKeySuffix, dailyCigaretteLimit.toString());
         localStorage.setItem('smoketrack_vape_session_limit' + localStorageKeySuffix, vapeSessionDurationLimit.toString());
         localStorage.setItem('smoketrack_vape_daily_limit' + localStorageKeySuffix, dailyTotalVapeTimeLimit.toString());
-        localStorage.setItem('smoketrack_log_v2' + localStorageKeySuffix, JSON.stringify(smokeLog)); // Use new key
+        localStorage.setItem('smoketrack_log_v2' + localStorageKeySuffix, JSON.stringify(smokeLog)); // Keep v2 key
         localStorage.setItem('smoketrack_last_log_date' + localStorageKeySuffix, lastLogDate);
         localStorage.setItem('smoketrack_today_cig' + localStorageKeySuffix, todayCigaretteCount.toString());
         localStorage.setItem('smoketrack_today_vape_time' + localStorageKeySuffix, todayTotalVapeTime.toString());
@@ -155,63 +110,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Core Logic ---
 
+    // checkDateAndResetCounts - Unchanged from previous version
     function checkDateAndResetCounts() {
         const currentDate = getCurrentDateString();
-        if (currentDate !== lastLogDate && lastLogDate !== '') { // Only process if date changed AND there was a previous date
+        if (currentDate !== lastLogDate && lastLogDate !== '') {
             console.log(`Date changed from ${lastLogDate} to ${currentDate}. Checking yesterday's limits and resetting counts.`);
-
-            // --- Streak Calculation (Checks YESTERDAY's totals) ---
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = getCurrentDateString(yesterday); // Helper needed if not using simple string compare
-
+            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = getCurrentDateString(yesterday);
             const yesterdayCigsUnder = todayCigaretteCount <= dailyCigaretteLimit;
             const yesterdayVapeUnder = todayTotalVapeTime <= dailyTotalVapeTimeLimit;
             const yesterdayWasUnderLimit = yesterdayCigsUnder && yesterdayVapeUnder;
-
-            // Logic assumes lastLogDate *was* yesterday if date changed. More robust check might be needed.
             if (yesterdayWasUnderLimit) {
-                smokeFreeStreak++;
-                lastDayStreakIncremented = currentDate; // Mark today as the day streak was incremented
-                showToast(`Streak Extended! ${smokeFreeStreak} Days!`);
-                addPoints(5, `Streak: ${smokeFreeStreak} Days`);
-
-                if ([1, 3, 7, 14, 30, 60, 90].includes(smokeFreeStreak)) { // Added 1 day milestone
-                    healthMilestones++;
-                    addPoints(Math.max(10, smokeFreeStreak * 2), `Milestone: ${smokeFreeStreak}-Day Streak!`);
+                smokeFreeStreak++; lastDayStreakIncremented = currentDate;
+                showToast(`Streak Extended! ${smokeFreeStreak} Days!`); addPoints(5, `Streak: ${smokeFreeStreak} Days`);
+                if ([1, 3, 7, 14, 30, 60, 90].includes(smokeFreeStreak)) {
+                    healthMilestones++; addPoints(Math.max(10, smokeFreeStreak * 2), `Milestone: ${smokeFreeStreak}-Day Streak!`);
                     showToast(`MILESTONE! ${smokeFreeStreak}-Day Streak Achieved!`);
                 }
-            } else {
-                // Went over limit yesterday, reset streak
-                smokeFreeStreak = 0;
-                lastDayStreakIncremented = '';
-                showToast("Streak Reset. Keep trying!", 3000);
-            }
-
-            // --- Reset Daily Counts for TODAY ---
-            todayCigaretteCount = 0;
-            todayTotalVapeTime = 0;
-            lastLogDate = currentDate; // Update the last log date to today
-
-            saveState(); // Save the reset counts and new date/streak info
-        } else if (lastLogDate === '') {
-             // First time using the app or data cleared
-             lastLogDate = currentDate;
-             saveState();
-        }
+            } else { smokeFreeStreak = 0; lastDayStreakIncremented = ''; showToast("Streak Reset. Keep trying!", 3000); }
+            todayCigaretteCount = 0; todayTotalVapeTime = 0; lastLogDate = currentDate;
+            saveState();
+        } else if (lastLogDate === '') { lastLogDate = currentDate; saveState(); }
     }
 
     function logCigaretteEvent() {
         checkDateAndResetCounts();
         todayCigaretteCount++;
-        const logEntry = { type: 'cigarette', timestamp: Date.now() };
+        const logEntry = { type: 'cigarette', timestamp: Date.now(), reason: '' }; // Add empty reason field
         smokeLog.unshift(logEntry);
-        if (smokeLog.length > 100) smokeLog.pop(); // Limit log size
+        if (smokeLog.length > 100) smokeLog.pop();
 
         showToast("Cigarette logged.");
         checkAndWarnLimits();
         updateStatusDisplay();
-        renderSmokeLog();
+        renderSmokeLog(); // Will now include the 'add reason' icon
         saveState();
     }
 
@@ -223,120 +155,140 @@ document.addEventListener('DOMContentLoaded', () => {
         vapeTimerStartTime = Date.now();
         startVapeTimerButton.disabled = true;
         stopVapeTimerButton.disabled = false;
-        stopVapeTimerButton.style.display = 'inline-block'; // Show stop button
+        stopVapeTimerButton.style.display = 'inline-block';
+        vapeTimerDisplay.classList.remove('warning', 'counting-down'); // Reset visual state
 
-        vapeTimerDisplay.classList.remove('warning'); // Ensure warning is off initially
-        vapeTimerDisplay.textContent = formatTimerDisplay(0);
+        // Determine timer mode
+        if (vapeSessionDurationLimit > 0) {
+            vapeTimerMode = 'down';
+            vapeTimerTargetEndTime = vapeTimerStartTime + vapeSessionDurationLimit * 1000;
+            vapeTimerDisplay.textContent = formatTimerDisplay(vapeSessionDurationLimit);
+            vapeTimerDisplay.classList.add('counting-down');
+            showToast(`Vape timer started (Counting down from ${formatTimerDisplay(vapeSessionDurationLimit)})!`);
+        } else {
+            vapeTimerMode = 'up';
+            vapeTimerTargetEndTime = null; // No target for count up
+            vapeTimerDisplay.textContent = formatTimerDisplay(0);
+            showToast("Vape timer started (Counting up)!");
+        }
 
+        // --- Timer Interval Logic ---
         vapeTimerIntervalId = setInterval(() => {
-            const elapsedMillis = Date.now() - vapeTimerStartTime;
-            const elapsedSeconds = Math.floor(elapsedMillis / 1000);
-            vapeTimerDisplay.textContent = formatTimerDisplay(elapsedSeconds);
-
-            // Check if session limit is exceeded and add visual warning
-            if (vapeSessionDurationLimit > 0 && elapsedSeconds > vapeSessionDurationLimit) {
-                 vapeTimerDisplay.classList.add('warning');
-                 // Optional: auto-stop? For now, just visual cue.
-            } else {
-                 vapeTimerDisplay.classList.remove('warning');
+            if (vapeTimerMode === 'down') {
+                const remainingMillis = vapeTimerTargetEndTime - Date.now();
+                if (remainingMillis <= 0) {
+                    // Countdown finished
+                    vapeTimerDisplay.textContent = "00:00";
+                    showToast("Vape session limit reached!", 3000);
+                    vapeTimerDisplay.classList.add('warning'); // Flash warning at end
+                    stopVapeTimer(true); // Auto-stop, indicating limit was reached
+                } else {
+                    const remainingSeconds = Math.ceil(remainingMillis / 1000);
+                    vapeTimerDisplay.textContent = formatTimerDisplay(remainingSeconds);
+                    // Optional: add warning class when remainingSeconds < 10 ?
+                }
+            } else { // Count 'up' mode
+                const elapsedMillis = Date.now() - vapeTimerStartTime;
+                const elapsedSeconds = Math.floor(elapsedMillis / 1000);
+                vapeTimerDisplay.textContent = formatTimerDisplay(elapsedSeconds);
+                // No warning needed for count up unless we add a different kind of limit
             }
-
-        }, 1000);
-
-        showToast("Vape timer started!");
+        }, 1000); // Update every second
     }
 
-    function stopVapeTimer() {
+    function stopVapeTimer(autoStopped = false) {
         if (!isVapeTimerRunning) return;
 
         clearInterval(vapeTimerIntervalId);
         isVapeTimerRunning = false;
         const endTime = Date.now();
-        const durationSeconds = Math.max(1, Math.round((endTime - vapeTimerStartTime) / 1000)); // Log at least 1 second
+
+        let durationSeconds;
+        if (vapeTimerMode === 'down') {
+            if (autoStopped) {
+                // Countdown finished naturally
+                durationSeconds = vapeSessionDurationLimit;
+            } else {
+                // Stopped manually during countdown
+                durationSeconds = Math.max(1, Math.round((endTime - vapeTimerStartTime) / 1000));
+                // Ensure logged duration doesn't exceed the limit if stopped manually early
+                durationSeconds = Math.min(durationSeconds, vapeSessionDurationLimit);
+            }
+        } else {
+            // Count up mode, stopped manually
+            durationSeconds = Math.max(1, Math.round((endTime - vapeTimerStartTime) / 1000));
+        }
 
         todayTotalVapeTime += durationSeconds;
 
         const logEntry = {
             type: 'vape',
-            timestamp: endTime, // Log end time
-            duration: durationSeconds
+            timestamp: endTime,
+            duration: durationSeconds,
+            reason: '' // Add empty reason field
         };
         smokeLog.unshift(logEntry);
-        if (smokeLog.length > 100) smokeLog.pop(); // Limit log size
+        if (smokeLog.length > 100) smokeLog.pop();
 
         // Reset UI
-        vapeTimerStartTime = null;
-        vapeTimerIntervalId = null;
+        vapeTimerStartTime = null; vapeTimerTargetEndTime = null; vapeTimerIntervalId = null; vapeTimerMode = 'up';
         startVapeTimerButton.disabled = false;
-        stopVapeTimerButton.disabled = true;
-        stopVapeTimerButton.style.display = 'none'; // Hide stop button
-        vapeTimerDisplay.textContent = formatTimerDisplay(0); // Reset display
-        vapeTimerDisplay.classList.remove('warning');
+        stopVapeTimerButton.disabled = true; stopVapeTimerButton.style.display = 'none';
+        vapeTimerDisplay.textContent = formatTimerDisplay(0);
+        vapeTimerDisplay.classList.remove('warning', 'counting-down');
 
-        showToast(`Vape session logged: ${formatTime(durationSeconds)}`);
-        checkAndWarnLimits(); // Check daily total limit now
+        if (!autoStopped) { // Don't show redundant toast if auto-stopped
+           showToast(`Vape session logged: ${formatTime(durationSeconds)}`);
+        }
+        checkAndWarnLimits();
         updateStatusDisplay();
-        renderSmokeLog();
+        renderSmokeLog(); // Will include 'add reason' icon
         saveState();
     }
 
+    // checkAndWarnLimits - Unchanged
      function checkAndWarnLimits() {
         const cigOver = todayCigaretteCount > dailyCigaretteLimit;
         const vapeOver = todayTotalVapeTime > dailyTotalVapeTimeLimit;
-
-        if (cigOver) {
-            showToast(`Warning: Cigarette limit (${dailyCigaretteLimit}) exceeded!`, 3000);
-        }
-         if (vapeOver) {
-            showToast(`Warning: Daily vape time limit (${formatTime(dailyTotalVapeTimeLimit)}) exceeded!`, 3000);
-        }
+        if (cigOver) { showToast(`Warning: Cigarette limit (${dailyCigaretteLimit}) exceeded!`, 3000); }
+        if (vapeOver) { showToast(`Warning: Daily vape time limit (${formatTime(dailyTotalVapeTimeLimit)}) exceeded!`, 3000); }
     }
 
+
     // --- UI Update Functions ---
+    // updateHeaderDisplays - Unchanged
     function updateHeaderDisplays() {
         if (userPointsDisplay) userPointsDisplay.textContent = userPoints;
         if (smokeFreeStreakDisplay) smokeFreeStreakDisplay.textContent = smokeFreeStreak;
-        if (streakDisplay) streakDisplay.textContent = `${smokeFreeStreak} Days`; // Update streak in progress section too
+        if (streakDisplay) streakDisplay.textContent = `${smokeFreeStreak} Days`;
         if (healthMilestonesDisplay) healthMilestonesDisplay.textContent = healthMilestones;
         if (shopUserPointsDisplay) shopUserPointsDisplay.textContent = userPoints;
     }
 
+    // updateStatusDisplay - Unchanged
     function updateStatusDisplay() {
-        // Cigarettes
         if (todayCigaretteCountDisplay) todayCigaretteCountDisplay.textContent = todayCigaretteCount;
         if (cigaretteLimitDisplay) cigaretteLimitDisplay.textContent = dailyCigaretteLimit;
         if (todayCigaretteCountDisplay) todayCigaretteCountDisplay.parentElement.classList.toggle('over-limit', todayCigaretteCount > dailyCigaretteLimit);
-
-        // Vape Time
         if (todayTotalVapeTimeDisplay) todayTotalVapeTimeDisplay.textContent = formatTime(todayTotalVapeTime);
         if (dailyVapeTimeLimitDisplay) dailyVapeTimeLimitDisplay.textContent = formatTime(dailyTotalVapeTimeLimit);
-         if (todayTotalVapeTimeDisplay) todayTotalVapeTimeDisplay.parentElement.classList.toggle('over-limit', todayTotalVapeTime > dailyTotalVapeTimeLimit);
-
-        // Timer Buttons initial state
+        if (todayTotalVapeTimeDisplay) todayTotalVapeTimeDisplay.parentElement.classList.toggle('over-limit', todayTotalVapeTime > dailyTotalVapeTimeLimit);
         if (startVapeTimerButton) startVapeTimerButton.disabled = isVapeTimerRunning;
-        if (stopVapeTimerButton) {
-            stopVapeTimerButton.disabled = !isVapeTimerRunning;
-            stopVapeTimerButton.style.display = isVapeTimerRunning ? 'inline-block' : 'none';
-        }
-        if (vapeTimerDisplay && !isVapeTimerRunning) {
-            vapeTimerDisplay.textContent = formatTimerDisplay(0); // Ensure reset if not running
-             vapeTimerDisplay.classList.remove('warning');
-        }
+        if (stopVapeTimerButton) { stopVapeTimerButton.disabled = !isVapeTimerRunning; stopVapeTimerButton.style.display = isVapeTimerRunning ? 'inline-block' : 'none'; }
+        if (vapeTimerDisplay && !isVapeTimerRunning) { vapeTimerDisplay.textContent = formatTimerDisplay(0); vapeTimerDisplay.classList.remove('warning', 'counting-down'); }
     }
 
     function renderSmokeLog() {
         if (!smokeLogList) return;
-        smokeLogList.innerHTML = ''; // Clear existing list
+        smokeLogList.innerHTML = '';
 
-        const logsToRender = smokeLog.slice(0, 25); // Show more logs
+        const logsToRender = smokeLog.slice(0, 30); // Show a few more logs
 
         if (logsToRender.length === 0) {
-            if (noLogsPlaceholder) noLogsPlaceholder.style.display = 'block';
-            return;
+            if (noLogsPlaceholder) noLogsPlaceholder.style.display = 'block'; return;
         } else {
              if (noLogsPlaceholder) noLogsPlaceholder.style.display = 'none';
         }
-
 
         logsToRender.forEach(log => {
             const listItem = document.createElement('li');
@@ -348,47 +300,76 @@ document.addEventListener('DOMContentLoaded', () => {
             const logDate = new Date(log.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric'});
 
             let iconClass = ''; let iconColor = ''; let text = ''; let details = '';
+            let reasonIconClass = log.reason ? 'fas fa-comment-dots has-reason' : 'far fa-comment-dots'; // Use filled icon if reason exists
 
             if (log.type === 'cigarette') {
-                iconClass = 'fas fa-smoking';
-                iconColor = 'var(--theme-highlight-accent)';
-                text = 'Cigarette';
+                iconClass = 'fas fa-smoking'; iconColor = 'var(--theme-highlight-accent)'; text = 'Cigarette';
             } else if (log.type === 'vape') {
-                iconClass = 'fas fa-vial';
-                iconColor = 'var(--theme-primary-accent)';
-                text = 'Vape Session';
-                details = log.duration ? `(${formatTime(log.duration)})` : ''; // Show duration
+                iconClass = 'fas fa-vial'; iconColor = 'var(--theme-primary-accent)'; text = 'Vape Session';
+                details = log.duration ? `(${formatTime(log.duration)})` : '';
             }
 
+            // Structure for better alignment of reason icon
             listItem.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                    <span style="margin-right: 10px;"><i class="${iconClass}" style="color: ${iconColor}; margin-right: 8px;"></i> ${text} ${details}</span>
-                    <span style="font-size: 14px; color: #666; white-space: nowrap;">${logDate} @ ${logTime}</span>
+                <div class="log-item-content">
+                    <div class="log-item-details">
+                        <i class="${iconClass}" style="color: ${iconColor}; margin-right: 8px; font-size: 18px;"></i>
+                        <span>${text} ${details}</span>
+                    </div>
+                    <div class="log-item-reason-icon-container">
+                         <span class="log-item-time">${logDate} @ ${logTime}</span>
+                         <i class="${reasonIconClass} add-reason-icon" data-timestamp="${log.timestamp}" title="${log.reason ? 'Edit Reason' : 'Add Reason'}"></i>
+                    </div>
                 </div>
             `;
             smokeLogList.appendChild(listItem);
         });
     }
 
+     // --- Reason Modal Logic ---
+    function handleOpenReasonModal(timestamp) {
+        const logEntry = smokeLog.find(log => log.timestamp === timestamp);
+        if (!logEntry || !reasonModalOverlay) return;
+
+        reasonInput.value = logEntry.reason || ''; // Populate existing reason or empty
+        reasonLogTimestampInput.value = timestamp; // Store timestamp
+        reasonModalOverlay.classList.add('show');
+        reasonInput.focus(); // Focus textarea
+    }
+
+    function handleCloseReasonModal() {
+        if(reasonModalOverlay) reasonModalOverlay.classList.remove('show');
+        reasonInput.value = ''; // Clear textarea
+        reasonLogTimestampInput.value = ''; // Clear timestamp
+    }
+
+    function handleSaveReason() {
+        const timestamp = parseInt(reasonLogTimestampInput.value);
+        const newReason = reasonInput.value.trim();
+        if (isNaN(timestamp)) return;
+
+        const logEntry = smokeLog.find(log => log.timestamp === timestamp);
+        if (logEntry) {
+            logEntry.reason = newReason;
+            saveState();
+            renderSmokeLog(); // Re-render to update icon state
+            showToast(newReason ? "Reason Saved!" : "Reason Cleared.");
+        }
+        handleCloseReasonModal();
+    }
+
+
     // --- Event Listeners ---
     if (logCigaretteButton) logCigaretteButton.addEventListener('click', logCigaretteEvent);
     if (startVapeTimerButton) startVapeTimerButton.addEventListener('click', startVapeTimer);
-    if (stopVapeTimerButton) stopVapeTimerButton.addEventListener('click', stopVapeTimer);
+    if (stopVapeTimerButton) stopVapeTimerButton.addEventListener('click', () => stopVapeTimer(false)); // Manual stop
 
     // Cigarette Limit Listener
     if (saveLimitButton && setLimitInput) {
         saveLimitButton.addEventListener('click', () => {
             const newLimit = parseInt(setLimitInput.value);
-            if (!isNaN(newLimit) && newLimit >= 0) {
-                dailyCigaretteLimit = newLimit;
-                updateStatusDisplay();
-                checkAndWarnLimits(); // Re-check warning with new limit
-                saveState();
-                showToast(`Cigarette limit set to ${dailyCigaretteLimit}.`);
-            } else {
-                showToast("Invalid limit value.");
-                setLimitInput.value = dailyCigaretteLimit;
-            }
+            if (!isNaN(newLimit) && newLimit >= 0) { dailyCigaretteLimit = newLimit; updateStatusDisplay(); checkAndWarnLimits(); saveState(); showToast(`Cigarette limit set to ${dailyCigaretteLimit}.`); }
+            else { showToast("Invalid limit value."); setLimitInput.value = dailyCigaretteLimit; }
         });
     }
 
@@ -396,15 +377,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saveVapeSessionLimitButton && setVapeSessionLimitInput) {
          saveVapeSessionLimitButton.addEventListener('click', () => {
             const parsedSeconds = parseMMSS(setVapeSessionLimitInput.value);
+            // Allow 0 for count-up mode
             if (parsedSeconds !== null && parsedSeconds >= 0) {
-                 vapeSessionDurationLimit = parsedSeconds;
-                 saveState();
-                 showToast(`Vape session limit set to ${formatTimerDisplay(vapeSessionDurationLimit)}.`);
-                 // Update display format in case user entered "1:5" -> "01:05"
+                 vapeSessionDurationLimit = parsedSeconds; saveState();
+                 showToast(`Vape session limit set to ${formatTimerDisplay(vapeSessionDurationLimit)} ${parsedSeconds === 0 ? '(Count Up)' : ''}.`);
                  setVapeSessionLimitInput.value = formatTimerDisplay(vapeSessionDurationLimit);
             } else {
                  showToast("Invalid session limit format (use MM:SS).");
-                 setVapeSessionLimitInput.value = formatTimerDisplay(vapeSessionDurationLimit); // Reset
+                 setVapeSessionLimitInput.value = formatTimerDisplay(vapeSessionDurationLimit);
             }
          });
     }
@@ -414,27 +394,38 @@ document.addEventListener('DOMContentLoaded', () => {
         saveDailyVapeTimeLimitButton.addEventListener('click', () => {
             const newLimitMinutes = parseInt(setDailyVapeTimeLimitInput.value);
              if (!isNaN(newLimitMinutes) && newLimitMinutes >= 0) {
-                dailyTotalVapeTimeLimit = newLimitMinutes * 60; // Store as seconds
-                updateStatusDisplay();
-                checkAndWarnLimits(); // Re-check warning
-                saveState();
+                dailyTotalVapeTimeLimit = newLimitMinutes * 60; updateStatusDisplay(); checkAndWarnLimits(); saveState();
                 showToast(`Daily vape time limit set to ${newLimitMinutes} minutes.`);
-            } else {
-                showToast("Invalid limit value (minutes).");
-                setDailyVapeTimeLimitInput.value = Math.floor(dailyTotalVapeTimeLimit / 60); // Reset
+            } else { showToast("Invalid limit value (minutes)."); setDailyVapeTimeLimitInput.value = Math.floor(dailyTotalVapeTimeLimit / 60); }
+        });
+    }
+
+    // Reason Modal Listeners
+    if (smokeLogList) { // Event delegation for reason icons
+        smokeLogList.addEventListener('click', (event) => {
+            if (event.target.classList.contains('add-reason-icon')) {
+                const timestamp = parseInt(event.target.dataset.timestamp);
+                if (!isNaN(timestamp)) {
+                    handleOpenReasonModal(timestamp);
+                }
             }
         });
     }
+    if (saveReasonButton) saveReasonButton.addEventListener('click', handleSaveReason);
+    if (cancelReasonButton) cancelReasonButton.addEventListener('click', handleCloseReasonModal);
+    if (reasonModalOverlay) reasonModalOverlay.addEventListener('click', (event) => { // Close on overlay click
+        if (event.target === reasonModalOverlay) { handleCloseReasonModal(); }
+    });
 
 
     // --- Initial Setup ---
     loadState();
-    checkDateAndResetCounts(); // IMPORTANT: Run check before first render/update
+    checkDateAndResetCounts();
     updateHeaderDisplays();
-    updateStatusDisplay(); // Includes setting initial button states
+    updateStatusDisplay();
     renderSmokeLog();
 
-    console.log("Smoke Tracker Initialized (v2 - Timer).");
+    console.log("Smoke Tracker Initialized (v3 - Reason Modal & Countdown).");
     console.log("Current State:", { userPoints, smokeFreeStreak, dailyCigaretteLimit, vapeSessionDurationLimit, dailyTotalVapeTimeLimit, todayCigaretteCount, todayTotalVapeTime, lastLogDate });
 
 }); // End DOMContentLoaded
