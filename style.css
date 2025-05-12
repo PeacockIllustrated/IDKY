@@ -548,8 +548,15 @@ i.fas, i.far { vertical-align: middle; }
 @keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
 @keyframes zoomInModal { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-#particleCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 2999; }
-
+#particleCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Allows clicks to go through to elements behind it */
+    z-index: 2999; /* Ensure it's behind modals (usually z-index: 3000) but above most content */
+}
 /* Shop Toolbar Styles */
 .shop-toolbar-fixed {
     position: fixed;
