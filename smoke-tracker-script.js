@@ -154,9 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${y}-${m}-${d}`;
     }
 
-    // =================================================================================
+  // =================================================================================
     // SECTION: PARTICLE SYSTEM
-    // (Initialization, creation, animation, and specific effect triggers)
     // =================================================================================
     function initializeParticleCanvas() {
         if (particleCanvas) {
@@ -176,10 +175,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createGenericParticle(x, y, options) {
         if (!particleCtx) { return; }
-        const defaults = { color: '#FFFFFF', size: Math.random() * 5 + 2, count: 1, spread: 3, speedX: (Math.random() - 0.5) * options.spread, speedY: (Math.random() * -1.5 - 0.5) * (options.speedMultiplier || 1), life: 60 + Math.random() * 40, gravity: 0.01, alphaDecay: 0.98 };
+        const defaults = {
+            color: '#FFFFFF',
+            size: Math.random() * 5 + 2,
+            count: 1,
+            spread: 3,
+            speedX: (Math.random() - 0.5) * options.spread,
+            speedY: (Math.random() * -1.5 - 0.5) * (options.speedMultiplier || 1),
+            life: 60 + Math.random() * 40,
+            gravity: 0.01,
+            alphaDecay: 0.98,
+            shadowColor: null, // NEW: For vape particles
+            shadowBlur: 0     // NEW: For vape particles
+        };
         const pOptions = { ...defaults, ...options };
+
         for (let i = 0; i < pOptions.count; i++) {
-            particles.push({ x: x + (Math.random() - 0.5) * (pOptions.initialSpread || 0), y: y + (Math.random() - 0.5) * (pOptions.initialSpread || 0), size: pOptions.size, color: pOptions.color, vx: pOptions.speedX, vy: pOptions.speedY, life: pOptions.life, alpha: 1, gravity: pOptions.gravity, alphaDecay: pOptions.alphaDecay });
+            particles.push({
+                x: x + (Math.random() - 0.5) * (pOptions.initialSpread || 0),
+                y: y + (Math.random() - 0.5) * (pOptions.initialSpread || 0),
+                size: pOptions.size,
+                color: pOptions.color,
+                vx: pOptions.speedX,
+                vy: pOptions.speedY,
+                life: pOptions.life,
+                alpha: 1,
+                gravity: pOptions.gravity,
+                alphaDecay: pOptions.alphaDecay,
+                shadowColor: pOptions.shadowColor, // Store shadow properties
+                shadowBlur: pOptions.shadowBlur
+            });
         }
         if (particles.length > 0 && !isAnimatingParticles) {
             isAnimatingParticles = true;
@@ -192,10 +217,26 @@ document.addEventListener('DOMContentLoaded', () => {
         particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
         let stillAnimating = false;
         for (let i = particles.length - 1; i >= 0; i--) {
-            const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.alpha *= p.alphaDecay; p.life--;
+            const p = particles[i];
+            p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.alpha *= p.alphaDecay; p.life--;
             if (p.life <= 0 || p.alpha <= 0.01) { particles.splice(i, 1); continue; }
-            particleCtx.fillStyle = p.color; particleCtx.globalAlpha = p.alpha;
+
+            // Apply shadow if specified
+            if (p.shadowColor) {
+                particleCtx.shadowColor = p.shadowColor;
+                particleCtx.shadowBlur = p.shadowBlur;
+            }
+
+            particleCtx.fillStyle = p.color;
+            particleCtx.globalAlpha = p.alpha;
             particleCtx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+
+            // Reset shadow for next particle
+            if (p.shadowColor) {
+                particleCtx.shadowColor = 'transparent'; // Or null
+                particleCtx.shadowBlur = 0;
+            }
+
             stillAnimating = true;
         }
         particleCtx.globalAlpha = 1;
@@ -203,92 +244,86 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function triggerCigarettePuff() {
-        if (!logCigaretteButton || !particleCtx) { return; }
-        const rect = logCigaretteButton.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
+        // Target the PARENT card of the logCigaretteButton
+        const targetCard = logCigaretteButton ? logCigaretteButton.closest('.log-actions-section') : null;
+        if (!targetCard || !particleCtx) { return; }
+
+        const cardRect = targetCard.getBoundingClientRect();
+        const buttonRect = logCigaretteButton.getBoundingClientRect();
+
+        // Emit from the top edge of the card, centered horizontally with the button
+        const emitX = buttonRect.left + buttonRect.width / 2; // Horizontal center of button
+        const emitY = cardRect.top; // Top edge of the card
+
         const greyColors = ['#AAAAAA', '#BBBBBB', '#CCCCCC', '#DDDDDD'];
-        const numParticles = 30;
+        const numParticles = 35; // Slightly more for a denser initial puff
 
         for (let i = 0; i < numParticles; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const radiusX = rect.width / 2;
-            const radiusY = rect.height / 2;
-            const emitX = centerX + Math.cos(angle) * radiusX;
-            const emitY = centerY + Math.sin(angle) * radiusY;
-            const speedMagnitude = 0.5 + Math.random() * 1;
-            const vx = Math.cos(angle) * speedMagnitude * (0.5 + Math.random() * 0.5);
-            const vy = Math.sin(angle) * speedMagnitude * (0.5 + Math.random() * 0.5) - (0.2 + Math.random() * 0.3);
-            createGenericParticle(emitX, emitY, { color: greyColors[Math.floor(Math.random() * greyColors.length)], size: Math.random() * 5 + 3, speedX: vx, speedY: vy, gravity: -0.015, life: 40 + Math.random() * 30, alphaDecay: 0.96, initialSpread: 2 });
+            // Emit upwards and slightly outwards from the emit point
+            const angleOffset = (Math.random() - 0.5) * (Math.PI / 2); // Spread within a 90-degree upward cone
+            const initialAngle = -Math.PI / 2 + angleOffset; // Centered upwards
+
+            const speedMagnitude = 0.8 + Math.random() * 0.7;
+            const vx = Math.cos(initialAngle) * speedMagnitude;
+            const vy = Math.sin(initialAngle) * speedMagnitude;
+
+            createGenericParticle(emitX, emitY, {
+                color: greyColors[Math.floor(Math.random() * greyColors.length)],
+                size: Math.random() * 6 + 4, // 4-10px
+                speedX: vx,
+                speedY: vy,
+                gravity: -0.01, // Gentle upward float, then slight fall
+                life: 50 + Math.random() * 40, // 50-90 frames
+                alphaDecay: 0.95,
+                initialSpread: buttonRect.width * 0.6 // Spread along the button's width initially
+            });
         }
     }
 
     function startVapeParticleStream() {
-        if (!startVapeTimerButton || vapeParticleIntervalId || !particleCtx) { return; }
-        const rect = startVapeTimerButton.getBoundingClientRect(); // Use start button for origin reference
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
+        // Target the PARENT card of the vape timer section
+        const targetCard = vapeTimerDisplay ? vapeTimerDisplay.closest('.vape-timer-section') : null;
+        if (!targetCard || vapeParticleIntervalId || !particleCtx) { return; }
+
+        const cardRect = targetCard.getBoundingClientRect();
+        // Emit from the top edge of the card, spread across its width
+        const emitY = cardRect.top;
 
         vapeParticleIntervalId = setInterval(() => {
             if (!isVapeTimerRunning) { stopVapeParticleStream(); return; }
-            const angle = Math.random() * Math.PI * 2;
-            const radiusX = rect.width / 2; // Use button's radius
-            const radiusY = rect.height / 2;
-            const emitX = centerX + Math.cos(angle) * radiusX;
-            const emitY = centerY + Math.sin(angle) * radiusY;
-            const speedMagnitude = 0.2 + Math.random() * 0.3;
-            const vx = Math.cos(angle) * speedMagnitude;
-            const vy = Math.sin(angle) * speedMagnitude - (0.1 + Math.random() * 0.2);
-            createGenericParticle(emitX, emitY, { color: '#F0F0F0', size: Math.random() * 3 + 2, count: 1, speedX: vx, speedY: vy, gravity: -0.025, life: 70 + Math.random() * 40, alphaDecay: 0.99, initialSpread: 1 });
-        }, 200);
+
+            // Emit from a random horizontal position along the top edge of the card
+            const emitX = cardRect.left + Math.random() * cardRect.width;
+
+            const angleOffset = (Math.random() - 0.5) * (Math.PI / 1.5); // Wider upward cone
+            const initialAngle = -Math.PI / 2 + angleOffset;
+
+            const speedMagnitude = 0.3 + Math.random() * 0.4;
+            const vx = Math.cos(initialAngle) * speedMagnitude;
+            const vy = Math.sin(initialAngle) * speedMagnitude * 1.2; // Slightly more upward emphasis
+
+            createGenericParticle(emitX, emitY, {
+                color: '#F0F0F0', // Whiteish vape
+                size: Math.random() * 4 + 2, // 2-6px
+                count: 1,
+                speedX: vx,
+                speedY: vy,
+                gravity: -0.03, // Stronger upward float
+                life: 90 + Math.random() * 60, // Longer life
+                alphaDecay: 0.988,
+                shadowColor: 'rgba(0, 0, 0, 0.3)', // <<< NEW: Subtle black shadow
+                shadowBlur: 3                       // <<< NEW: Blur radius for the shadow
+            });
+        }, 180); // Emit slightly less frequently
     }
 
+    // stopVapeParticleStream remains the same:
     function stopVapeParticleStream() {
         if (vapeParticleIntervalId) {
             clearInterval(vapeParticleIntervalId);
             vapeParticleIntervalId = null;
         }
     }
-
-
-    // =================================================================================
-    // SECTION: LOCAL STORAGE & STATE MANAGEMENT
-    // =================================================================================
-    function loadState() {
-        userPoints = parseInt(localStorage.getItem('idk_user_points_val' + localStorageKeySuffix)) || 0;
-        smokeFreeStreak = parseInt(localStorage.getItem('smoketrack_streak' + localStorageKeySuffix)) || 0;
-        healthMilestones = parseInt(localStorage.getItem('smoketrack_milestones' + localStorageKeySuffix)) || 0;
-        dailyCigaretteLimit = parseInt(localStorage.getItem('smoketrack_cig_limit' + localStorageKeySuffix)) || 5;
-        vapeSessionDurationLimit = parseInt(localStorage.getItem('smoketrack_vape_session_limit' + localStorageKeySuffix)) || 30;
-        dailyTotalVapeTimeLimit = parseInt(localStorage.getItem('smoketrack_vape_daily_limit' + localStorageKeySuffix)) || 300;
-        smokeLog = JSON.parse(localStorage.getItem('smoketrack_log_v2' + localStorageKeySuffix)) || [];
-        lastLogDate = localStorage.getItem('smoketrack_last_log_date' + localStorageKeySuffix) || '';
-        todayCigaretteCount = parseInt(localStorage.getItem('smoketrack_today_cig' + localStorageKeySuffix)) || 0;
-        todayTotalVapeTime = parseInt(localStorage.getItem('smoketrack_today_vape_time' + localStorageKeySuffix)) || 0;
-        lastDayStreakIncremented = localStorage.getItem('smoketrack_last_streak_date' + localStorageKeySuffix) || '';
-        ownedThemes = JSON.parse(localStorage.getItem('idk_owned_themes' + localStorageKeySuffix)) || ['default'];
-        currentTheme = localStorage.getItem('idk_current_theme' + localStorageKeySuffix) || 'default';
-        if (setLimitInput) { setLimitInput.value = dailyCigaretteLimit; }
-        if (setDailyVapeTimeLimitInput) { setDailyVapeTimeLimitInput.value = Math.floor(dailyTotalVapeTimeLimit / 60); }
-        if (setVapeSessionLimitInput) { setVapeSessionLimitInput.value = formatTimerDisplay(vapeSessionDurationLimit); }
-    }
-
-    function saveState() {
-        localStorage.setItem('idk_user_points_val' + localStorageKeySuffix, userPoints.toString());
-        localStorage.setItem('smoketrack_streak' + localStorageKeySuffix, smokeFreeStreak.toString());
-        localStorage.setItem('smoketrack_milestones' + localStorageKeySuffix, healthMilestones.toString());
-        localStorage.setItem('smoketrack_cig_limit' + localStorageKeySuffix, dailyCigaretteLimit.toString());
-        localStorage.setItem('smoketrack_vape_session_limit' + localStorageKeySuffix, vapeSessionDurationLimit.toString());
-        localStorage.setItem('smoketrack_vape_daily_limit' + localStorageKeySuffix, dailyTotalVapeTimeLimit.toString());
-        localStorage.setItem('smoketrack_log_v2' + localStorageKeySuffix, JSON.stringify(smokeLog));
-        localStorage.setItem('smoketrack_last_log_date' + localStorageKeySuffix, lastLogDate);
-        localStorage.setItem('smoketrack_today_cig' + localStorageKeySuffix, todayCigaretteCount.toString());
-        localStorage.setItem('smoketrack_today_vape_time' + localStorageKeySuffix, todayTotalVapeTime.toString());
-        localStorage.setItem('smoketrack_last_streak_date' + localStorageKeySuffix, lastDayStreakIncremented);
-        localStorage.setItem('idk_owned_themes' + localStorageKeySuffix, JSON.stringify(ownedThemes));
-        localStorage.setItem('idk_current_theme' + localStorageKeySuffix, currentTheme);
-    }
-
 
     // =================================================================================
     // SECTION: THEME APPLICATION
