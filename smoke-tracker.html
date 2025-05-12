@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* --- Styles from previous step (Keep these) --- */
+        /* ... (modal, timer, limit, log item, toolbar link styles) ... */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 3000; animation: fadeInBg 0.3s ease; }
         .modal-overlay.show { display: flex; }
         .modal-content { background-color: var(--theme-card-bg); padding: 20px; border: var(--pixel-border-width) solid var(--theme-border-main); box-shadow: 4px 4px 0 var(--theme-primary-dark); width: 90%; max-width: 450px; animation: zoomInModal 0.3s ease-out; color: var(--theme-text-main); }
@@ -22,11 +23,9 @@
         .modal-actions button#cancelReasonButton { background-color: #aaa; color: var(--theme-primary-dark); }
         .modal-actions button:hover:not(:active) { transform: translateY(-1px); box-shadow: 2px 2px 0px var(--theme-primary-dark); }
         .modal-actions button:active { transform: translate(1px, 1px); box-shadow: none; }
-
         .add-reason-icon { cursor: pointer; margin-left: 8px; color: var(--theme-tertiary-accent); font-size: 16px; transition: color 0.2s, transform 0.2s; vertical-align: middle; }
         .add-reason-icon:hover { color: var(--theme-highlight-accent); transform: scale(1.1); }
         .add-reason-icon.has-reason { color: var(--theme-primary-accent); }
-
         .timer-display { font-size: 28px; background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark); padding: 5px 10px; border: var(--pixel-border-width) solid var(--theme-primary-accent); margin: 10px auto; text-align: center; width: fit-content; min-width: 80px; box-shadow: inset 1px 1px 0px rgba(0,0,0,0.4); }
         .timer-display.counting-down { border-color: var(--theme-secondary-accent); }
         .timer-display.warning { animation: pulseWarning 1s infinite; border-color: var(--theme-highlight-accent); }
@@ -34,52 +33,80 @@
         .limit-setting label { font-size: 16px; margin-right: 5px; }
         .limit-setting input[type="text"], .limit-setting input[type="number"] { width: 70px; padding: 4px; font-family: 'VT323', monospace; font-size: 16px; border: var(--pixel-border-width) solid var(--theme-border-main); background-color: var(--theme-light-bg); color: var(--theme-text-main); text-align: center; }
         .over-limit { color: var(--theme-highlight-accent) !important; font-weight: bold; }
-
         .log-item-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px; }
         .log-item-details { display: flex; align-items: center; flex-grow: 1; }
         .log-item-time { font-size: 14px; color: #666; white-space: nowrap; }
         .log-item-reason-icon-container { text-align: right; }
-
-        /* --- Styles for the SIMPLIFIED Shop Toolbar (Link) --- */
-        .shop-toolbar-fixed {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark);
-            border-top: var(--pixel-border-width) solid var(--theme-border-main);
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.2); z-index: 1000;
-        }
-        .shop-toolbar-header-link {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 15px; font-size: 18px;
-            color: var(--theme-text-on-dark); 
-            text-decoration: none; 
-            cursor: pointer;
-        }
+        .shop-toolbar-fixed { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark); border-top: var(--pixel-border-width) solid var(--theme-border-main); box-shadow: 0 -2px 5px rgba(0,0,0,0.2); z-index: 1000; }
+        .shop-toolbar-header-link { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; font-size: 18px; color: var(--theme-text-on-dark); text-decoration: none; cursor: pointer; }
         .shop-toolbar-header-link:hover { background-color: color-mix(in srgb, var(--theme-primary-dark) 85%, white); }
         .shop-toolbar-header-link i { margin-right: 5px; }
         .shop-pts-display { font-size: 16px; margin-left: auto; margin-right: 15px; }
-
-        /* Necessary animations if not in style.css */
         @keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
         @keyframes zoomInModal { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes pointsFlash { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); color: var(--theme-secondary-accent); } }
 
-        /* Ensure particle canvas is correctly styled to be behind other content but visible */
-        #particleCanvas {
+        /* --- NEW: Full Screen Smoke Overlay Styles --- */
+        .smoke-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            pointer-events: none; /* Important */
-            z-index: -1; /* Or a low positive value if you have other background elements */
+            pointer-events: none; /* Allows clicks through */
+            z-index: 2900; /* Below modals, above most content */
+            opacity: 0;
+            transition: opacity 0.5s ease-out; /* For fade-out */
         }
+
+        #cigaretteSmokeOverlay {
+            background: radial-gradient(ellipse at center,
+                        rgba(128, 128, 128, 0) 0%,    /* Transparent center */
+                        rgba(128, 128, 128, 0.5) 30%, /* Light grey mid */
+                        rgba(100, 100, 100, 0.85) 75%, /* Darker grey edge */
+                        rgba(80, 80, 80, 0.95) 100%); /* Densest at very edge */
+            animation: cigarettePuffAnim 1s ease-out forwards;
+            display: none; /* Hidden by default, JS will show */
+        }
+
+        @keyframes cigarettePuffAnim {
+            0% { opacity: 0; transform: scale(0.5); } /* Start small and transparent */
+            50% { opacity: 0.7; transform: scale(1.2); } /* Puff out, slightly more opaque */
+            100% { opacity: 0; transform: scale(1.5); } /* Dissipate larger and fade out */
+        }
+
+        #vapeSmokeOverlay {
+            background: radial-gradient(ellipse at center,
+                        rgba(255, 255, 255, 0) 0%,   /* Transparent center */
+                        rgba(255, 255, 255, 0) 40%,  /* Transparent further out for vignette */
+                        rgba(240, 240, 240, 0.4) 70%, /* Light white smoke */
+                        rgba(220, 220, 220, 0.7) 100%); /* Denser white at edges */
+            /* JS will control opacity for filling and dissipating */
+        }
+
+        /* Class to trigger the fade-in/fill for vape */
+        #vapeSmokeOverlay.active {
+            opacity: 1; /* Target opacity when active */
+            transition: opacity 0.8s ease-in; /* Slow fill */
+        }
+        /* Class to trigger fade-out */
+        .smoke-overlay.fade-out {
+            opacity: 0 !important; /* Ensure it fades out */
+            transition: opacity 1s ease-out !important; /* 1 second dissipation */
+        }
+
     </style>
 </head>
 <body>
-    <canvas id="particleCanvas"></canvas>
-    <div class="app-container" style="padding-bottom: 70px;"> <!-- Increased padding slightly -->
+    <!-- REMOVED: <canvas id="particleCanvas"></canvas> -->
+    <!-- NEW: Overlay divs -->
+    <div class="smoke-overlay" id="cigaretteSmokeOverlay"></div>
+    <div class="smoke-overlay" id="vapeSmokeOverlay"></div>
 
-        <!-- Header Section (Unchanged) -->
+    <div class="app-container" style="padding-bottom: 70px;">
+        <!-- Header, Main Content, Shop Toolbar Link, Modals... (All same as previous step) -->
+        <!-- ... (Your existing app-container content) ... -->
+        <!-- Header Section -->
         <div class="header-section">
              <div class="app-title-bar"> <div class="app-title-container"> <i class="fas fa-smoking title-icon"></i> <h1>Smoke Tracker</h1> </div> </div>
              <div class="header-stats-bar">
@@ -89,31 +116,21 @@
              </div>
         </div>
 
-        <!-- Main Content (Unchanged Structure) -->
+        <!-- Main Content -->
         <div class="smoke-tracker-content">
-            <!-- Cigarette Logging --> <div class="log-actions-section moment-card" style="padding: 15px; margin-bottom: 15px; text-align: center;"> <button class="log-button" id="logCigaretteButton" style="width: 80%; font-size: 16px; padding: 10px;"><i class="fas fa-smoking"></i> LOG CIGARETTE</button> </div>
-            <!-- Vape Timer --> <div class="vape-timer-section moment-card" style="padding: 15px; margin-bottom: 15px; text-align: center;"> <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px;">VAPE TIMER</h2> <div class="timer-display" id="vapeTimerDisplay">00:00</div> <div style="display: flex; justify-content: space-around; margin-top: 15px;"> <button class="log-button" id="startVapeTimerButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-primary-accent);"><i class="fas fa-play"></i> START</button> <button class="log-button" id="stopVapeTimerButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-highlight-accent); display: none;"><i class="fas fa-stop"></i> STOP & LOG</button> </div> <div class="limit-setting" style="margin-top: 15px; padding-top: 10px; border-top: var(--pixel-border-width) dotted #bbb; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px;"> <label for="setVapeSessionLimitInput">Session Limit (0=Off):</label> <input type="text" id="setVapeSessionLimitInput" placeholder="MM:SS" value="0:30"> <button class="action-button" id="saveVapeSessionLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div>
-            <!-- Daily Status & Limits --> <div class="status-limit-section moment-card" style="padding: 10px; margin-bottom: 15px;"> <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px; border-bottom: var(--pixel-border-width) dashed var(--theme-primary-accent); padding-bottom: 5px;">DAILY STATUS & LIMITS</h2> <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 5px 0; border-bottom: 1px dotted #ccc;"> <span style="font-size: 18px;">CIGARETTES: <strong id="todayCigaretteCount">0</strong> / <span id="cigaretteLimitDisplay">5</span></span> <div class="limit-setting" style="display: flex; gap: 5px; align-items: center;"> <label for="setLimitInput" style="font-size: 14px;">Limit:</label> <input type="number" id="setLimitInput" min="0" value="5"> <button class="action-button" id="saveLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div> <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding: 5px 0;"> <span style="font-size: 18px;">TOTAL VAPE TIME: <strong id="todayTotalVapeTimeDisplay">0m 0s</strong> / <span id="dailyVapeTimeLimitDisplay">5m 0s</span></span> <div class="limit-setting" style="display: flex; gap: 5px; align-items: center;"> <label for="setDailyVapeTimeLimitInput" style="font-size: 14px;">Limit (min):</label> <input type="number" id="setDailyVapeTimeLimitInput" min="0" value="5"> <button class="action-button" id="saveDailyVapeTimeLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div> </div>
-            <!-- Log History --> <div class="log-history-section"> <h2 style="text-align: center; color: var(--theme-secondary-accent); font-size: 20px; margin-bottom: 10px;">RECENT LOG</h2> <ul class="moments-list" id="smokeLogList"> <li class="moment-card no-items-placeholder" id="noLogsPlaceholder" style="padding: 15px; text-align: center; color: #888; display: none;">NO LOGS YET TODAY</li> </ul> </div>
-            <!-- Progress --> <div class="progress-section moment-card" style="padding: 10px; margin-top: 20px; text-align: center; background-color: var(--theme-light-bg);"> <h2 style="font-size: 18px; color: var(--theme-primary-dark); margin-bottom: 10px;">PROGRESS OVERVIEW</h2> <p style="color: #666;">[Charts/Streak Visuals Here]</p> <div style="margin-top: 15px; padding: 8px; border: var(--pixel-border-width) dashed var(--theme-primary-accent);"> <span style="font-size: 18px;">Current 'Under Limit' Streak: <strong style="color: var(--theme-primary-accent);" id="streakDisplay">0 Days</strong></span> <i class="fas fa-fire" style="color: var(--theme-highlight-accent);"></i> </div> </div>
-        </div> <!-- End smoke-tracker-content -->
-    </div> <!-- End app-container -->
-
-    <!-- Shop Toolbar - Link Bar -->
-     <div class="shop-toolbar-fixed" id="shopToolbar">
-        <a href="shop.html" class="shop-toolbar-header-link" id="shopToolbarHeaderLink">
-            <span><i class="fas fa-store"></i> THEME SHOP</span>
-            <span class="shop-pts-display">
-                <i class="fas fa-coins points-icon"></i> <span id="shopUserPoints">0</span> PTS
-            </span>
-             <i class="fas fa-arrow-right"></i>
-        </a>
+            <div class="log-actions-section moment-card" style="padding: 15px; margin-bottom: 15px; text-align: center;"> <button class="log-button" id="logCigaretteButton" style="width: 80%; font-size: 16px; padding: 10px;"><i class="fas fa-smoking"></i> LOG CIGARETTE</button> </div>
+            <div class="vape-timer-section moment-card" style="padding: 15px; margin-bottom: 15px; text-align: center;"> <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px;">VAPE TIMER</h2> <div class="timer-display" id="vapeTimerDisplay">00:00</div> <div style="display: flex; justify-content: space-around; margin-top: 15px;"> <button class="log-button" id="startVapeTimerButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-primary-accent);"><i class="fas fa-play"></i> START</button> <button class="log-button" id="stopVapeTimerButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-highlight-accent); display: none;"><i class="fas fa-stop"></i> STOP & LOG</button> </div> <div class="limit-setting" style="margin-top: 15px; padding-top: 10px; border-top: var(--pixel-border-width) dotted #bbb; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px;"> <label for="setVapeSessionLimitInput">Session Limit (0=Off):</label> <input type="text" id="setVapeSessionLimitInput" placeholder="MM:SS" value="0:30"> <button class="action-button" id="saveVapeSessionLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div>
+            <div class="status-limit-section moment-card" style="padding: 10px; margin-bottom: 15px;"> <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px; border-bottom: var(--pixel-border-width) dashed var(--theme-primary-accent); padding-bottom: 5px;">DAILY STATUS & LIMITS</h2> <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 5px 0; border-bottom: 1px dotted #ccc;"> <span style="font-size: 18px;">CIGARETTES: <strong id="todayCigaretteCount">0</strong> / <span id="cigaretteLimitDisplay">5</span></span> <div class="limit-setting" style="display: flex; gap: 5px; align-items: center;"> <label for="setLimitInput" style="font-size: 14px;">Limit:</label> <input type="number" id="setLimitInput" min="0" value="5"> <button class="action-button" id="saveLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div> <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding: 5px 0;"> <span style="font-size: 18px;">TOTAL VAPE TIME: <strong id="todayTotalVapeTimeDisplay">0m 0s</strong> / <span id="dailyVapeTimeLimitDisplay">5m 0s</span></span> <div class="limit-setting" style="display: flex; gap: 5px; align-items: center;"> <label for="setDailyVapeTimeLimitInput" style="font-size: 14px;">Limit (min):</label> <input type="number" id="setDailyVapeTimeLimitInput" min="0" value="5"> <button class="action-button" id="saveDailyVapeTimeLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button> </div> </div> </div>
+            <div class="log-history-section"> <h2 style="text-align: center; color: var(--theme-secondary-accent); font-size: 20px; margin-bottom: 10px;">RECENT LOG</h2> <ul class="moments-list" id="smokeLogList"> <li class="moment-card no-items-placeholder" id="noLogsPlaceholder" style="padding: 15px; text-align: center; color: #888; display: none;">NO LOGS YET TODAY</li> </ul> </div>
+            <div class="progress-section moment-card" style="padding: 10px; margin-top: 20px; text-align: center; background-color: var(--theme-light-bg);"> <h2 style="font-size: 18px; color: var(--theme-primary-dark); margin-bottom: 10px;">PROGRESS OVERVIEW</h2> <p style="color: #666;">[Charts/Streak Visuals Here]</p> <div style="margin-top: 15px; padding: 8px; border: var(--pixel-border-width) dashed var(--theme-primary-accent);"> <span style="font-size: 18px;">Current 'Under Limit' Streak: <strong style="color: var(--theme-primary-accent);" id="streakDisplay">0 Days</strong></span> <i class="fas fa-fire" style="color: var(--theme-highlight-accent);"></i> </div> </div>
+        </div>
     </div>
 
-    <!-- Reason Modal (Unchanged) -->
+    <!-- Shop Toolbar Link -->
+     <div class="shop-toolbar-fixed" id="shopToolbar"> <a href="shop.html" class="shop-toolbar-header-link" id="shopToolbarHeaderLink"> <span><i class="fas fa-store"></i> THEME SHOP</span> <span class="shop-pts-display"> <i class="fas fa-coins points-icon"></i> <span id="shopUserPoints">0</span> PTS </span> <i class="fas fa-arrow-right"></i> </a> </div>
+    <!-- Reason Modal -->
     <div class="modal-overlay" id="reasonModalOverlay"> <div class="modal-content"> <h3>Why this time? (Optional)</h3> <textarea id="reasonInput" placeholder="e.g., stressed, bored, social, craving..."></textarea> <input type="hidden" id="reasonLogTimestamp"> <div class="modal-actions"> <button id="saveReasonButton">SAVE REASON</button> <button id="cancelReasonButton">CANCEL</button> </div> </div> </div>
-
-    <!-- Toast Notification (Unchanged) -->
+    <!-- Toast Notification -->
     <div class="toast-notification" id="toastNotification">Toast message</div>
 
     <script src="smoke-tracker-script.js"></script>
