@@ -1,333 +1,139 @@
-// smoke-tracker-script.js
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smoke Tracker - IDKY Retro</title>
+    <!-- Link to the EXISTING style.css -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Keep the same font and icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Optional: Include particle canvas for consistency -->
+    <canvas id="particleCanvas"></canvas>
 
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Constants and State Variables ---
-    const localStorageKeySuffix = '_v27_theme_shop'; // Keep consistent with index.html
-
-    // --- Element Selectors ---
-    const userPointsDisplay = document.getElementById('userPoints');
-    const smokeFreeStreakDisplay = document.getElementById('smokeFreeStreak');
-    const healthMilestonesDisplay = document.getElementById('healthMilestones');
-    const shopUserPointsDisplay = document.getElementById('shopUserPoints');
-
-    const logCigaretteButton = document.getElementById('logCigaretteButton');
-    const logVapeButton = document.getElementById('logVapeButton');
-
-    const todayCigaretteCountDisplay = document.getElementById('todayCigaretteCount');
-    const cigaretteLimitDisplay = document.getElementById('cigaretteLimitDisplay');
-    const setLimitInput = document.getElementById('setLimitInput'); // Cigarette limit input
-    const saveLimitButton = document.getElementById('saveLimitButton'); // Cigarette limit save
-
-    // NOTE: Added elements for vape limit - YOU NEED TO ADD THESE TO smoke-tracker.html
-    const todayVapeCountDisplay = document.getElementById('todayVapeCount');
-    const vapeLimitDisplay = document.getElementById('vapeLimitDisplay');
-    // Assume HTML elements like these exist:
-    // <label for="setVapeLimitInput">Set Daily Vape Limit:</label>
-    // <input type="number" id="setVapeLimitInput" ... >
-    // <button id="saveVapeLimitButton">SET</button>
-    const setVapeLimitInput = document.getElementById('setVapeLimitInput');
-    const saveVapeLimitButton = document.getElementById('saveVapeLimitButton');
-
-    const smokeLogList = document.getElementById('smokeLogList');
-    const toastNotification = document.getElementById('toastNotification'); // Assumes toast element exists
-
-    // --- State ---
-    let userPoints = 0;
-    let smokeFreeStreak = 0; // Consecutive days under *both* limits
-    let healthMilestones = 0; // Simple counter for achieved goals/streaks
-    let dailyCigaretteLimit = 5;
-    let dailyVapeLimit = 15;
-    let smokeLog = []; // Array of { type: 'cigarette'/'vape', timestamp: Date.now() }
-    let lastLogDate = ''; // YYYY-MM-DD format to check for day changes
-    let todayCigaretteCount = 0;
-    let todayVapeCount = 0;
-    let lastDayStreakIncremented = ''; // YYYY-MM-DD
-
-    // --- Load State ---
-    function loadState() {
-        userPoints = parseInt(localStorage.getItem('idk_user_points_val' + localStorageKeySuffix)) || 0;
-        smokeFreeStreak = parseInt(localStorage.getItem('smoketrack_streak' + localStorageKeySuffix)) || 0;
-        healthMilestones = parseInt(localStorage.getItem('smoketrack_milestones' + localStorageKeySuffix)) || 0;
-        dailyCigaretteLimit = parseInt(localStorage.getItem('smoketrack_cig_limit' + localStorageKeySuffix)) || 5;
-        dailyVapeLimit = parseInt(localStorage.getItem('smoketrack_vape_limit' + localStorageKeySuffix)) || 15;
-        smokeLog = JSON.parse(localStorage.getItem('smoketrack_log' + localStorageKeySuffix)) || [];
-        lastLogDate = localStorage.getItem('smoketrack_last_log_date' + localStorageKeySuffix) || '';
-        todayCigaretteCount = parseInt(localStorage.getItem('smoketrack_today_cig' + localStorageKeySuffix)) || 0;
-        todayVapeCount = parseInt(localStorage.getItem('smoketrack_today_vape' + localStorageKeySuffix)) || 0;
-        lastDayStreakIncremented = localStorage.getItem('smoketrack_last_streak_date' + localStorageKeySuffix) || '';
-
-        // Set input values from loaded limits
-        if (setLimitInput) setLimitInput.value = dailyCigaretteLimit;
-        if (setVapeLimitInput) setVapeLimitInput.value = dailyVapeLimit;
-    }
-
-    // --- Save State ---
-    function saveState() {
-        localStorage.setItem('idk_user_points_val' + localStorageKeySuffix, userPoints.toString());
-        localStorage.setItem('smoketrack_streak' + localStorageKeySuffix, smokeFreeStreak.toString());
-        localStorage.setItem('smoketrack_milestones' + localStorageKeySuffix, healthMilestones.toString());
-        localStorage.setItem('smoketrack_cig_limit' + localStorageKeySuffix, dailyCigaretteLimit.toString());
-        localStorage.setItem('smoketrack_vape_limit' + localStorageKeySuffix, dailyVapeLimit.toString());
-        localStorage.setItem('smoketrack_log' + localStorageKeySuffix, JSON.stringify(smokeLog));
-        localStorage.setItem('smoketrack_last_log_date' + localStorageKeySuffix, lastLogDate);
-        localStorage.setItem('smoketrack_today_cig' + localStorageKeySuffix, todayCigaretteCount.toString());
-        localStorage.setItem('smoketrack_today_vape' + localStorageKeySuffix, todayVapeCount.toString());
-        localStorage.setItem('smoketrack_last_streak_date' + localStorageKeySuffix, lastDayStreakIncremented);
-    }
-
-    // --- Utility Functions (Adapted/Simplified from index.html script) ---
-    function showToast(message, duration = 2500) {
-        if (toastNotification) {
-            toastNotification.textContent = message;
-            toastNotification.classList.add('show');
-            setTimeout(() => {
-                toastNotification.classList.remove('show');
-            }, duration);
-        } else {
-            console.log("Toast:", message); // Fallback if toast element isn't present
-        }
-    }
-
-    function triggerPointsFlash() {
-        const mainPointsDisplay = document.querySelector('.header-stats-bar .points-display:first-child');
-        if (mainPointsDisplay) {
-            mainPointsDisplay.classList.add('points-earned-flash');
-            setTimeout(() => {
-                if (mainPointsDisplay) mainPointsDisplay.classList.remove('points-earned-flash');
-            }, 500);
-        }
-    }
-
-    function addPoints(amount, reason = "") {
-        if (amount > 0) {
-            userPoints += amount;
-            showToast(`+${amount} PTS! ${reason}`.trim());
-            triggerPointsFlash();
-            updateHeaderDisplays();
-            saveState();
-            // Potential particle effect call here if needed
-        }
-    }
-
-    function getCurrentDateString() {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-        const day = String(today.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-
-    // --- Core Logic Functions ---
-
-    function checkDateAndResetCounts() {
-        const currentDate = getCurrentDateString();
-        if (currentDate !== lastLogDate) {
-            console.log(`Date changed from ${lastLogDate} to ${currentDate}. Resetting counts.`);
-
-            // --- Streak Calculation (Before Resetting Counts!) ---
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = getCurrentDateString(yesterday); // Need to format yesterday's date
-
-            // Check if *yesterday* was under the limit
-            const yesterdayWasUnderLimit = (todayCigaretteCount <= dailyCigaretteLimit && todayVapeCount <= dailyVapeLimit);
-
-            if (lastLogDate && yesterdayWasUnderLimit) { // Only update streak if there *was* a previous log day
-                if (lastDayStreakIncremented === yesterdayStr) {
-                    // Consecutive day under limit
-                    smokeFreeStreak++;
-                    lastDayStreakIncremented = currentDate; // Update streak date to today
-                    showToast(`Streak Extended! ${smokeFreeStreak} Days!`);
-                    addPoints(5, `Streak: ${smokeFreeStreak} Days`); // Award points for extending streak
-
-                    // Check for milestone achievements based on streak
-                    if ([3, 7, 14, 30].includes(smokeFreeStreak)) {
-                         healthMilestones++;
-                         addPoints(10 * (smokeFreeStreak/2), `Milestone: ${smokeFreeStreak}-Day Streak!`); // Bigger bonus for milestones
-                         showToast(`MILESTONE! ${smokeFreeStreak}-Day Streak Achieved!`);
-                         // Increment achievements display needed here
-                    }
-
-                } else if (lastLogDate === yesterdayStr) {
-                    // It was yesterday, under limit, but streak wasn't incremented yesterday (missed a day before?)
-                    // Reset streak to 1 (for yesterday)
-                    smokeFreeStreak = 1;
-                    lastDayStreakIncremented = currentDate; // Start streak from today
-                    showToast("Streak Started: 1 Day!");
-                    addPoints(2, "Streak Started!");
-                } else {
-                     // Gap since last under-limit day, reset streak
-                    smokeFreeStreak = 0;
-                    lastDayStreakIncremented = '';
-                    showToast("Streak Reset.");
-                }
-            } else if (lastLogDate) {
-                // Yesterday was over limit or no previous log day
-                smokeFreeStreak = 0;
-                lastDayStreakIncremented = '';
-                 showToast("Streak Reset.");
-            }
-
-            // --- Reset Daily Counts ---
-            todayCigaretteCount = 0;
-            todayVapeCount = 0;
-            lastLogDate = currentDate; // Update the last log date to today
-
-            saveState(); // Save the reset counts and new date/streak info
-        }
-    }
-
-    function logSmokeEvent(type) {
-        checkDateAndResetCounts(); // Ensure counts are for today
-
-        const logEntry = { type: type, timestamp: Date.now() };
-        smokeLog.unshift(logEntry); // Add to beginning of array
-
-        // Limit log size for performance (e.g., keep last 100 entries)
-        if (smokeLog.length > 100) {
-            smokeLog.pop();
-        }
-
-        let message = "";
-        if (type === 'cigarette') {
-            todayCigaretteCount++;
-            message = "Cigarette logged.";
-        } else if (type === 'vape') {
-            todayVapeCount++;
-            message = "Vape hit logged.";
-        }
-
-        // Check if over limit *after* logging
-        const cigOver = todayCigaretteCount > dailyCigaretteLimit;
-        const vapeOver = todayVapeCount > dailyVapeLimit;
-
-        if (cigOver || vapeOver) {
-            showToast(message + " Careful, over the limit!", 3000);
-            // Reset streak immediately if they go over limit mid-day? Or wait till EOD check?
-            // Let's wait for EOD check via checkDateAndResetCounts for simplicity
-        } else {
-            showToast(message);
-        }
-
-        updateStatusDisplay();
-        renderSmokeLog();
-        saveState();
-    }
-
-    function updateHeaderDisplays() {
-        if (userPointsDisplay) userPointsDisplay.textContent = userPoints;
-        if (smokeFreeStreakDisplay) smokeFreeStreakDisplay.textContent = smokeFreeStreak;
-        if (healthMilestonesDisplay) healthMilestonesDisplay.textContent = healthMilestones;
-        if (shopUserPointsDisplay) shopUserPointsDisplay.textContent = userPoints; // Keep shop points updated
-    }
-
-    function updateStatusDisplay() {
-        if (todayCigaretteCountDisplay) todayCigaretteCountDisplay.textContent = todayCigaretteCount;
-        if (cigaretteLimitDisplay) cigaretteLimitDisplay.textContent = dailyCigaretteLimit;
-        if (todayVapeCountDisplay) todayVapeCountDisplay.textContent = todayVapeCount;
-        if (vapeLimitDisplay) vapeLimitDisplay.textContent = dailyVapeLimit;
-
-        // Optional: Add visual cues for being over limit
-        if (todayCigaretteCountDisplay) {
-           todayCigaretteCountDisplay.parentElement.classList.toggle('over-limit', todayCigaretteCount > dailyCigaretteLimit);
-        }
-         if (todayVapeCountDisplay) {
-           todayVapeCountDisplay.parentElement.classList.toggle('over-limit', todayVapeCount > dailyVapeLimit);
-        }
-        // You'd need to add a CSS rule for `.over-limit { color: var(--theme-highlight-accent); font-weight: bold; }` or similar in style.css
-    }
-
-    function renderSmokeLog() {
-        if (!smokeLogList) return;
-        smokeLogList.innerHTML = ''; // Clear existing list
-
-        // Render maybe the last 15-20 logs for performance
-        const logsToRender = smokeLog.slice(0, 20);
-
-        logsToRender.forEach(log => {
-            const listItem = document.createElement('li');
-            listItem.className = 'moment-card'; // Reuse existing style
-            // Remove animation for log items to avoid constant flashing
-            listItem.style.opacity = '1';
-            listItem.style.animation = 'none';
-            listItem.style.padding = '8px';
-            listItem.style.marginBottom = '8px';
-
-            const logTime = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            const logDate = new Date(log.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric'});
-
-            let iconClass = '';
-            let iconColor = '';
-            let text = '';
-
-            if (log.type === 'cigarette') {
-                iconClass = 'fas fa-smoking';
-                iconColor = 'var(--theme-highlight-accent)';
-                text = 'Cigarette Logged';
-            } else if (log.type === 'vape') {
-                iconClass = 'fas fa-vial'; // Or fa-smog?
-                iconColor = 'var(--theme-primary-accent)';
-                text = 'Vape Hit Logged';
-            }
-
-            listItem.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span><i class="${iconClass}" style="color: ${iconColor}; margin-right: 8px;"></i> ${text}</span>
-                    <span style="font-size: 14px; color: #666;">${logDate} @ ${logTime}</span>
+    <div class="app-container">
+        <!-- Reuse Header Section Structure -->
+        <div class="header-section">
+            <div class="app-title-bar">
+                <div class="app-title-container">
+                    <!-- Keep icon, adapt title -->
+                    <i class="fas fa-smoking title-icon"></i>
+                    <h1>Smoke Tracker</h1>
                 </div>
-            `;
-            smokeLogList.appendChild(listItem);
-        });
-    }
+            </div>
+            <!-- Reuse Stats Bar Structure -->
+            <div class="header-stats-bar">
+                <div class="points-display">
+                    <i class="fas fa-coins points-icon"></i> <span id="userPoints">0</span> PTS
+                </div>
+                <!-- Add a new stat relevant to smoking -->
+                <div class="points-display">
+                    <i class="fas fa-calendar-check points-icon"></i> <span id="smokeFreeStreak">0</span> DAY STREAK
+                </div>
+                <div class="points-display">
+                    <i class="fas fa-star points-icon gold-star-icon"></i> <span id="healthMilestones">0</span> ACHIEVED
+                </div>
+            </div>
+        </div>
 
-    // --- Event Listeners ---
-    if (logCigaretteButton) {
-        logCigaretteButton.addEventListener('click', () => logSmokeEvent('cigarette'));
-    }
+        <!-- Main Content for Smoke Tracker -->
+        <div class="smoke-tracker-content">
 
-    if (logVapeButton) {
-        logVapeButton.addEventListener('click', () => logSmokeEvent('vape'));
-    }
+            <!-- Section for Quick Logging -->
+            <div class="log-actions-section moment-card" style="padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center;">
+                 <button class="log-button" id="logCigaretteButton" style="width: 45%; font-size: 16px; padding: 10px;">
+                    <i class="fas fa-smoking"></i> LOG CIGARETTE
+                 </button>
+                 <button class="log-button" id="logVapeButton" style="width: 45%; font-size: 16px; padding: 10px; background-color: var(--theme-primary-accent);">
+                    <i class="fas fa-vial"></i> LOG VAPE HIT
+                 </button>
+                 <!-- Add Start/Stop for vape session later if needed -->
+            </div>
 
-    if (saveLimitButton && setLimitInput) {
-        saveLimitButton.addEventListener('click', () => {
-            const newLimit = parseInt(setLimitInput.value);
-            if (!isNaN(newLimit) && newLimit >= 0) {
-                dailyCigaretteLimit = newLimit;
-                updateStatusDisplay();
-                saveState();
-                showToast(`Cigarette limit set to ${dailyCigaretteLimit}.`);
-            } else {
-                showToast("Invalid limit value.");
-                setLimitInput.value = dailyCigaretteLimit; // Reset to current value
-            }
-        });
-    }
+            <!-- Section for Status & Limits -->
+            <div class="status-limit-section moment-card" style="padding: 10px; margin-bottom: 15px;">
+                <h2 style="text-align: center; color: var(--theme-primary-accent); font-size: 20px; margin-bottom: 10px; border-bottom: var(--pixel-border-width) dashed var(--theme-primary-accent); padding-bottom: 5px;">DAILY STATUS</h2>
+                <div style="display: flex; justify-content: space-around; margin-bottom: 10px;">
+                    <span style="font-size: 18px;">CIGARETTES: <strong id="todayCigaretteCount">2</strong> / <span id="cigaretteLimitDisplay">5</span></span>
+                    <span style="font-size: 18px;">VAPE HITS: <strong id="todayVapeCount">8</strong> / <span id="vapeLimitDisplay">15</span></span>
+                </div>
+                <div class="limit-setting" style="display: flex; gap: 10px; align-items: center; justify-content: center; margin-top: 10px; padding-top: 10px; border-top: var(--pixel-border-width) dotted #bbb;">
+                    <label for="setLimitInput" style="font-size: 16px;">Set Daily Cig Limit:</label>
+                    <input type="number" id="setLimitInput" min="0" value="5" style="width: 60px; padding: 4px; font-family: 'VT323', monospace; font-size: 16px; border: var(--pixel-border-width) solid var(--theme-border-main); background-color: var(--theme-light-bg); color: var(--theme-text-main); text-align: center;">
+                    <button class="action-button" id="saveLimitButton" style="font-size: 14px; background-color: var(--theme-tertiary-accent); color: var(--theme-card-bg); padding: 4px 8px;">SET</button>
+                     <!-- Add similar input for vape limit -->
+                </div>
+            </div>
 
-    // Add listener for vape limit save button
-    if (saveVapeLimitButton && setVapeLimitInput) {
-         saveVapeLimitButton.addEventListener('click', () => {
-            const newLimit = parseInt(setVapeLimitInput.value);
-            if (!isNaN(newLimit) && newLimit >= 0) {
-                dailyVapeLimit = newLimit;
-                updateStatusDisplay();
-                saveState();
-                showToast(`Vape limit set to ${dailyVapeLimit}.`);
-            } else {
-                showToast("Invalid limit value.");
-                setVapeLimitInput.value = dailyVapeLimit; // Reset
-            }
-        });
-    }
+            <!-- Section for Log History -->
+            <div class="log-history-section">
+                 <h2 style="text-align: center; color: var(--theme-secondary-accent); font-size: 20px; margin-bottom: 10px;">RECENT LOG</h2>
+                 <!-- Reuse moments-list styling -->
+                 <ul class="moments-list" id="smokeLogList">
+                    <!-- Example Log Item (Use moment-card styling) -->
+                    <li class="moment-card" style="padding: 8px; margin-bottom: 8px; opacity: 1; animation: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fas fa-smoking" style="color: var(--theme-highlight-accent); margin-right: 5px;"></i> Cigarette Logged</span>
+                            <span style="font-size: 14px; color: #666;">Today @ 10:32 AM</span>
+                        </div>
+                    </li>
+                    <li class="moment-card" style="padding: 8px; margin-bottom: 8px; opacity: 1; animation: none;">
+                         <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fas fa-vial" style="color: var(--theme-primary-accent); margin-right: 5px;"></i> Vape Hit Logged</span>
+                            <span style="font-size: 14px; color: #666;">Today @ 09:15 AM</span>
+                        </div>
+                    </li>
+                     <li class="moment-card" style="padding: 8px; margin-bottom: 8px; opacity: 1; animation: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fas fa-smoking" style="color: var(--theme-highlight-accent); margin-right: 5px;"></i> Cigarette Logged</span>
+                            <span style="font-size: 14px; color: #666;">Today @ 08:01 AM</span>
+                        </div>
+                    </li>
+                    <!-- Add more placeholder items -->
+                 </ul>
+            </div>
 
-    // --- Initial Setup ---
-    loadState();
-    checkDateAndResetCounts(); // Run on load to handle potential day change since last visit
-    updateHeaderDisplays();
-    updateStatusDisplay();
-    renderSmokeLog();
+             <!-- Placeholder for Progress Charts/Streaks Visualization -->
+            <div class="progress-section moment-card" style="padding: 10px; margin-top: 20px; text-align: center; background-color: var(--theme-light-bg);">
+                <h2 style="font-size: 18px; color: var(--theme-primary-dark); margin-bottom: 10px;">PROGRESS OVERVIEW</h2>
+                <p style="color: #666;">[Charts/Streak Visuals Here]</p>
+                 <!-- E.g., Placeholder for a simple streak display -->
+                 <div style="margin-top: 15px; padding: 8px; border: var(--pixel-border-width) dashed var(--theme-primary-accent);">
+                     <span style="font-size: 18px;">Current 'Under Limit' Streak: <strong style="color: var(--theme-primary-accent);">3 Days</strong></span> <i class="fas fa-fire" style="color: var(--theme-highlight-accent);"></i>
+                 </div>
+            </div>
 
-    console.log("Smoke Tracker Initialized.");
-    console.log("Current State:", { userPoints, smokeFreeStreak, healthMilestones, dailyCigaretteLimit, dailyVapeLimit, todayCigaretteCount, todayVapeCount, lastLogDate });
+        </div> <!-- End smoke-tracker-content -->
 
-}); // End DOMContentLoaded
+    </div> <!-- End app-container -->
+
+    <!-- Optional: Reuse Shop Toolbar Link for consistent navigation -->
+     <div class="shop-toolbar-fixed" id="shopToolbar">
+        <div class="shop-toolbar-header" id="shopToolbarHeader" onclick="window.location.href='shop.html'">
+            <span><i class="fas fa-palette"></i> THEME SHOP</span>
+            <span class="shop-pts-display">
+                <i class="fas fa-coins points-icon"></i> <span id="shopUserPoints">0</span> PTS
+            </span>
+            <!-- Use a simple link/indicator instead of accordion toggle for prototype -->
+             <i class="fas fa-arrow-right"></i>
+        </div>
+         <!-- Minimal content just showing it's a link -->
+        <div class="shop-accordion-content" id="shopAccordionContent">
+             <div class="theme-item" style="justify-content: center; padding: 10px;">
+                <span>Visit Theme Emporium...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add a minimal script part if needed for basic interactions later, or link to a new JS file -->
+    <!-- <script src="smoke-tracker-script.js"></script> -->
+    <!-- Include particle script if canvas is used -->
+    <!-- <script> /* Basic particle setup if needed */ </script> -->
+
+</body>
+</html>
