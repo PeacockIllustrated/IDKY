@@ -334,7 +334,7 @@ textarea:focus, input[type="text"]:focus, input[type="number"]:focus {
 /* ==========================================================================
    SECTION: SMOKE TRACKER SPECIFIC UI
    ========================================================================== */
-.smoke-tracker-content .moment-card { padding: 15px; /* More general padding for smoke tracker sections */ }
+.smoke-tracker-content .moment-card { padding: 15px; } /* General padding for smoke tracker sections */
 .timer-display {
     font-size: 28px; background-color: var(--theme-primary-dark); color: var(--theme-text-on-dark);
     padding: 5px 10px; border: var(--pixel-border-width) solid var(--theme-primary-accent);
@@ -344,7 +344,7 @@ textarea:focus, input[type="text"]:focus, input[type="number"]:focus {
 .timer-display.counting-down { border-color: var(--theme-secondary-accent); }
 .timer-display.warning { animation: pulseWarning 1s infinite; border-color: var(--theme-highlight-accent); }
 /* smokeLogList uses .moments-list which has no base style, items are .moment-card */
-.smokeLogList .moment-card { padding: 8px !important; } /* Specific padding for log items */
+#smokeLogList .moment-card { padding: 8px !important; } /* Specific padding for log items */
 .log-item-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px; }
 .log-item-details { display: flex; align-items: center; flex-grow: 1; }
 .log-item-time { font-size: 14px; color: #666; white-space: nowrap; }
@@ -435,7 +435,7 @@ textarea:focus, input[type="text"]:focus, input[type="number"]:focus {
 .modal-actions button#cancelReasonButton { background-color: #aaa; color: var(--theme-primary-dark); }
 
 /* Quiz Modal styles (index.html) */
-.quiz-modal { /* The .modal-content div when it's a quiz */
+.quiz-modal-overlay .modal-content { /* Target .modal-content specifically inside quiz overlay */
     max-width: 550px; /* Quiz modal can be a bit wider */
 }
 .quiz-modal h2 { /* Overrides .modal-content h3 for quiz */
@@ -480,50 +480,46 @@ textarea:focus, input[type="text"]:focus, input[type="number"]:focus {
     color: var(--theme-text-on-dark); border-top: var(--pixel-border-width) solid var(--theme-border-main);
     box-shadow: 0 -2px 5px rgba(0,0,0,0.2); z-index: 1000;
 }
-/* For smoke-tracker.html (direct link) */
-.shop-toolbar-header-link {
+/* For smoke-tracker.html AND index.html (direct link style) */
+.shop-toolbar-header-link, /* For smoke-tracker */
+#shopToolbar .shop-toolbar-header /* For index.html - the <a> tag container */
+{
     display: flex; justify-content: space-between; align-items: center; padding: 8px 15px;
     font-size: 18px; color: var(--theme-text-on-dark); text-decoration: none; cursor: pointer;
     transition: background-color 0.1s ease;
 }
-.shop-toolbar-header-link:hover { background-color: color-mix(in srgb, var(--theme-primary-dark) 85%, white); }
-.shop-toolbar-header-link i { margin-right: 5px; }
-.shop-pts-display { font-size: 16px; margin-left: auto; margin-right: 15px; }
-
-/* For index.html (accordion-like header that is a link) */
-#shopToolbar .shop-toolbar-header {
-    display: flex; justify-content: space-between; align-items: center; padding: 8px 15px;
-    font-size: 18px; color: var(--theme-text-on-dark); text-decoration: none;
-    cursor: pointer; transition: background-color 0.1s ease;
-}
+.shop-toolbar-header-link:hover,
 #shopToolbar .shop-toolbar-header:hover { background-color: color-mix(in srgb, var(--theme-primary-dark) 85%, white); }
-#shopToolbar .shop-pts-display { /* Already styled by .shop-pts-display */ }
-#shopToolbar .shop-toggle-icon { /* This icon might be visually misleading on index.html */
-    /* Consider hiding it for index.html if it's purely a link: display: none; */
+
+.shop-pts-display { font-size: 16px; margin-left: auto; margin-right: 15px; }
+#shopToolbar .shop-pts-display { /* Ensures consistency if any diffs */
+    font-size: 16px; margin-left: auto; margin-right: 15px;
 }
-#shopToolbar .shop-accordion-content { padding: 10px; /* JS replaces this content */ }
-.shop-page-link-button { /* Style for the dynamically inserted button on index.html */
-    display: inline-block !important; padding: 8px 15px !important;
-    background-color: var(--theme-secondary-accent) !important; color: var(--theme-primary-dark) !important;
-    text-decoration: none !important; font-size: 16px !important;
-    border: var(--pixel-border-width) solid var(--theme-primary-dark) !important;
-    box-shadow: 1px 1px 0 var(--theme-primary-dark) !important;
-    transition: all 0.1s ease !important; font-family: 'VT323', monospace !important; text-align: center;
+
+
+/* If #shopToolbarHeader on index.html is the <a> tag itself after changes: */
+/* #shopToolbarHeaderLink { ... } */
+
+
+/* index.html no longer has shopAccordionContent or shop-page-link-button from JS directly */
+/* The link is now simpler, ensure the icon inside it is styled if needed */
+#shopToolbarHeaderLink i.fa-arrow-right,
+#shopToolbar .shop-toolbar-header i.fa-chevron-up /* If icon is still there */
+{
+    /* Style for the right-side icon in the toolbar link */
+    color: var(--theme-secondary-accent);
 }
-.shop-page-link-button:hover { background-color: color-mix(in srgb, var(--theme-secondary-accent) 90%, black) !important; transform: translateY(-1px) !important; box-shadow: 2px 2px 0 var(--theme-primary-dark) !important; }
-.shop-page-link-button:active { transform: translate(1px, 1px) !important; box-shadow: none !important; }
 
 
 /* ==========================================================================
    SECTION: TOAST NOTIFICATIONS
    ========================================================================== */
 .toast-notification {
-    position: fixed; bottom: 10px; /* Default bottom-left for IDKY */
-    /* For smoke-tracker.html, it might be styled differently if it has its own #toastNotification */
+    position: fixed; bottom: 10px;
     left: 10px;
     background-color: var(--theme-primary-dark);
     color: var(--theme-text-on-dark); padding: 10px 15px; border: var(--pixel-border-width) solid var(--theme-primary-accent);
-    font-size: 16px; font-family: 'VT323', monospace; z-index: 4000; /* Above quiz modal */
+    font-size: 16px; font-family: 'VT323', monospace; z-index: 4000;
     opacity: 0; transform: translateY(50px);
     transition: transform 0.3s ease-out, opacity 0.3s ease-out; box-shadow: 2px 2px 0px 0px var(--theme-primary-accent);
 }
@@ -533,9 +529,9 @@ textarea:focus, input[type="text"]:focus, input[type="number"]:focus {
 /* ==========================================================================
    SECTION: PARTICLE CANVAS
    ========================================================================== */
-#particleCanvas, /* For index.html */
-#particleCanvasShop, /* For shop.html */
-#particleCanvasSmokeTracker /* Assuming smoke-tracker.html also has its own canvas with this ID if particles are independent */
+#particleCanvas,
+#particleCanvasShop,
+#particleCanvasSmokeTracker /* Assuming smoke-tracker might have its own canvas */
 {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     pointer-events: none; z-index: -1;
@@ -596,12 +592,12 @@ textarea:focus, input[type="text"]:focus, input[type="number"]:focus {
 /* ==========================================================================
    SECTION: SHOP / VENDING MACHINE STYLES (for shop.html)
    ========================================================================== */
-body.shop-active { background-color: var(--theme-primary-dark, #1a202c); color: var(--theme-text-on-dark, #EAEAEA); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; /* overflow: hidden; /* REMOVED to allow scrolling for tall vending machine on small screens */ }
-.vending-machine-page-container { width: 100%; max-width: 700px; position: relative; margin: auto; /* For centering when body is scrollable */ }
-.shop-navigation-area { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 100; }
-.shop-nav-button { font-size: 16px; color: var(--theme-secondary-accent, #E9C46A); text-decoration: none; padding: 8px 15px; border: var(--pixel-border-width) solid var(--theme-secondary-accent, #E9C46A); background-color: rgba(from var(--theme-primary-dark, #000) r g b / 0.7); box-shadow: 2px 2px 0 var(--theme-secondary-accent, #E9C46A); transition: all 0.2s ease; white-space: nowrap; font-family: 'VT323', monospace; }
-.shop-nav-button:hover { background-color: var(--theme-secondary-accent, #E9C46A); color: var(--theme-primary-dark, #264653); transform: translateY(-2px); box-shadow: 3px 3px 0 var(--theme-primary-dark, #264653); }
+body.shop-active { background-color: var(--theme-primary-dark, #1a202c); color: var(--theme-text-on-dark, #EAEAEA); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; padding: 20px; overflow-y: auto; }
+.shop-navigation-area { display: flex; gap: 15px; margin-bottom: 25px; padding: 10px; background-color: rgba(from var(--theme-primary-dark, #000) r g b / 0.5); border-radius: 5px; border: var(--pixel-border-width) solid var(--theme-secondary-accent); box-shadow: 2px 2px 0 var(--theme-secondary-accent); z-index: 100; }
+.shop-nav-button { font-size: 16px; color: var(--theme-secondary-accent, #E9C46A); text-decoration: none; padding: 8px 15px; border: var(--pixel-border-width) solid var(--theme-secondary-accent, #E9C46A); background-color: transparent; box-shadow: 1px 1px 0 var(--theme-secondary-accent, #E9C46A); transition: all 0.2s ease; white-space: nowrap; font-family: 'VT323', monospace; }
+.shop-nav-button:hover { background-color: var(--theme-secondary-accent, #E9C46A); color: var(--theme-primary-dark, #264653); transform: translateY(-1px); box-shadow: 2px 2px 0 var(--theme-primary-dark, #264653); }
 .shop-nav-button i { margin-right: 8px; }
+.vending-machine-page-container { width: 100%; max-width: 700px; margin: 0 auto; }
 .vending-machine { width: 100%; background-color: var(--theme-tertiary-accent, #c0c0c0); border: 4px solid var(--theme-primary-dark, #333); border-radius: 10px; box-shadow: inset 0 0 15px rgba(0,0,0,0.3), 5px 5px 0px var(--theme-primary-dark, #111), 0 0 30px rgba(from var(--theme-secondary-accent, #E9C46A) r g b / 0.3); padding: 15px; display: flex; flex-direction: column; }
 .vending-machine-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; margin-bottom: 15px; background-color: var(--theme-primary-dark, #222); border: 2px solid var(--theme-border-main, #444); border-radius: 5px; box-shadow: inset 0 0 10px rgba(0,0,0,0.4); }
 .brand-logo h1 { font-size: 28px; color: var(--theme-secondary-accent, #E9C46A); text-shadow: 1px 1px 0 var(--theme-primary-dark, #000), 0 0 5px var(--theme-secondary-accent, #E9C46A); animation: flickerBrand 3s infinite alternate; letter-spacing: 1px; }
@@ -617,10 +613,10 @@ body.shop-active { background-color: var(--theme-primary-dark, #1a202c); color: 
 .vending-item-preview { width: 100%; height: 60px; display: flex; margin-bottom: 10px; border: 1px solid var(--theme-border-main, #ccc); }
 .vending-item-preview span { flex-grow: 1; height: 100%; transition: filter 0.2s ease; }
 .vending-item-slot:hover .vending-item-preview span { filter: brightness(1.1); }
-.vending-item-info { margin-bottom: 10px; }
-.vending-item-name { font-size: 18px; color: var(--theme-primary-accent, #2A9D8F); margin-bottom: 4px; font-weight:normal; } /* VT323 is often thin, bold is applied by h3 */
+.vending-item-info { margin-bottom: 10px; text-align: center; }
+.vending-item-name { font-size: 18px; color: var(--theme-primary-accent, #2A9D8F); margin-bottom: 4px; font-weight:normal; }
 .vending-item-description { font-size: 13px; color: var(--theme-text-main, #333); min-height: 2.6em; line-height: 1.3; overflow: hidden; }
-.vending-item-purchase-area { width: 100%; text-align: center; /* Center cost/status and button */ }
+.vending-item-purchase-area { width: 100%; text-align: center; }
 .vending-item-status { display: block; font-size: 13px; font-weight: bold; margin-bottom: 5px; min-height: 1.2em; }
 .vending-item-status.owned { color: var(--theme-tertiary-accent, #F4A261); }
 .vending-item-status.active { color: var(--theme-primary-accent, #2A9D8F); }
@@ -637,7 +633,7 @@ body.shop-active { background-color: var(--theme-primary-dark, #1a202c); color: 
 .brand-smallprint { font-size: 12px; color: var(--theme-text-on-dark, #aaa); opacity: 0.7; text-align: center; }
 /* Responsive Shop Styles */
 @media (max-width: 600px) {
-    .shop-navigation-area { position: static; transform: none; flex-direction: column; align-items: center; margin: 20px auto 20px auto; /* Added top margin */ }
+    .shop-navigation-area { flex-direction: column; align-items: center; margin: 20px auto 20px auto; width: fit-content; }
     .vending-machine-page-container { padding: 10px; }
     .vending-machine-header { flex-direction: column; align-items: center; }
     .brand-logo h1 { order: 1; font-size: 24px; margin-bottom: 10px; flex-basis: auto; text-align: center; }
