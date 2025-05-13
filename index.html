@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I DON'T KNOW, YET! - Retro Points Layout</title>
+    <title>I DON'T KNOW, YET! - Retro IDKY</title>
     <link rel="stylesheet" href="style.css"> <!-- Main styles -->
-    <!-- shop-style.css is NOT needed for index.html, only for shop.html -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <canvas id="particleCanvas"></canvas> <!-- Main particle canvas for index.html -->
+    <canvas id="particleCanvas"></canvas>
 
     <div class="app-container">
         <div class="header-section">
@@ -38,26 +37,33 @@
             </div>
             <div class="input-area">
                 <textarea id="idkInput" placeholder="LOG QUESTION OR STATEMENT..." rows="2"></textarea>
-                <button class="log-button" id="logButton">[+] LOG MOMENT</button>
+                <button class="log-button" id="logButton"><i class="fas fa-plus-circle"></i> LOG MOMENT</button>
             </div>
         </div>
 
-        <div class="list-controls-bar">
+        <div class="list-controls-bar" style="display: none;"> <!-- JS will show if moments exist -->
             <div class="select-all-container">
-                <button class="select-all-button" id="selectAllButton">SEL. ALL</button>
+                <button id="selectAllButton">SEL. ALL</button> <!-- JS updates text -->
                 <span id="selectedCount">0 SEL</span>
                 <span id="reviewedCountDisplay">(0/0 Reviewed)</span>
             </div>
-            <button class="test-knowledge-button" id="testKnowledgeButton" disabled>Test Knowledge!</button>
+            <button id="testKnowledgeButton" disabled>Test Knowledge!</button>
         </div>
-        <ul class="moments-list" id="momentsList"></ul>
-        <div class="no-moments-placeholder" id="noMomentsPlaceholder" style="display: none;">
-            <i class="far fa-lightbulb"></i> NO MOMENTS LOGGED.<br>CAPTURE YOUR CURIOSITIES!
+
+        <ul class="moments-list" id="momentsList">
+            <!-- Moment cards will be injected here by JS -->
+        </ul>
+        <div class="no-moments-placeholder" id="noMomentsPlaceholder" style="display: none;"> <!-- JS manages display -->
+            <i class="far fa-lightbulb" style="font-size: 1.5em; display: block; margin-bottom: 5px;"></i>
+            NO MOMENTS LOGGED.<br>CAPTURE YOUR CURIOSITIES!
         </div>
-        <div class="batch-process-button-container">
-            <button class="batch-process-button" id="processSelectedButton"> <i class="fas fa-cog"></i> PROCESS SELECTED </button>
+
+        <div class="batch-process-button-container" style="display: none;"> <!-- JS will show if moments exist -->
+            <button class="log-button" id="processSelectedButton" disabled> <i class="fas fa-cog"></i> PROCESS SELECTED </button>
         </div>
-        <div class="overall-loading-indicator" id="overallLoadingIndicator"></div>
+        <div class="overall-loading-indicator" id="overallLoadingIndicator" style="display: none;">
+            <!-- JS populates text -->
+        </div>
 
         <div class="accordion-section archived-knowledge-section">
             <div class="accordion-header" id="archiveHeader">
@@ -65,7 +71,9 @@
                 <i class="fas fa-chevron-down accordion-toggle-icon" id="archiveToggleIcon"></i>
             </div>
             <div class="accordion-content-container" id="archivedItemsListContainer">
-                <ul class="moments-list" id="archivedMomentsList"></ul>
+                <ul class="moments-list" id="archivedMomentsList">
+                    <!-- Archived moment cards injected here -->
+                </ul>
                 <div class="no-items-placeholder" id="noArchivedPlaceholder" style="display: none;">
                     NO ITEMS ARCHIVED YET.
                 </div>
@@ -78,7 +86,9 @@
                 <i class="fas fa-chevron-down accordion-toggle-icon" id="deepenedToggleIcon"></i>
             </div>
             <div class="accordion-content-container" id="deepenedItemsListContainer">
-                <ul class="moments-list" id="deepenedMomentsList"></ul>
+                <ul class="moments-list" id="deepenedMomentsList">
+                    <!-- Deepened moment cards injected here -->
+                </ul>
                 <div class="no-items-placeholder" id="noDeepenedPlaceholder" style="display: none;">
                     NO ITEMS FULLY MASTERED YET.
                 </div>
@@ -88,12 +98,17 @@
 
     <div class="toast-notification" id="toastNotification">Toast message</div>
 
-    <!-- Quiz Modal (remains on index.html) -->
-    <div class="quiz-modal-overlay" id="quizModalOverlay">
-        <div class="quiz-modal">
+    <!-- Quiz Modal -->
+    <div class="modal-overlay quiz-modal-overlay" id="quizModalOverlay">
+        <div class="modal-content quiz-modal"> <!-- Added .quiz-modal class here for specific styling -->
             <h2 id="quizModalTitle">KNOWLEDGE TEST!</h2>
-            <div class="quiz-question-area"> <p id="quizQuestionNumber"></p> <p class="quiz-question-text" id="quizQuestionText"></p> </div>
-            <div class="quiz-options-container" id="quizOptionsContainer"></div>
+            <div class="quiz-question-area">
+                <p id="quizQuestionNumber"></p>
+                <p class="quiz-question-text" id="quizQuestionText"></p>
+            </div>
+            <div class="quiz-options-container" id="quizOptionsContainer">
+                <!-- Options injected by JS -->
+            </div>
             <div class="quiz-feedback-area" id="quizFeedbackArea">CHOOSE AN OPTION.</div>
             <div class="quiz-modal-actions">
                 <button class="quiz-modal-button" id="submitQuizAnswerButton" disabled>SUBMIT ANSWER</button>
@@ -104,26 +119,25 @@
         </div>
     </div>
 
-    <!-- Shop Toolbar for index.html - Its content will be managed by script.js to be a link -->
+    <!-- Shop Toolbar (Fixed Bottom) -->
     <div class="shop-toolbar-fixed" id="shopToolbar">
-        <div class="shop-toolbar-header" id="shopToolbarHeader">
+        <div class="shop-toolbar-header" id="shopToolbarHeader"> <!-- JS makes this clickable -->
             <span><i class="fas fa-palette"></i> THEME SHOP</span>
             <span class="shop-pts-display">
                 <i class="fas fa-coins points-icon"></i> <span id="shopUserPoints">0</span> PTS
             </span>
-            <i class="fas fa-chevron-up shop-toggle-icon" id="shopToggleIcon"></i>
+            <i class="fas fa-chevron-up shop-toggle-icon" id="shopToggleIcon"></i> <!-- Icon might be just visual -->
         </div>
         <div class="shop-accordion-content" id="shopAccordionContent">
-            <!-- This content will be dynamically replaced by script.js with a link to shop.html -->
-            <!-- Fallback content in case JS fails or is delayed: -->
+            <!-- Content replaced by JS with a link button -->
             <div class="theme-item" style="justify-content: center; padding: 15px 10px;">
-                <a href="shop.html" class="shop-page-link-button" style="display: inline-block; padding: 8px 15px; background-color: var(--theme-secondary-accent, #E9C46A); color: var(--theme-primary-dark, #264653); text-decoration: none; font-size: 16px; border: var(--pixel-border-width, 2px) solid var(--theme-primary-dark, #264653); box-shadow: 1px 1px 0 var(--theme-primary-dark, #264653);">
+                <a href="shop.html" class="shop-page-link-button" style="/* Fallback styles if JS takes time to inject its own */ display: inline-block; padding: 8px 15px; background-color: var(--theme-secondary-accent, #E9C46A); color: var(--theme-primary-dark, #264653); text-decoration: none; font-size: 16px; border: var(--pixel-border-width, 2px) solid var(--theme-primary-dark, #264653); box-shadow: 1px 1px 0 var(--theme-primary-dark, #264653);">
                     <i class="fas fa-store"></i> VISIT THEME EMPORIUM
                 </a>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script> <!-- Main script for index.html -->
+    <script src="script.js"></script>
 </body>
 </html>
