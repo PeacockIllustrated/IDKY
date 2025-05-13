@@ -306,6 +306,146 @@ input[type="number"]:focus {
 
 
 /* ==========================================================================
+   SECTION: CALENDAR LOG (Smoke Tracker)
+   ========================================================================== */
+.calendar-log-container {
+    display: none; /* Hidden by default, JS toggles 'show' class */
+    margin-top: 15px; /* Space above calendar */
+    border: var(--pixel-border-width) solid var(--theme-primary-dark);
+    padding: 10px;
+    background-color: var(--theme-card-bg); /* Match card background */
+    box-shadow: 2px 2px 0 var(--theme-primary-dark);
+}
+.calendar-log-container.show {
+    display: block;
+    animation: retroFadeIn 0.4s ease-out;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: var(--theme-light-bg); /* Slightly different background for header */
+    border-bottom: var(--pixel-border-width) dashed var(--theme-border-main);
+}
+
+.calendar-nav-button {
+    background-color: var(--theme-tertiary-accent);
+    color: var(--theme-card-bg);
+    border: var(--pixel-border-width) solid var(--theme-primary-dark);
+    padding: 2px 8px; /* Adjusted padding */
+    font-size: 16px;
+    box-shadow: 1px 1px 0 var(--theme-primary-dark);
+    cursor: pointer;
+    font-family: 'VT323', monospace; /* Ensure font */
+    transition: all 0.1s ease;
+    outline: none;
+}
+.calendar-nav-button:hover {
+    background-color: color-mix(in srgb, var(--theme-tertiary-accent) 90%, black);
+    transform: translateY(-1px);
+    box-shadow: 2px 2px 0 var(--theme-primary-dark);
+}
+.calendar-nav-button:active {
+    transform: translate(1px, 1px);
+    box-shadow: none;
+}
+
+.calendar-month-year {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--theme-primary-accent);
+    text-shadow: 1px 1px 0 var(--theme-primary-dark);
+}
+
+.calendar-grid {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: transparent; /* Let container background show */
+    table-layout: fixed; /* Ensures columns are evenly spaced */
+}
+
+.calendar-grid th,
+.calendar-grid td {
+    border: var(--pixel-border-width) solid var(--theme-border-main);
+    text-align: center;
+    padding: 2px; /* Minimal padding */
+    height: 50px; /* Slightly taller cells */
+    position: relative; /* For absolute positioning of potential future icons */
+    overflow: hidden; /* Prevent content spillover */
+}
+
+.calendar-grid th {
+    background-color: var(--theme-light-bg);
+    font-size: 14px;
+    color: var(--theme-primary-dark);
+    padding: 4px 2px;
+    height: auto; /* Header height based on content */
+}
+
+.calendar-day { /* Applied to TD cells */
+    font-size: 16px;
+    vertical-align: top;
+    cursor: default; /* Change later for click interaction */
+    transition: background-color 0.2s ease;
+}
+.calendar-day:hover {
+    /* Slight hover effect, maybe outline */
+    outline: 1px dashed var(--theme-secondary-accent);
+    outline-offset: -2px;
+}
+
+.calendar-day-number {
+    display: block; /* Make span take block */
+    font-weight: bold;
+    font-size: 14px; /* Slightly smaller day number */
+    margin-bottom: 2px;
+    text-align: left; /* Align day number top-left */
+    padding-left: 3px;
+    color: var(--theme-text-main);
+}
+
+.calendar-day.other-month .calendar-day-number {
+    color: #bbb; /* Dim day number for other months */
+    font-weight: normal;
+}
+.calendar-day.other-month {
+     background-color: color-mix(in srgb, var(--theme-light-bg) 50%, transparent); /* Dim background */
+     cursor: default;
+     pointer-events: none; /* Disable hover/click */
+}
+.calendar-day.other-month:hover {
+    outline: none;
+}
+
+
+/* Status Indicators */
+.calendar-day.today {
+     /* More subtle today indicator, maybe just border? */
+     border-color: var(--theme-secondary-accent);
+     /* background-color: color-mix(in srgb, var(--theme-secondary-accent) 15%, transparent); */
+}
+.calendar-day.today .calendar-day-number {
+     color: var(--theme-secondary-accent); /* Highlight today's number */
+}
+
+.calendar-day.calendar-day-success {
+    background-color: color-mix(in srgb, var(--theme-primary-accent) 30%, transparent);
+}
+.calendar-day.calendar-day-overlimit {
+    background-color: color-mix(in srgb, var(--theme-highlight-accent) 35%, transparent);
+}
+.calendar-day.calendar-day-nodata {
+    /* Use default background */
+}
+.calendar-day.calendar-day-nodata .calendar-day-number {
+    /* Slightly dimmer number if no data? Optional */
+    /* color: #777; */
+}
+
+/* ==========================================================================
    SECTION: SMOKE TRACKER SPECIFIC UI
    - Timer Display, Log Item formatting
    ========================================================================== */
