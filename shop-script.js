@@ -4,10 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const shopPageUserPointsDisplay = document.getElementById('shopPageUserPoints');
     const particleCanvasShop = document.getElementById('particleCanvasShop');
     const dispensingTrayVisual = document.querySelector('.dispensing-tray-visual');
-    const shopToastNotification = document.createElement('div'); // Create toast element dynamically
+    const shopToastNotification = document.createElement('div');
 
-    // Style the toast element (can be moved to CSS)
-    shopToastNotification.id = 'shopToastNotification';
+    // Style the toast element (remains the same)
+    shopToastNotification.id = 'shopToastNotification'; // For potential specific styling via CSS
     shopToastNotification.style.position = 'fixed';
     shopToastNotification.style.bottom = '20px';
     shopToastNotification.style.left = '50%';
@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const localStorageKeySuffix = '_v27_theme_shop'; // MUST match script.js
-    const themes = { // MUST be complete and match script.js
+    const localStorageKeySuffix = '_v27_theme_shop'; // MUST match other scripts
+    const themes = { // MUST be complete and match other scripts
         default: { name: "Default Retro", cost: 0, owned: true, description: "The classic look and feel.", cssVariables: { '--theme-primary-dark': '#264653', '--theme-primary-accent': '#2A9D8F', '--theme-secondary-accent': '#E9C46A', '--theme-tertiary-accent': '#F4A261', '--theme-highlight-accent': '#E76F51', '--theme-light-bg': '#EAEAEA', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#EAEAEA', '--theme-page-bg': 'rgb(174, 217, 211)' } },
         oceanDepths: { name: "Ocean Depths", cost: 1, description: "Dive into cool blue tranquility.", cssVariables: { '--theme-primary-dark': '#03045E', '--theme-primary-accent': '#0077B6', '--theme-secondary-accent': '#00B4D8', '--theme-tertiary-accent': '#90E0EF', '--theme-highlight-accent': '#CAF0F8', '--theme-light-bg': '#E0FBFC', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#CAF0F8', '--theme-page-bg': '#ADE8F4' } },
         volcanoRush: { name: "Volcano Rush", cost: 1, description: "Fiery reds and oranges.", cssVariables: { '--theme-primary-dark': '#2B0000', '--theme-primary-accent': '#6A0000', '--theme-secondary-accent': '#FF4500', '--theme-tertiary-accent': '#FF8C00', '--theme-highlight-accent': '#AE2012', '--theme-light-bg': '#FFF2E6', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#FFDAB9', '--theme-page-bg': '#FFCDB2' } },
@@ -47,19 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
         forestGreens: { name: "Forest Greens", cost: 1, description: "Earthy and calming greens.", cssVariables: { '--theme-primary-dark': '#1A2B12', '--theme-primary-accent': '#335128', '--theme-secondary-accent': '#526F35', '--theme-tertiary-accent': '#8A9A5B', '--theme-highlight-accent': '#E0E7A3', '--theme-light-bg': '#F0F5E0', '--theme-card-bg': '#FFFFFF', '--theme-text-on-dark': '#E0E7A3', '--theme-page-bg': '#D8E0C0' } }
     };
 
-    // --- State Variables (Loaded from Local Storage) ---
     let userPoints = parseInt(localStorage.getItem('idk_user_points_val' + localStorageKeySuffix)) || 0;
     let ownedThemes = JSON.parse(localStorage.getItem('idk_owned_themes' + localStorageKeySuffix)) || ['default'];
     let currentTheme = localStorage.getItem('idk_current_theme' + localStorageKeySuffix) || 'default';
 
-    // --- Utility Functions ---
     function showToast(message, duration = 2500) {
         if (!shopToastNotification) return;
         shopToastNotification.textContent = message;
-        shopToastNotification.style.transform = 'translateX(-50%) translateY(0)'; // Slide in
+        shopToastNotification.style.transform = 'translateX(-50%) translateY(0)';
         shopToastNotification.style.opacity = '1';
         setTimeout(() => {
-            shopToastNotification.style.transform = 'translateX(-50%) translateY(70px)'; // Slide out
+            shopToastNotification.style.transform = 'translateX(-50%) translateY(70px)';
             shopToastNotification.style.opacity = '0';
         }, duration);
     }
@@ -73,25 +71,27 @@ document.addEventListener('DOMContentLoaded', () => {
             for (const [key, value] of Object.entries(themeVars)) {
                 document.documentElement.style.setProperty(key, value);
             }
-            // Ensure text/border derived colors are also set
             document.documentElement.style.setProperty('--theme-text-main', themeVars['--theme-primary-dark']);
             document.documentElement.style.setProperty('--theme-border-main', themeVars['--theme-primary-dark']);
         } else {
-            console.warn(`Theme ID "${themeId}" not found or missing cssVariables. Applying default.`);
-            applyThemeOnPage('default'); // Fallback to default explicitly
-            return; // Exit early after applying default
+            console.warn(`Theme ID "${themeId}" not found. Applying default explicitly.`);
+            if (themes.default && themes.default.cssVariables) { // Ensure default exists
+                 const defaultVars = themes.default.cssVariables;
+                 for (const [key, value] of Object.entries(defaultVars)) { document.documentElement.style.setProperty(key, value); }
+                 document.documentElement.style.setProperty('--theme-text-main', defaultVars['--theme-primary-dark']);
+                 document.documentElement.style.setProperty('--theme-border-main', defaultVars['--theme-primary-dark']);
+                 currentTheme = 'default'; // Explicitly set to default
+            }
         }
-         // **Important:** Save the new theme choice immediately after applying
-        saveShopData();
+        saveShopData(); // Save theme choice immediately
     }
 
     function saveShopData() {
         localStorage.setItem('idk_user_points_val' + localStorageKeySuffix, userPoints.toString());
         localStorage.setItem('idk_owned_themes' + localStorageKeySuffix, JSON.stringify(ownedThemes));
-        localStorage.setItem('idk_current_theme' + localStorageKeySuffix, currentTheme); // Save the currently applied theme
+        localStorage.setItem('idk_current_theme' + localStorageKeySuffix, currentTheme);
     }
 
-    // --- Shop Rendering ---
     function renderShopPageThemes() {
         if (!themeGalleryWindow) return;
         themeGalleryWindow.innerHTML = '';
@@ -99,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.entries(themes).forEach(([themeId, themeData]) => {
             const itemSlot = document.createElement('div');
             itemSlot.className = 'vending-item-slot';
-            // Highlight based on the *current* theme state variable
             if (currentTheme === themeId) {
                 itemSlot.classList.add('highlighted-product');
             }
@@ -113,9 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
             previewHTML += '</div>';
 
             const isOwned = ownedThemes.includes(themeId);
-            const isActive = currentTheme === themeId; // Check against current state variable
-            let buttonHTML;
-            let statusHTML = '';
+            const isActive = currentTheme === themeId;
+            let buttonHTML, statusHTML = '';
 
             if (isActive) {
                 buttonHTML = `<button class="vending-item-button equipped-button" disabled>EQUIPPED</button>`;
@@ -137,26 +135,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="vending-item-purchase-area">
                     ${statusHTML}
                     ${buttonHTML}
-                </div>
-            `;
+                </div>`;
             themeGalleryWindow.appendChild(itemSlot);
 
-            const button = itemSlot.querySelector('.vending-item-button');
-            if (button && button.dataset.action) { // Make sure it's a button with an action
+            const button = itemSlot.querySelector('.vending-item-button[data-action]');
+            if (button) {
                 button.addEventListener('click', () => handleShopPageThemeAction(themeId, themeData, button.dataset.action, itemSlot));
             }
         });
-
-        // Update points display after rendering
         if(shopPageUserPointsDisplay) shopPageUserPointsDisplay.textContent = userPoints;
     }
 
-    // --- Shop Action Handling ---
     function handleShopPageThemeAction(themeId, themeData, action, cardElement) {
         let particleColor = themeData.cssVariables['--theme-secondary-accent'];
 
         if (action === 'apply') {
-            applyThemeOnPage(themeId); // This function now updates currentTheme and saves
+            applyThemeOnPage(themeId); // This now saves
             showToast(`${themeData.name} theme APPLIED!`);
             if (dispensingTrayVisual) dispensingTrayVisual.textContent = `${themeData.name} APPLIED!`;
             if(cardElement && particleCanvasShop) {
@@ -167,8 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (userPoints >= themeData.cost) {
                 userPoints -= themeData.cost;
                 ownedThemes.push(themeId);
-                // No need to call saveShopData here, applyThemeOnPage will do it
-                applyThemeOnPage(themeId); // Apply immediately after buying
+                applyThemeOnPage(themeId); // Apply immediately after buying (this also saves)
                 showToast(`Purchased & Applied ${themeData.name}!`);
                 if (dispensingTrayVisual) {
                     dispensingTrayVisual.textContent = `VENDING ${themeData.name}...`;
@@ -183,15 +176,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (dispensingTrayVisual) dispensingTrayVisual.textContent = `INSUFFICIENT PTS!`;
             }
         }
-        // Re-render everything to update button states, highlighting, and points display
-        renderShopPageThemes();
+        renderShopPageThemes(); // Re-render to update states and points
     }
 
-    // --- Particle Effects (Keep as provided) ---
+    // --- Particle Effects ---
     function createShopParticle(x, y, color, size, count, spread, speedMultiplier = 1) {
         if (!particleCanvasShop || !shopCtx) return;
         for (let i = 0; i < count; i++) {
-            shopParticles.push({ x, y, size: Math.random() * size + 2, color, vx: (Math.random() - 0.5) * spread * speedMultiplier, vy: (Math.random() * -2.5 - 1) * speedMultiplier, life: 50 + Math.random() * 30 });
+            shopParticles.push({ x, y, size: Math.random() * size + 2, color, vx: (Math.random() - 0.5) * spread * speedMultiplier, vy: (Math.random() * -2.5 - 0.5) * speedMultiplier, life: 50 + Math.random() * 30 }); // Adjusted vy for more upward burst
         }
         if (shopParticles.length > 0 && !shopParticles.isAnimatingLoop) {
             shopParticles.isAnimatingLoop = true;
@@ -203,9 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
         shopCtx.clearRect(0, 0, particleCanvasShop.width, particleCanvasShop.height);
         let stillAnimating = false;
         for (let i = shopParticles.length - 1; i >= 0; i--) {
-            const p = shopParticles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.09; p.life--;
+            const p = shopParticles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.09; /* Gravity */ p.life--;
             if (p.life <= 0) { shopParticles.splice(i, 1); continue; }
-            shopCtx.fillStyle = p.color; shopCtx.globalAlpha = Math.max(0, p.life / 80);
+            shopCtx.fillStyle = p.color; shopCtx.globalAlpha = Math.max(0, p.life / 80); // Fade out
             shopCtx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
             stillAnimating = true;
         }
@@ -215,10 +207,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Initial Setup ---
-    document.body.classList.add('shop-active'); // Add class for shop-specific body styles
+    // document.body.classList.add('shop-active'); // This is now directly in shop.html
     if(shopPageUserPointsDisplay) shopPageUserPointsDisplay.textContent = userPoints;
-    applyThemeOnPage(currentTheme); // Apply the initially loaded theme
-    renderShopPageThemes(); // Render the themes based on loaded data
+    applyThemeOnPage(currentTheme);
+    renderShopPageThemes();
 
     console.log("Shop Page Initialized.");
 });
